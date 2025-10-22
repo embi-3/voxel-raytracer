@@ -39,3 +39,14 @@
 
 # debug information files
 *.dwo
+
+# C++ Stuff
+build/
+build_release/
+Testing/
+.cache/
+.clangd/
+.vs/
+.DS_Store
+CMakeFiles
+CMakeCache.txt
