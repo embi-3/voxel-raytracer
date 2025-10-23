@@ -79,6 +79,7 @@ class Vec3 {
         return v - (2 * v.dot(n) * n);
     }
 
+    // ? Should this function name be shortened?
     inline Vec3 into_reciprocal() const {
         return Vec3(
             1 / x,
