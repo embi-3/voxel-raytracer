@@ -1,4 +1,4 @@
-#include "voxel-raytracer.h"
+#include "voxel-raytracer.hpp"
 
 #include <iostream>
 
