@@ -56,4 +56,4 @@ endif()
 # -------------- DO NOT MODIFY ABOVE THIS LINE --------------- #
 # ------------------------------------------------------------ #
 
-add_executable(voxel-raytracer src/voxel-raytracer.cpp)
+add_executable(static_renderer src/static_renderer.cpp)
