@@ -1,7 +1,7 @@
 #ifndef VOXELGRID_H
 #define VOXELGRID_H
 
-#include "Voxel.hpp"
+#include "voxel.hpp"
 #include <cmath>
 #include <iostream>
 

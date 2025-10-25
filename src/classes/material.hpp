@@ -1,8 +1,8 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-#include "Common.hpp"
-#include "Vec3.hpp"
+#include "../common.hpp"
+#include "vec3.hpp"
 
 namespace texture {
     struct Material {
