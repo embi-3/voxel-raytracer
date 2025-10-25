@@ -6,15 +6,18 @@
 #include "Colour.hpp"
 #include "Material.hpp"
 
-#define NUM_FACES 6
+#include <array>
 
-class Voxel {
-    public:
-        Vec3 coords = Vec3();
-        Colour colours[NUM_FACES] = {Colour(), Colour(), Colour(), Colour(), Colour(), Colour()}; // ! This is really bad code.
-        Material material = Material();
-        
-        explicit constexpr Voxel() = default;
-};
+constexpr int NUM_FACES = 6;
 
+namespace geometry {
+    class Voxel {
+        public:
+            geometry::Vec3 coords = geometry::Vec3();
+            std::array<texture::Colour, NUM_FACES> colours = {Colour(), Colour(), Colour(), Colour(), Colour(), Colour()}; // ! This is really bad code.
+            texture::Material material = Material();
+            
+            explicit constexpr Voxel() = default;
+    };
+}
 #endif // VOXEL_H
