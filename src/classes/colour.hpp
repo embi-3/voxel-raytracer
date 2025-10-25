@@ -1,7 +1,7 @@
 #ifndef COLOUR_H
 #define COLOUR_H
 
-#include "common.hpp"
+#include "../common.hpp"
 #include "vec3.hpp"
 
 #include <cstdint>
@@ -16,7 +16,7 @@ namespace texture {
 
         explicit constexpr Colour() noexcept = default;
 
-        explicit constexpr Colour(const num r, const num g, const num b, const num a = 1) noexcept
+        explicit constexpr Colour(const uint8_t r, const uint8_t g, const uint8_t b, const num a = 1) noexcept
         : r(r)
         , g(g)
         , b(b)
