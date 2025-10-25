@@ -3,7 +3,7 @@
 #ifndef VEC3_H
 #define VEC3_H
 
-#include "Common.hpp"
+#include "../common.hpp"
 #include <cmath>
 #include <iostream>
 
@@ -57,9 +57,7 @@ namespace geometry {
             return (x * x) + (y * y) + (z * z);
         }
 
-        Vec3 into_unit() const {
-            return *this / length();
-        }
+        Vec3 into_unit() const;
 
         num dot(const Vec3& rhs) const noexcept {
             return (x * rhs.x) + (y * rhs.y) + (z * rhs.z);
@@ -70,10 +68,7 @@ namespace geometry {
         }
 
         // ! Double check this does what it should.
-        Vec3 reflect(const Vec3& n) const {
-            const Vec3 v(*this);
-            return v - (2 * v.dot(n) * n);
-        }
+        Vec3 reflect(const Vec3& n) const;
 
         // ? Should this function name be shortened?
         Vec3 into_reciprocal() const {
@@ -91,7 +86,7 @@ namespace geometry {
 
     // Vector Non-Member Utility Functions
     inline std::ostream& operator<<(std::ostream& out, const Vec3& v) {
-        return out << 'Vec3(' << v.x << ', ' << v.y << ', ' << v.z << ')';
+        return out << "Vec3(" << v.x << ", " << v.y << ", " << v.z << ")";
     }
 
     inline Vec3 operator+(const Vec3& u, const Vec3& v) noexcept {
@@ -100,10 +95,6 @@ namespace geometry {
 
     inline Vec3 operator-(const Vec3& u, const Vec3& v) noexcept {
         return Vec3(u.x - v.x, u.y - v.y, u.z - v.z);
-    }
-
-    inline Vec3 operator*(const Vec3& u, const Vec3& v) noexcept {
-        return Vec3(u.x * v.x, u.y * v.y, u.z * v.z);
     }
 
     inline Vec3 operator*(num t, const Vec3& v) noexcept {
