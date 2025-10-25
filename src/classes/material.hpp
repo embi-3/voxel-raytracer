@@ -6,11 +6,11 @@
 
 namespace texture {
     struct Material {
-        public:
-            // Add more fields here.
+    public:
+        // Add more fields here.
 
-            explicit constexpr Material() = default;
+        explicit constexpr Material() = default;
     };
-}
+} // namespace texture
 
 #endif // MATERIAL_H
