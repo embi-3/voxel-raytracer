@@ -24,6 +24,8 @@ namespace texture {
 
         Colour& operator+=(const Colour& rhs) {
             // TODO: Implement RGBA addition logic.
+            (void)rhs;
+
             return *this;
         }
 
