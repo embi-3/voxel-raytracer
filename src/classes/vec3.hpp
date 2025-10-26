@@ -57,7 +57,7 @@ namespace geometry {
             return (x * x) + (y * y) + (z * z);
         }
 
-        Vec3 into_unit() const;
+        Vec3 into_unit() const noexcept;    // defined outside class (at the bottom)
 
         num dot(const Vec3& rhs) const noexcept {
             return (x * rhs.x) + (y * rhs.y) + (z * rhs.z);
@@ -107,6 +107,10 @@ namespace geometry {
 
     inline Vec3 operator/(const Vec3& v, num t) {
         return (static_cast<num>(1) / t) * v;
+    }
+
+    inline Vec3 Vec3::into_unit() const noexcept {
+        return *this / length();
     }
 } // namespace geometry
 
