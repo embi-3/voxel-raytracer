@@ -1,11 +1,11 @@
 #ifndef BOUNDINGBOX_H
 #define BOUNDINGBOX_H
 
-#include "Common.hpp"
-#include "Vec3.hpp"
-#include "VoxelGrid.hpp"
-#include "Ray.hpp"
-#include "Interval.hpp"
+#include "../common.hpp"
+#include "vec3.hpp"
+#include "voxel_grid.hpp"
+#include "ray.hpp"
+#include "interval.hpp"
 
 namespace geometry {
     // Axis Aligned Bounding Box

@@ -1,10 +1,10 @@
 #ifndef INTERSECTION_H
 #define INTERSECTION_H
 
-#include "Common.hpp"
-#include "Vec3.hpp"
-#include "Material.hpp"
-#include "Voxel.hpp"
+#include "../common.hpp"
+#include "vec3.hpp"
+#include "material.hpp"
+#include "voxel.hpp"
 
 namespace geometry {
     class Intersection {

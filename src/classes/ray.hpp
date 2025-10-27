@@ -1,11 +1,11 @@
 #ifndef RAY_H
 #define RAY_H
 
-#include "Common.hpp"
-#include "Vec3.hpp"
-#include "Voxel.hpp"
-#include "VoxelGrid.hpp"
-#include "Intersection.hpp"
+#include "../common.hpp"
+#include "vec3.hpp"
+#include "voxel.hpp"
+#include "voxel_grid.hpp"
+#include "intersection.hpp"
 
 namespace geometry {
     class Ray {

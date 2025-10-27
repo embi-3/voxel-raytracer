@@ -1,8 +1,8 @@
 #ifndef COLOUR_H
 #define COLOUR_H
 
-#include "Common.hpp"
-#include "Vec3.hpp"
+#include "../common.hpp"
+#include "vec3.hpp"
 
 #include <cstdint>
 
