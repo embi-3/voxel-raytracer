@@ -6,7 +6,7 @@
 // #elifdef USE_SINGLE_PRECISION
 
 #ifdef USE_SINGLE_PRECISION
-    using num = float;
+using num = float;
 #else
-    using num = double;
+using num = double;
 #endif

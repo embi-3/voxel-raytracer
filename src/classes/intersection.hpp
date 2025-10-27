@@ -14,6 +14,10 @@ namespace geometry {
 
         explicit constexpr Intersection(Voxel voxel) : voxel(voxel) {}
         explicit constexpr Intersection(Voxel voxel, num distance) : voxel(voxel), distance(distance) {}
+        
+        static constexpr Intersection invalid() {
+            return Intersection(Voxel(), -1);
+        }
     };
 
 
