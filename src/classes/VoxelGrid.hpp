@@ -38,7 +38,12 @@ namespace geometry {
             }
 
             Voxel get_voxel(int x, int y, int z) {
-                // TODO: Implement an interface for accessing voxels in the grid.
+                // TODO: Implement a function for accessing voxels in the grid by index.
+                return Voxel();
+            }
+
+            Voxel get_voxel_at_coords(Vec3 pos) {
+                // TODO: Implement a function for accessing voxels in the grid by coordinates.
                 return Voxel();
             }
 
