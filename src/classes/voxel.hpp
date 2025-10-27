@@ -16,8 +16,8 @@ namespace geometry {
 
     public:
         geometry::Vec3 coords = geometry::Vec3();
-        Faces colours = {Colour(), Colour(), Colour(), Colour(), Colour(), Colour()}; // ! This is really bad code.
-        texture::Material material = Material();
+        // Faces colours = {Colour(), Colour(), Colour(), Colour(), Colour(), Colour()}; // ! This is really bad code.
+        texture::Material material = texture::Material();
 
         explicit constexpr Voxel() = default;
     };
