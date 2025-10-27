@@ -13,7 +13,7 @@ namespace geometry {
         public:
             Vec3 origin;
             Vec3 dir;
-            // Vec3 inv_dir; // precompute this for better performance
+            // Vec3 inv_dir; // TODO: precompute this for better performance
 
             explicit constexpr Ray(Vec3 origin, Vec3 dir) : origin(origin), dir(dir) {}
 
