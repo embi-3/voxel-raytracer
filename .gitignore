@@ -50,3 +50,5 @@ Testing/
 .DS_Store
 CMakeFiles
 CMakeCache.txt
+
+.vscode
