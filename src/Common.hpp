@@ -4,6 +4,7 @@
 // #ifdef USE_INTEGER_PRECISION
 //     using num = int;
 // #elifdef USE_SINGLE_PRECISION
+
 #ifdef USE_SINGLE_PRECISION
     using num = float;
 #else
