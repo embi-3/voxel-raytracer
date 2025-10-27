@@ -13,9 +13,10 @@ constexpr int NUM_FACES = 6;
 namespace geometry {
     class Voxel {
         public:
-            geometry::Vec3 coords = geometry::Vec3();
-            std::array<texture::Colour, NUM_FACES> colours = {Colour(), Colour(), Colour(), Colour(), Colour(), Colour()}; // ! This is really bad code.
-            texture::Material material = Material();
+            bool opaque = true;
+            // geometry::Vec3 coords = geometry::Vec3(); // ! We shouldn't store the coordinates for the voxel in itself.
+            // std::array<texture::Colour, NUM_FACES> colours = {Colour(), Colour(), Colour(), Colour(), Colour(), Colour()}; // ! This is really bad code.
+            // texture::Material material = Material();
             
             explicit constexpr Voxel() = default;
     };
