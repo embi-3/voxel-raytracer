@@ -1,5 +1,0 @@
-#ifndef VOXEL_RAYTRACER_H
-#define VOXEL_RAYTRACER_H
-
-
-#endif // VOXEL_RAYTRACER_H

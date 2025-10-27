@@ -1,0 +1,5 @@
+#ifndef STATIC_RENDERER_H
+#define STATIC_RENDERER_H
+
+
+#endif // STATIC_RENDERER_H
