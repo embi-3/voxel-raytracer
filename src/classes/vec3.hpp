@@ -49,35 +49,22 @@ namespace geometry {
             return (x * x) + (y * y) + (z * z);
         }
 
-        Vec3 into_unit() const {
-            return *this / length();
-        }
-        
-        num dot(const Vec3 &rhs) const noexcept {
+        Vec3 into_unit() const noexcept;    // defined outside class (at the bottom)
+
+        num dot(const Vec3& rhs) const noexcept {
             return (x * rhs.x) + (y * rhs.y) + (z * rhs.z);
         }
 
-        Vec3 cross(const Vec3 &rhs) const noexcept {
-            return Vec3(
-                (y * rhs.z) - (z * rhs.y),
-                (z * rhs.x) - (x * rhs.z),
-                (x * rhs.y) - (y * rhs.x)
-            );
+        Vec3 cross(const Vec3& rhs) const noexcept {
+            return Vec3((y * rhs.z) - (z * rhs.y), (z * rhs.x) - (x * rhs.z), (x * rhs.y) - (y * rhs.x));
         }
 
         // ! Double check this does what it should.
-        Vec3 reflect(const Vec3 &n) const {
-            const Vec3 v(*this);
-            return v - (2 * v.dot(n) * n);
-        }
+        Vec3 reflect(const Vec3& n) const;
 
         // ? Should this function name be shortened?
         Vec3 into_reciprocal() const {
-            return Vec3(
-                1 / x,
-                1 / y,
-                1 / z
-            );
+            return Vec3(1 / x, 1 / y, 1 / z);
         }
 
         // Components
@@ -91,7 +78,7 @@ namespace geometry {
 
     // Vector Non-Member Utility Functions
     inline std::ostream& operator<<(std::ostream& out, const Vec3& v) {
-        return out << 'Vec3(' << v.x << ', ' << v.y << ', ' << v.z << ')';
+        return out << "Vec3(" << v.x << ", " << v.y << ", " << v.z << ")";
     }
 
     inline Vec3 operator+(const Vec3& u, const Vec3& v) noexcept {
@@ -102,12 +89,8 @@ namespace geometry {
         return Vec3(u.x - v.x, u.y - v.y, u.z - v.z);
     }
 
-    inline Vec3 operator*(const Vec3& u, const Vec3& v) noexcept {
-        return Vec3(u.x * v.x, u.y * v.y, u.z * v.z);
-    }
-
     inline Vec3 operator*(num t, const Vec3& v) noexcept {
-        return Vec3(t*v.x, t*v.y, t*v.z);
+        return Vec3(t * v.x, t * v.y, t * v.z);
     }
 
     inline Vec3 operator*(const Vec3& v, num t) noexcept {
@@ -117,6 +100,10 @@ namespace geometry {
     inline Vec3 operator/(const Vec3& v, num t) {
         return (static_cast<num>(1) / t) * v;
     }
-}
+
+    inline Vec3 Vec3::into_unit() const noexcept {
+        return *this / length();
+    }
+} // namespace geometry
 
 #endif

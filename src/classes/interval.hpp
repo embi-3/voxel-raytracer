@@ -3,13 +3,15 @@
 
 #include "../common.hpp"
 
-class Interval {
-    public:
-        bool isValid;
-        num start;
-        num end;
+namespace geometry {
+    class Interval {
+        public:
+            bool isValid;
+            num start;
+            num end;
 
-        constexpr explicit Interval(num start, num end) : isValid(start <= end), start(start), end(end) {}
-};
+            constexpr explicit Interval(num start, num end) : isValid(start <= end), start(start), end(end) {}
+    };
+} // namespace geometry
 
 #endif // INTERVAL_H

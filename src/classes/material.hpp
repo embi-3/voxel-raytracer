@@ -5,12 +5,12 @@
 #include "vec3.hpp"
 
 namespace texture {
-    struct Material {
+    class Material {
         public:
             // Add more fields here.
 
             explicit constexpr Material() = default;
     };
-}
+} // namespace texture
 
 #endif // MATERIAL_H

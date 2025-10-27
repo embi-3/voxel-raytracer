@@ -38,12 +38,10 @@ namespace geometry {
                 // ? At times like this I wish for an Option type.
             }
 
-            Vec3 at(num t) {
+            Vec3 at(num t) const {
                 return origin + t * dir;
             }
     };
-
-
-}
+} // namespace geometry
 
 #endif // RAY_H
