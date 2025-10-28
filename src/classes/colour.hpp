@@ -14,14 +14,9 @@ namespace texture {
         uint8_t b = 0;
         num a = 0; // Alpha channel, range: [0, 1]
 
-        explicit constexpr Colour() noexcept = default;
-
-        explicit constexpr Colour(const uint8_t r, const uint8_t g, const uint8_t b, const num a = 1) noexcept
-        : r(r)
-        , g(g)
-        , b(b)
-        , a(a) {}
-
+			explicit constexpr Colour() noexcept = default;
+			explicit constexpr Colour(const uint8_t r, const uint8_t g, const uint8_t b, const num a = 1) noexcept : r(r), g(g), b(b), a(a) {}
+            
         Colour& operator+=(const Colour& rhs) {
             // TODO: Implement RGBA addition logic.
             (void)rhs;
@@ -29,14 +24,13 @@ namespace texture {
             return *this;
         }
 
-        // ! Remove this function if unneeded.
-        // Vec3 rgb() {
-        // 	return Vec3(r, g, b);
-        // }
+			static constexpr Colour white() noexcept {
+				return Colour(255, 255, 255);
+			}
 
-        static constexpr Colour black() noexcept {
-            return Colour(0, 0, 0);
-        }
+			static constexpr Colour red() noexcept {
+				return Colour(255, 0, 0);
+			}
 
         static constexpr Colour white() noexcept {
             return Colour(255, 255, 255);
