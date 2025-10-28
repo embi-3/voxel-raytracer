@@ -11,14 +11,10 @@ namespace geometry {
     class Vec3 {
     public:
         // Zero constructor
-        constexpr Vec3() noexcept = default;
-
-        // is this necessary?
+        explicit constexpr Vec3() noexcept = default;
         explicit constexpr Vec3(const num val) noexcept : x(val), y(val), z(val) {}
+        explicit constexpr Vec3(const num x, const num y, const num z) noexcept : x(x), y(y), z(z) {}
 
-        constexpr Vec3(const num x, const num y, const num z) noexcept : x(x), y(y), z(z) {}
-
-        // Inverse operator
         Vec3 operator-() const noexcept { 
             return Vec3(-x, -y, -z); 
         }
