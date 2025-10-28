@@ -3,16 +3,21 @@
 
 #include "../common.hpp"
 #include "vec3.hpp"
-#include "colour.hpp"
 #include "material.hpp"
 #include "voxel.hpp"
 
 namespace geometry {
     class Intersection {
         public:
-            texture::Colour colour;
-            // texture::Material material;
-            // num distance;
+            Voxel voxel;        // for colour and material data
+            num distance = 0;   // for depth shader.
+
+        explicit constexpr Intersection(Voxel voxel) : voxel(voxel) {}
+        explicit constexpr Intersection(Voxel voxel, num distance) : voxel(voxel), distance(distance) {}
+        
+        static constexpr Intersection invalid() {
+            return Intersection(Voxel(), -1);
+        }
     };
 
 
