@@ -7,7 +7,7 @@ namespace geometry {
         return v - (2 * v.dot(n) * n);
     }
 
-    Vec3 Vec3::into_unit() const {
+    Vec3 Vec3::normalise() const {
         return *this / length();
     }  
 }
