@@ -65,6 +65,7 @@ target_include_directories(stb_image_write PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/li
 # stb_image_write library
 add_library(stb_image_write STATIC lib/stb_image_write.cpp)
 >>>>>>> 6e2ceaf (Implemented PNG output)
+target_include_directories(stb_image_write PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 
 # Suppress warnings for stb_image_write
 target_compile_options(stb_image_write PRIVATE
@@ -92,3 +93,9 @@ add_executable(static_renderer src/static_renderer.cpp)
 
 add_executable(static_renderer src/static_renderer.cpp src/classes/vec3.cpp)
 >>>>>>> 6e2ceaf (Implemented PNG output)
+
+# Link the stb_image_write library
+target_link_libraries(static_renderer PRIVATE stb_image_write)
+
+# Ensure the include path for stb_image_write is visible
+target_include_directories(static_renderer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lib)

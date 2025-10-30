@@ -3,22 +3,7 @@
 #include "classes/ray.hpp"
 #include "classes/vec3.hpp"
 
-<<<<<<< HEAD
 #include "stb_image_write.h"
-=======
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wold-style-cast"
-#pragma clang diagnostic ignored "-Wsign-conversion"
-#pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
-#pragma clang diagnostic ignored "-Wmissing-field-initializers"
-#pragma clang diagnostic ignored "-Wimplicit-int-conversion"
-#pragma clang diagnostic ignored "-Wshorten-64-to-32"
-
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "../lib/stb_image_write.h"
-
-#pragma clang diagnostic pop
->>>>>>> 6e2ceaf (Implemented PNG output)
 
 #include <cstdint>
 #include <fstream>
