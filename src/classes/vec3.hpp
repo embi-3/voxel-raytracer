@@ -3,18 +3,25 @@
 #ifndef VEC3_H
 #define VEC3_H
 
-#include "../common.hpp"
+#include "common.hpp"
 #include <cmath>
 #include <iostream>
 
 namespace geometry {
+    // point3 is just an alias for vec3, but useful for geometric clarity in the code.
+    using Point3 = Vec3;
+
     class Vec3 {
     public:
         // Zero constructor
-        explicit constexpr Vec3() noexcept = default;
-        explicit constexpr Vec3(const num val) noexcept : x(val), y(val), z(val) {}
-        explicit constexpr Vec3(const num x, const num y, const num z) noexcept : x(x), y(y), z(z) {}
+        constexpr Vec3() noexcept = default;
 
+        // is this necessary?
+        explicit constexpr Vec3(const num val) noexcept : x(val), y(val), z(val) {}
+
+        constexpr Vec3(const num x, const num y, const num z) noexcept : x(x), y(y), z(z) {}
+
+        // Inverse operator
         Vec3 operator-() const noexcept { 
             return Vec3(-x, -y, -z); 
         }
@@ -93,7 +100,7 @@ namespace geometry {
 
     // Vector Non-Member Utility Functions
     inline std::ostream& operator<<(std::ostream& out, const Vec3& v) {
-        return out << "Vec3(" << v.x << ", " << v.y << ", " << v.z << ")";
+        return out << 'Vec3(' << v.x << ', ' << v.y << ', ' << v.z << ')';
     }
 
     inline Vec3 operator+(const Vec3& u, const Vec3& v) noexcept {
