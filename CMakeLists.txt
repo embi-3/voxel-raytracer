@@ -57,9 +57,14 @@ endif()
 # ------------------------------------------------------------ #
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 # stb_image_write library
 add_library(stb_image_write STATIC lib/stb_image_write.cpp)
 target_include_directories(stb_image_write PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+=======
+# stb_image_write library
+add_library(stb_image_write STATIC lib/stb_image_write.cpp)
+>>>>>>> 6e2ceaf (Implemented PNG output)
 
 # Suppress warnings for stb_image_write
 target_compile_options(stb_image_write PRIVATE
@@ -68,6 +73,7 @@ target_compile_options(stb_image_write PRIVATE
     -Wno-implicit-int-conversion
     -Wno-missing-field-initializers
     -Wno-zero-as-null-pointer-constant
+<<<<<<< HEAD
     -Wno-conversion
 )
 
@@ -81,3 +87,8 @@ target_include_directories(static_renderer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/l
 =======
 add_executable(static_renderer src/static_renderer.cpp)
 >>>>>>> d260ed6 (Simple ray caster (#2))
+=======
+)
+
+add_executable(static_renderer src/static_renderer.cpp src/classes/vec3.cpp)
+>>>>>>> 6e2ceaf (Implemented PNG output)

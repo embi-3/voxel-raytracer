@@ -25,8 +25,4 @@ namespace geometry {
     };
 }
 
-<<<<<<< HEAD
 #endif // AABB_H
-=======
-#endif // AABB_H
->>>>>>> 9fec134 (Fix make errors)
