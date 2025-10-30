@@ -1,17 +1,10 @@
 #ifndef VOXEL_H
 #define VOXEL_H
 
-<<<<<<< HEAD
 #include "../common.hpp"
 #include "vec3.hpp"
 #include "colour.hpp"
 #include "material.hpp"
-=======
-#include "colour.hpp"
-#include "../common.hpp"
-#include "material.hpp"
-#include "vec3.hpp"
->>>>>>> main
 
 #include <array>
 
