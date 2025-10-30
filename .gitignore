@@ -51,4 +51,12 @@ Testing/
 CMakeFiles
 CMakeCache.txt
 
+<<<<<<< HEAD
 .vscode
+=======
+# VSCode configuration files
+.vscode
+
+# output
+output
+>>>>>>> 2259c79661ebc22b87cddad9fb5cdbd3e3624d0f
