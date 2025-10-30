@@ -9,5 +9,5 @@ namespace geometry {
 
     Vec3 Vec3::into_unit() const {
         return *this / length();
-    }    
+    }  
 }

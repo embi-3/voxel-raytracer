@@ -7,7 +7,7 @@
 #include <cmath>
 #include <iostream>
 
-namespace math {
+namespace geometry {
     // point3 is just an alias for vec3, but useful for geometric clarity in the code.
     using Point3 = Vec3;
 
@@ -81,12 +81,6 @@ namespace math {
             );
         }
 
-        // ! Double check this does what it should.
-        Vec3 reflect(const Vec3 &n) const {
-            const Vec3 v(*this);
-            return v - (2 * v.dot(n) * n);
-        }
-
         // ? Should this function name be shortened?
         Vec3 into_reciprocal() const {
             return Vec3(
@@ -95,6 +89,11 @@ namespace math {
                 1 / z
             );
         }
+
+        // ! Double check this does what it should.
+        Vec3 reflect(const Vec3 &n) const;
+
+        Vec3 into_unit() const;
 
         // Components
         num x = 0;
