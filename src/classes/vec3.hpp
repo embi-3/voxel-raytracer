@@ -3,7 +3,7 @@
 #ifndef VEC3_H
 #define VEC3_H
 
-#include "Common.hpp"
+#include "../common.hpp"
 #include <cmath>
 #include <iostream>
 
