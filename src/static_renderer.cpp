@@ -30,9 +30,9 @@ void createPPM(std::size_t width, std::size_t height, const std::vector<Pixel>& 
 
 // simple gradient from 4.2 from "Ray Tracing In One Weekend" website
 texture::Colour ray_colour(const geometry::Ray& r) {
-    geometry::Vec3 unit_direction = r.dir.normalise();
+    geometry::Vec3 unit_direction = (r.dir).normalise();
     auto a = 0.5 * (unit_direction.y + 1.0);
-    return (1.0 - a) * texture::Colour(1.0, 1.0, 1.0) + a * texture::Colour(0.5, 0.7, 1.0);
+    return (1.0 - a) * texture::Colour(255, 255, 255) + a * texture::Colour(124, 179, 255);
 }
 
 
