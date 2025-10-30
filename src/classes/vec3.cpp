@@ -6,8 +6,4 @@ namespace geometry {
         const Vec3 v(*this);
         return v - (2 * v.dot(n) * n);
     }
-
-    Vec3 Vec3::into_unit() const {
-        return *this / length();
-    }    
 }

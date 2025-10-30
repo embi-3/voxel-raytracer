@@ -3,11 +3,11 @@
 #ifndef VEC3_H
 #define VEC3_H
 
-#include "Common.hpp"
+#include "../common.hpp"
 #include <cmath>
 #include <iostream>
 
-namespace math {
+namespace geometry {
     // point3 is just an alias for vec3, but useful for geometric clarity in the code.
     using Point3 = Vec3;
 
@@ -51,7 +51,7 @@ namespace math {
         Vec3& operator/=(num t) {
             return (*this *= (static_cast<num>(1) / t));
         }
-
+        
         // Magnitude
         num length() const noexcept {
             return std::sqrt(length_squared());
@@ -142,6 +142,7 @@ namespace math {
     }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
     inline Vec3 Vec3::into_unit() const noexcept {
@@ -152,5 +153,8 @@ namespace math {
 =======
 }
 >>>>>>> 9fd11b0 (Fix file names after merge)
+=======
+} // namespace geometry
+>>>>>>> 6ace601 (Fix errors from merge)
 
 #endif
