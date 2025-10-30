@@ -2,11 +2,11 @@
 // We probably won't need to use integer precision anyways.
 
 // #ifdef USE_INTEGER_PRECISION
-// using num = int;
+//     using num = int;
 // #elifdef USE_SINGLE_PRECISION
 
 #ifdef USE_SINGLE_PRECISION
-using num = float;
+    using num = float;
 #else
-using num = double;
+    using num = double;
 #endif
