@@ -8,9 +8,6 @@
 #include <iostream>
 
 namespace geometry {
-    // point3 is just an alias for vec3, but useful for geometric clarity in the code.
-    using Point3 = Vec3;
-
     class Vec3 {
     public:
         // Zero constructor
@@ -100,7 +97,7 @@ namespace geometry {
 
     // Vector Non-Member Utility Functions
     inline std::ostream& operator<<(std::ostream& out, const Vec3& v) {
-        return out << 'Vec3(' << v.x << ', ' << v.y << ', ' << v.z << ')';
+        return out << "Vec3(" << v.x << ", " << v.y << ", " << v.z << ")";
     }
 
     inline Vec3 operator+(const Vec3& u, const Vec3& v) noexcept {
