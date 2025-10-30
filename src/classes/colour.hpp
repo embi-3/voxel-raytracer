@@ -15,9 +15,9 @@ namespace texture {
 			num a = 0; // Alpha channel, range: [0, 1]
 
 			explicit constexpr Colour() noexcept = default;
-			explicit constexpr Colour(const num r, const num g, const num b, const num a = 1) noexcept : r(r), g(g), b(b), a(a) {}
+			explicit constexpr Colour(const uint8_t r, const uint8_t g, const uint8_t b, const num a = 1) noexcept : r(r), g(g), b(b), a(a) {}
 
-			Colour& operator+=(const Colour& rhs) {
+			Colour& operator+=([[maybe_unused]] const Colour& rhs) {
 				// TODO: Implement RGBA addition logic.
 				return *this;
 			}
@@ -59,6 +59,8 @@ namespace texture {
 				return Colour(255, 0, 255);
 			}
 	};
+
+	// TODO: Implement binary operands for scalar multiplication of Colours
 }
 
 #endif // COLOUR_H
