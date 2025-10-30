@@ -56,4 +56,16 @@ endif()
 # -------------- DO NOT MODIFY ABOVE THIS LINE --------------- #
 # ------------------------------------------------------------ #
 
-add_executable(static_renderer src/static_renderer.cpp)
+# stb_image_write library
+add_library(stb_image_write STATIC lib/stb_image_write.cpp)
+
+# Suppress warnings for stb_image_write
+target_compile_options(stb_image_write PRIVATE
+    -Wno-old-style-cast
+    -Wno-sign-conversion
+    -Wno-implicit-int-conversion
+    -Wno-missing-field-initializers
+    -Wno-zero-as-null-pointer-constant
+)
+
+add_executable(static_renderer src/static_renderer.cpp src/classes/vec3.cpp)
