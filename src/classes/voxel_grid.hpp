@@ -52,9 +52,9 @@ namespace geometry {
             }
 
             bool contains(Vec3 position) {
-                return abs(position.x - origin.x) <= width
-                    && abs(position.y - origin.y) <= length
-                    && abs(position.z - origin.z) <= height;
+                return std::abs(position.x - origin.x) <= width
+                    && std::abs(position.y - origin.y) <= length
+                    && std::abs(position.z - origin.z) <= height;
             }
     };
 }
