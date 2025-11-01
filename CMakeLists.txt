@@ -67,6 +67,7 @@ target_compile_options(stb_image_write PRIVATE
     -Wno-implicit-int-conversion
     -Wno-missing-field-initializers
     -Wno-zero-as-null-pointer-constant
+    -Wno-conversion
 )
 
 add_executable(static_renderer src/static_renderer.cpp src/classes/vec3.cpp)
