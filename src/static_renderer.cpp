@@ -56,11 +56,7 @@ void create_image(std::size_t width, std::size_t height, const std::vector<Pixel
 texture::Colour ray_colour(const geometry::Ray& r) {
     geometry::Vec3 unit_direction = (r.dir).normalise();
     auto a = 0.5 * (unit_direction.y + 1.0);
-<<<<<<< HEAD
-    return (1.0 - a) * texture::Colour::white() + a * texture::Colour(0.5, 0.7, 1);
-=======
     return (1.0 - a) * texture::Colour::white() + a * texture::Colour(124, 179, 255);
->>>>>>> 6e2ceaf (Implemented PNG output)
 }
 
 int main() {

@@ -1,8 +1,6 @@
 #include <limits>
 
 #include "../common.hpp"
-#include "interval.hpp"
-#include "ray.hpp"
 #include "aabb.hpp"
 
 namespace geometry {
