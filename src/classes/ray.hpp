@@ -12,54 +12,54 @@ namespace geometry {
     using IntersectionList = std::vector<Intersection>;
 
     class Ray {
-    public:
-        enum Direction {
-            POSITIVE = 1,
-            ZERO = 0,
-            NEGATIVE = -1,
-        };
+        public:
+            enum Direction {
+                POSITIVE = 1,
+                ZERO = 0,
+                NEGATIVE = -1,
+            };
 
-        Vec3 origin;
-        Vec3 dir;
-        Vec3 orientation;
+            enum Orientation {
+                X_POS = 1,
+                X_NEG = 2,
+                Y_POS = 4,
+                Y_NEG = 8,
+                Z_POS = 16,
+                Z_NEG = 32,
+            };
 
-        // Vec3 inv_dir; // TODO: precompute this for better performance
+            Vec3 origin;
+            Vec3 dir;
+            Vec3 orientation;
 
-        explicit constexpr Ray(Vec3 origin, Vec3 dir)
-        : origin(origin)
-        , dir(dir)
-        , orientation(Vec3(x_dir(), y_dir(), z_dir())) {}
+            // Vec3 inv_dir; // TODO: precompute this for better performance
 
-        IntersectionList traverse(VoxelGrid grid);
+            explicit constexpr Ray(Vec3 origin, Vec3 dir) : origin(origin), dir(dir), orientation(Vec3(x_dir(), y_dir(), z_dir())) {}
 
-        Vec3 at(num t) const {
-            return origin + t * dir;
-        }
+            IntersectionList traverse(VoxelGrid grid);
 
-    private:
-        inline Direction x_dir() {
-            return get_dir(dir.x);
-        }
-
-        inline Direction y_dir() {
-            return get_dir(dir.y);
-        }
-
-        inline Direction z_dir() {
-            return get_dir(dir.z);
-        }
-
-        inline Direction get_dir(num value) {
-            if (value > 0) {
-                return POSITIVE;
+        private:
+            constexpr inline Direction x_dir() const {
+                return get_dir(dir.x);
             }
-            else if (value < 0) {
-                return NEGATIVE;
+
+            constexpr inline Direction y_dir() const {
+                return get_dir(dir.y);
             }
-            else {
-                return ZERO;
+
+            constexpr inline Direction z_dir() const {
+                return get_dir(dir.z);
             }
-        }
+
+            constexpr inline Direction get_dir(num value) const {
+                if (value > 0) {
+                    return POSITIVE;
+                } else if (value < 0) {
+                    return NEGATIVE;
+                } else {
+                    return ZERO;
+                }
+            }
     };
 } // namespace geometry
 
