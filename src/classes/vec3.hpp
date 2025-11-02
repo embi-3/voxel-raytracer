@@ -81,7 +81,7 @@ namespace geometry {
         }
 
         // ! Double check this does what it should.
-        
+
         // ! Double check this does what it should.
         Triple reflect(const Triple& n) const {
             const Triple v(*this);

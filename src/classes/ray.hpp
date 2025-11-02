@@ -52,7 +52,7 @@ namespace geometry {
             return get_sign(dir.z);
         }
 
-        constexpr inline Orientation get_sign (num value) const {
+        constexpr inline Orientation get_sign(num value) const {
             if (value > 0) {
                 return POSITIVE;
             }

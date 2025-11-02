@@ -5,7 +5,7 @@
 
 namespace geometry {
     Interval geometry::AABB::intersection(Ray ray) {
-        num t_min = 0; // ? should this be 0 instead?
+        num t_min = 0;
         num t_max = std::numeric_limits<num>::infinity();
 
         num x_min = (ray.origin.x - min.x) * ray.inv_dir.x;
