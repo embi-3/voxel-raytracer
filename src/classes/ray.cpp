@@ -32,6 +32,7 @@ namespace geometry
         Vec3 tmax;
         Vec3 tdelta = Vec3(grid.scale / dir.x, grid.scale / dir.y, grid.scale / dir.z);
         Vec3 tstep = orientation; // ? Is (*this) required here?
+        num tcur = 0;
         int x = 0;
         int y = 0;
         int z = 0;
@@ -56,22 +57,28 @@ namespace geometry
         grid.get_coords(pos, &x, &y, &z);
 
         // Iteratively find the next voxel using floating-point comparisons.
-        while (grid.contains(pos)) {
+        while (grid.contains(at(tcur))) {
             // Update the Amanatides-Woo algorithm to handle diagonals.
             if (tmax.x <= tmax.y && tmax.x <= tmax.z) {
+                tcur = tmax.x;
                 tmax.x += tdelta.x;
                 x += orientation.x;
             }
             
             if (tmax.y <= tmax.x && tmax.y <= tmax.z) {
+                tcur = tmax.y;
                 tmax.y += tdelta.y;
                 y += orientation.y;
             }
             
             if (tmax.z <= tmax.x && tmax.z <= tmax.y) {
+                tcur = tmax.z;
                 tmax.z += tdelta.z;
                 z += orientation.z;
             }
+
+            // TODO: Check that get_voxel actually returns a valid Voxel.
+            objects.push_back(Intersection(grid.get_voxel(x, y, z), tcur));
         }
     }
 } // namespace geometry
