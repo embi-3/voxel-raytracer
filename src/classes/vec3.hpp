@@ -8,10 +8,16 @@
 #include <iostream>
 
 namespace geometry {
-    template <typename T> class Triple {
+    template<typename T>
+    class Triple {
     public:
         // Zero constructor
         constexpr Triple() noexcept = default;
+
+        constexpr Triple(const T v) noexcept
+        : x(v)
+        , y(v)
+        , z(v) {}
 
         constexpr Triple(const T x, const T y, const T z) noexcept
         : x(x)
@@ -75,9 +81,16 @@ namespace geometry {
         }
 
         // ! Double check this does what it should.
-        Triple reflect(const Triple& n) const;
+        
+        // ! Double check this does what it should.
+        Triple reflect(const Triple& n) const {
+            const Triple v(*this);
+            return v - (2 * v.dot(n) * n);
+        }
 
-        Triple normalise() const;
+        Triple normalise() const {
+            return *this / length();
+        }
 
         // Components
         T x = 0;
@@ -89,38 +102,38 @@ namespace geometry {
     using Coordinate = Triple<int>;
 
     // Vector Non-Member Utility Functions
-    template <typename T>
+    template<typename T>
     inline std::ostream& operator<<(std::ostream& out, const Triple<T>& v) {
         return out << "Triple(" << v.x << ", " << v.y << ", " << v.z << ")";
     }
 
-    template <typename T>
+    template<typename T>
     inline Triple<T> operator+(const Triple<T>& u, const Triple<T>& v) noexcept {
         return Triple(u.x + v.x, u.y + v.y, u.z + v.z);
     }
 
-    template <typename T>
+    template<typename T>
     inline Triple<T> operator-(const Triple<T>& u, const Triple<T>& v) noexcept {
         return Triple(u.x - v.x, u.y - v.y, u.z - v.z);
     }
 
-    template <typename T>
+    template<typename T>
     inline Triple<T> operator*(const Triple<T>& u, const Triple<T>& v) noexcept {
         return Triple(u.x * v.x, u.y * v.y, u.z * v.z);
     }
 
-    template <typename T>
-    inline Triple<T> operator*(T t, const Triple<T>& v) noexcept {
+    template<typename T>
+    inline Triple<T> operator*(num t, const Triple<T>& v) noexcept {
         return Triple(t * v.x, t * v.y, t * v.z);
     }
 
-    template <typename T>
-    inline Triple<T> operator*(const Triple<T>& v, T t) noexcept {
-        return t * v;
+    template<typename T>
+    inline Triple<T> operator*(const Triple<T>& v, num t) noexcept {
+        return static_cast<T>(t) * v;
     }
 
-    template <typename T>
-    inline Triple<T> operator/(const Triple<T>& v, T t) {
+    template<typename T>
+    inline Triple<T> operator/(const Triple<T>& v, num t) {
         return (static_cast<T>(1) / t) * v;
     }
 } // namespace geometry

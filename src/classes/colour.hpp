@@ -4,9 +4,9 @@
 #include "../common.hpp"
 #include "vec3.hpp"
 
+#include <algorithm>
 #include <cstdint>
 #include <limits>
-#include <algorithm>
 // format library requires clang-17
 // #include <format>
 
