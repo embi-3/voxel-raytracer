@@ -6,11 +6,12 @@
 
 #include <cstdint>
 #include <limits>
+#include <algorithm>
 // format library requires clang-17
 // #include <format>
 
 // Biggest number less than 256
-static const num RGB_MAX = std::nexttoward(256, 0.0);
+static const num RGB_MAX = std::nexttoward(256, 0);
 static const num RGB_MIN = 0;
 
 namespace texture {

@@ -5,12 +5,14 @@
 
 #include "stb_image_write.h"
 
+#include <chrono>
 #include <cstdint>
-#include <ctime>
+#include <iostream>
 #include <fstream>
 #include <vector>
 
 using Pixel = texture::Colour;
+using namespace std::chrono;
 
 // Outputs PPM ASCII and PNG
 void create_image(std::size_t width, std::size_t height, const std::vector<Pixel>& pixels) {
@@ -20,26 +22,17 @@ void create_image(std::size_t width, std::size_t height, const std::vector<Pixel
     // we are using RGBA
     constexpr auto channels = 4;
 
-    auto filename = "output_" + std::to_string(std::time(nullptr));
-
-    // auto file = std::ofstream(filename + ".ppm");
-
-    // PPM header
-    // file << "P3\n" << width << " " << height << "\n255\n";
+    const auto timestamp = system_clock::now().time_since_epoch();
+    const auto filename = std::string("output_") + std::to_string(duration_cast<seconds>(timestamp).count());
 
     auto image = std::vector<uint8_t>{};
 
     for (const auto& pixel : pixels) {
-        // Write to PPM
-        // file << pixel.to_rgb_string() << " ";
-
         image.push_back(pixel.r_int());
         image.push_back(pixel.g_int());
         image.push_back(pixel.b_int());
         image.push_back(static_cast<uint8_t>(255.999 * pixel.a));
     }
-
-    // file.close();
 
     stbi_write_png((filename + ".png").c_str(),
                    static_cast<int>(width),
@@ -57,6 +50,8 @@ Pixel ray_colour(const geometry::Ray& r) {
 }
 
 int main() {
+    const auto start = high_resolution_clock::now();
+
     // 16:9 aspect ratio, width of 400
     auto aspect_ratio = 16.0 / 9.0;
     int image_width = 400;
@@ -96,4 +91,9 @@ int main() {
         }
     }
     create_image(static_cast<std::size_t>(image_width), static_cast<std::size_t>(image_height), pixels);
+
+    const auto end = high_resolution_clock::now();
+    const auto duration = duration_cast<milliseconds>(end - start).count();
+
+    std::cout << "Time taken: " << duration << " ms\n";
 }
