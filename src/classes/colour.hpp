@@ -5,45 +5,31 @@
 #include "vec3.hpp"
 
 #include <cstdint>
-<<<<<<< HEAD
-=======
 #include <limits>
+#include <algorithm>
 // format library requires clang-17
 // #include <format>
 
 // Biggest number less than 256
-static const num RGB_MAX = std::nexttoward(256, 0.0);
+static const num RGB_MAX = std::nexttoward(256, 0);
 static const num RGB_MIN = 0;
->>>>>>> 3bc441ef3c00a390c0483cc86a8123424795139a
 
 namespace texture {
 	class Colour {
 		public:
-<<<<<<< HEAD
-			num r = 0;
-			num g = 0;
-			num b = 0;
-			num a = 0; // Alpha channel, range: [0, 1]
-=======
 			num r = 0; // range: [0, 256)
 			num g = 0; // range: [0, 256)
 			num b = 0; // range: [0, 256)
 			num a = 0; // range: [0, 1]
->>>>>>> 3bc441ef3c00a390c0483cc86a8123424795139a
 
 			explicit constexpr Colour() noexcept = default;
 			explicit constexpr Colour(const num r, const num g, const num b, const num a = 1) noexcept : r(r), g(g), b(b), a(a) {}
 
-<<<<<<< HEAD
-			Colour& operator+=([[maybe_unused]] const Colour& rhs) {
-				// TODO: Implement RGBA addition logic.
-=======
 			Colour& operator+=(const Colour& rhs) {
 				r += rhs.r;
 				g += rhs.g;
 				b += rhs.b;
 				a += rhs.a;
->>>>>>> 3bc441ef3c00a390c0483cc86a8123424795139a
 				return *this;
 			}
 
@@ -53,14 +39,6 @@ namespace texture {
                 b *= s;
                 return *this;
             }
-<<<<<<< HEAD
-			
-			// ! Remove this function if unneeded.
-			// Vec3 rgb() {
-			// 	return Vec3(r, g, b);
-			// }
-=======
->>>>>>> 3bc441ef3c00a390c0483cc86a8123424795139a
 
 			static constexpr Colour black() noexcept {
 				return Colour(0, 0, 0);
@@ -93,19 +71,6 @@ namespace texture {
 			static constexpr Colour magenta() noexcept {
 				return Colour(255, 0, 255);
 			}
-<<<<<<< HEAD
-	};
-
-    // ! This currently takes the average of the alpha channel for both colours.
-    // ! How this implementation should handle addition should be discussed later.
-    inline Colour operator+(const Colour& u, const Colour& v) noexcept {
-        return Colour(u.r + v.r, u.g + v.g, u.b + v.b, (u.a + v.a) / 2);
-    }
-
-    inline Colour operator*(num s, const Colour& c) noexcept {
-        return Colour(s*c.r, s*c.g, s*c.b, c.a);
-    }
-=======
 
 			inline Colour set_alpha(num alpha) {
 				a = alpha;
@@ -236,7 +201,6 @@ namespace texture {
 
 	Colour interpolate(const Colour& u, const Colour& v, num ratio) noexcept;
 	
->>>>>>> 3bc441ef3c00a390c0483cc86a8123424795139a
 }
 
 #endif // COLOUR_H

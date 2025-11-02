@@ -70,20 +70,12 @@ target_compile_options(stb_image_write PRIVATE
     -Wno-conversion
 )
 
-<<<<<<< HEAD
-add_executable(static_renderer src/static_renderer.cpp src/classes/vec3.cpp)
-=======
 file(GLOB static_renderer_src CONFIGURE_DEPENDS "src/*.cpp" "src/classes/*.cpp")
 
 add_executable(static_renderer ${static_renderer_src})
->>>>>>> 3bc441ef3c00a390c0483cc86a8123424795139a
 
 # Link the stb_image_write library
 target_link_libraries(static_renderer PRIVATE stb_image_write)
 
 # Ensure the include path for stb_image_write is visible
-<<<<<<< HEAD
 target_include_directories(static_renderer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lib)
-=======
-target_include_directories(static_renderer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/lib)
->>>>>>> 3bc441ef3c00a390c0483cc86a8123424795139a

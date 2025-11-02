@@ -2,17 +2,11 @@
 #include "classes/colour.hpp"
 #include "classes/ray.hpp"
 #include "classes/vec3.hpp"
-<<<<<<< HEAD
-
-#include "stb_image_write.h"
-
-=======
 #include "classes/colour.hpp"
 
 #include "stb_image_write.h"
 
 #include <ctime>
->>>>>>> 3bc441ef3c00a390c0483cc86a8123424795139a
 #include <cstdint>
 #include <fstream>
 #include <vector>
@@ -27,34 +21,6 @@ void create_image(std::size_t width, std::size_t height, const std::vector<Pixel
     // we are using RGBA
     constexpr auto channels = 4;
 
-<<<<<<< HEAD
-    auto file = std::ofstream("output.ppm");
-
-    // PPM header
-    file << "P3\n" << width << " " << height << "\n255\n";
-
-    auto image = std::vector<uint8_t>{};
-
-    // scale from 0.0-1.0 to 0-255
-    for (const auto& pixel : pixels) {
-        auto r_int = static_cast<uint8_t>(255.999 * pixel.r);
-        auto g_int = static_cast<uint8_t>(255.999 * pixel.g);
-        auto b_int = static_cast<uint8_t>(255.999 * pixel.b);
-        auto a_int = static_cast<uint8_t>(255.999 * pixel.a);
-
-        // Write to PPM
-        file << static_cast<int>(r_int) << " " << static_cast<int>(g_int) << " " << static_cast<int>(b_int) << " ";
-
-        image.push_back(r_int);
-        image.push_back(g_int);
-        image.push_back(b_int);
-        image.push_back(a_int);
-    }
-
-    file.close();
-
-    stbi_write_png("output.png",
-=======
     auto filename = "output_" + std::to_string(std::time(nullptr));
 
     // auto file = std::ofstream(filename + ".ppm");
@@ -77,7 +43,6 @@ void create_image(std::size_t width, std::size_t height, const std::vector<Pixel
     // file.close();
 
     stbi_write_png((filename + ".png").c_str(),
->>>>>>> 3bc441ef3c00a390c0483cc86a8123424795139a
                    static_cast<int>(width),
                    static_cast<int>(height),
                    channels,
@@ -86,17 +51,10 @@ void create_image(std::size_t width, std::size_t height, const std::vector<Pixel
 }
 
 // simple gradient from 4.2 from "Ray Tracing In One Weekend" website
-<<<<<<< HEAD
-texture::Colour ray_colour(const geometry::Ray& r) {
-    geometry::Vec3 unit_direction = (r.dir).normalise();
-    auto a = 0.5 * (unit_direction.y + 1.0);
-    return (1.0 - a) * texture::Colour::white() + a * texture::Colour(124, 179, 255);
-=======
 Pixel ray_colour(const geometry::Ray& r) {
     geometry::Vec3 unit_direction = r.dir.normalise();
     auto a = 0.5 * (unit_direction.y + 1.0);
     return texture::interpolate(Pixel(124, 179, 255), Pixel::white(), a);
->>>>>>> 3bc441ef3c00a390c0483cc86a8123424795139a
 }
 
 int main() {
