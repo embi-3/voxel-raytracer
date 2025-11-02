@@ -14,13 +14,19 @@ namespace geometry {
         constexpr Vec3() noexcept = default;
 
         // is this necessary?
-        explicit constexpr Vec3(const num val) noexcept : x(val), y(val), z(val) {}
+        explicit constexpr Vec3(const num val) noexcept
+        : x(val)
+        , y(val)
+        , z(val) {}
 
-        constexpr Vec3(const num x, const num y, const num z) noexcept : x(x), y(y), z(z) {}
+        constexpr Vec3(const num x, const num y, const num z) noexcept
+        : x(x)
+        , y(y)
+        , z(z) {}
 
         // Inverse operator
-        Vec3 operator-() const noexcept { 
-            return Vec3(-x, -y, -z); 
+        Vec3 operator-() const noexcept {
+            return Vec3(-x, -y, -z);
         }
 
         // Vector addition assignment operator
@@ -58,32 +64,24 @@ namespace geometry {
         num length_squared() const noexcept {
             return (x * x) + (y * y) + (z * z);
         }
-        
+
         // Dot product
-        num dot(const Vec3 &rhs) const noexcept {
+        num dot(const Vec3& rhs) const noexcept {
             return (x * rhs.x) + (y * rhs.y) + (z * rhs.z);
         }
 
         // Cross product
-        Vec3 cross(const Vec3 &rhs) const noexcept {
-            return Vec3(
-                (y * rhs.z) - (z * rhs.y),
-                (z * rhs.x) - (x * rhs.z),
-                (x * rhs.y) - (y * rhs.x)
-            );
+        Vec3 cross(const Vec3& rhs) const noexcept {
+            return Vec3((y * rhs.z) - (z * rhs.y), (z * rhs.x) - (x * rhs.z), (x * rhs.y) - (y * rhs.x));
         }
 
         // ? Should this function name be shortened?
         Vec3 into_reciprocal() const {
-            return Vec3(
-                1 / x,
-                1 / y,
-                1 / z
-            );
+            return Vec3(1 / x, 1 / y, 1 / z);
         }
 
         // ! Double check this does what it should.
-        Vec3 reflect(const Vec3 &n) const;
+        Vec3 reflect(const Vec3& n) const;
 
         Vec3 normalise() const;
 
@@ -113,7 +111,7 @@ namespace geometry {
     }
 
     inline Vec3 operator*(num t, const Vec3& v) noexcept {
-        return Vec3(t*v.x, t*v.y, t*v.z);
+        return Vec3(t * v.x, t * v.y, t * v.z);
     }
 
     inline Vec3 operator*(const Vec3& v, num t) noexcept {
@@ -123,6 +121,6 @@ namespace geometry {
     inline Vec3 operator/(const Vec3& v, num t) {
         return (static_cast<num>(1) / t) * v;
     }
-}
+} // namespace geometry
 
 #endif

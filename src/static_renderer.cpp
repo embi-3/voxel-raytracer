@@ -2,12 +2,11 @@
 #include "classes/colour.hpp"
 #include "classes/ray.hpp"
 #include "classes/vec3.hpp"
-#include "classes/colour.hpp"
 
 #include "stb_image_write.h"
 
-#include <ctime>
 #include <cstdint>
+#include <ctime>
 #include <fstream>
 #include <vector>
 
