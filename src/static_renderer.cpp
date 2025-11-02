@@ -6,6 +6,7 @@
 
 #include "stb_image_write.h"
 
+#include <ctime>
 #include <cstdint>
 #include <fstream>
 #include <vector>
@@ -20,17 +21,18 @@ void create_image(std::size_t width, std::size_t height, const std::vector<Pixel
     // we are using RGBA
     constexpr auto channels = 4;
 
-    auto file = std::ofstream("output.ppm");
+    auto filename = "output_" + std::to_string(std::time(nullptr));
+
+    // auto file = std::ofstream(filename + ".ppm");
 
     // PPM header
-    file << "P3\n" << width << " " << height << "\n255\n";
+    // file << "P3\n" << width << " " << height << "\n255\n";
 
     auto image = std::vector<uint8_t>{};
 
-    // scale from 0.0-1.0 to 0-255
     for (const auto& pixel : pixels) {
         // Write to PPM
-        file << pixel.to_rgb_string() << " ";
+        // file << pixel.to_rgb_string() << " ";
 
         image.push_back(pixel.r_int());
         image.push_back(pixel.g_int());
@@ -38,9 +40,9 @@ void create_image(std::size_t width, std::size_t height, const std::vector<Pixel
         image.push_back(static_cast<uint8_t>(255.999 * pixel.a));
     }
 
-    file.close();
+    // file.close();
 
-    stbi_write_png("output.png",
+    stbi_write_png((filename + ".png").c_str(),
                    static_cast<int>(width),
                    static_cast<int>(height),
                    channels,
