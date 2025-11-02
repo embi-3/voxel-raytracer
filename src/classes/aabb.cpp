@@ -1,5 +1,12 @@
+<<<<<<< HEAD
 #include "../common.hpp"
 #include "ray.hpp"
+=======
+#include <limits>
+
+#include "../common.hpp"
+#include "aabb.hpp"
+>>>>>>> 3bc441ef3c00a390c0483cc86a8123424795139a
 
 namespace geometry {
     Interval geometry::AABB::intersection(Ray ray) {
