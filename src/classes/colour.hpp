@@ -5,8 +5,13 @@
 #include "vec3.hpp"
 
 #include <cstdint>
+#include <limits>
 // format library requires clang-17
 // #include <format>
+
+// Biggest number less than 256
+static const num RGB_MAX = std::nexttoward(256, 0.0);
+static const num RGB_MIN = 0;
 
 namespace texture {
 	class Colour {
@@ -23,7 +28,7 @@ namespace texture {
 				r += rhs.r;
 				g += rhs.g;
 				b += rhs.b;
-				a = (a + rhs.a) / 2;
+				a += rhs.a;
 				return *this;
 			}
 
@@ -71,13 +76,6 @@ namespace texture {
 				return *this;
 			}
 
-			inline bool is_valid() {
-				return (r >= 0 && r < 256)
-					&& (g >= 0 && g < 256)
-					&& (b >= 0 && b < 256)
-					&& (a >= 0.0 && a <= 1.0);
-			}
-
 			// ! std::format not supported by compiler.
 			// inline std::string to_rgb_string() {
 			// 	return std::format("%d %d %d %d", rint(), gint(), bint());
@@ -96,6 +94,8 @@ namespace texture {
 				return std::to_string(r_int()) + " " + std::to_string(g_int()) + " " + std::to_string(b_int()) + " " + std::to_string(a);
 			}
 
+			// static_cast always truncates the floating part of the number, rounding down.
+
 			inline uint8_t r_int() const {
 				return static_cast<uint8_t>(r);
 			}
@@ -109,41 +109,49 @@ namespace texture {
 			}
 	};
 
-	// ! These operations may produce invalid RGBA values! Be careful of overflows!
+	// Operator Overloads
+	// ! The following operations always return a valid RGBA value. If you are getting unexpected
+	// ! results, check for possible overflows in your arithmetic. You should avoid calling these
+	// ! operators directly and use blend modes instead.
+
     inline Colour operator+(const Colour& u, const Colour& v) noexcept {
-        Colour res = Colour(u.r + v.r, u.g + v.g, u.b + v.b, std::min((u.a) + (u.a * v.a), 1.0));
-		if (!res.is_valid()) {
-			std::cerr << "Invalid RGBA value! Received " << res.to_rgb_string() << "\n";
-			return Colour::black();
-		}
-
-		return res;
+		return Colour(
+			bounded_rgb(u.r + v.r),
+			bounded_rgb(u.g + v.g),
+			bounded_rgb(u.b + v.b), 
+			bounded_alpha(u.a + v.a)
+		);
     }
 
-	// ! These operations may produce invalid RGBA values! Be careful of overflows!
     inline Colour operator*(const num s, const Colour& c) noexcept {
-        Colour res = Colour(s*c.r, s*c.g, s*c.b, c.a);
-		if (!res.is_valid()) {
-			std::cerr << "Invalid RGBA value! Received " << res.to_rgba_string() << "\n";
-			return Colour::black();
-		}
-
-		return res;
+        return Colour(
+			bounded_rgb(s * c.r),
+			bounded_rgb(s * c.g),
+			bounded_rgb(s * c.b), 
+			c.a
+		);
     }
 
-	// ! These operations may produce invalid RGBA values! Be careful of overflows!
 	inline Colour operator*(const Colour& c, const num s) noexcept {
-        Colour res = Colour(s*c.r, s*c.g, s*c.b, c.a);
-		if (!res.is_valid()) {
-			std::cerr << "Invalid RGBA value! Received " << res.to_rgba_string() << "\n";
-			return Colour::black();
-		}
-
-		return res;
+        return Colour(
+			bounded_rgb(s * c.r),
+			bounded_rgb(s * c.g),
+			bounded_rgb(s * c.b), 
+			c.a
+		);
     }
+	
+	num bounded_rgb(num value) {
+		return std::clamp(value, RGB_MIN, RGB_MAX);
+	}
+
+	num bounded_alpha(num alpha) {
+		return std::clamp(alpha, 0.0, 1.0);
+	}
 
 	// Blend Modes
 	Colour normal_blend(const Colour& u, const Colour& v) noexcept;
+	
 }
 
 #endif // COLOUR_H
