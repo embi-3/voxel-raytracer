@@ -43,19 +43,19 @@ namespace geometry {
             }
 
         private:
-            inline Direction x_dir() {
+            constexpr inline Direction x_dir() const {
                 return get_dir(dir.x);
             }
 
-            inline Direction y_dir() {
+            constexpr inline Direction y_dir() const {
                 return get_dir(dir.y);
             }
 
-            inline Direction z_dir() {
+            constexpr inline Direction z_dir() const {
                 return get_dir(dir.z);
             }
 
-            inline Direction get_dir(num value) {
+            constexpr inline Direction get_dir(num value) const {
                 if (value > 0) {
                     return POSITIVE;
                 } else if (value < 0) {

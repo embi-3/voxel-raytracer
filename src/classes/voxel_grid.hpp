@@ -50,11 +50,12 @@ namespace geometry {
 
             // TODO: Think of a more elegant way to pass out three integers.
             // Perhaps make a Coordinate class, or turn Vec3 into a template.
-            void get_coords(Vec3 pos, int *x, int *y, int *z) {
-
+            void get_coords([[maybe_unused]] Vec3 pos, [[maybe_unused]] int *x, [[maybe_unused]] int *y, [[maybe_unused]] int *z) {
+                // TODO: Implement this function.
             }
 
             void set_voxel([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int z) {
+                // TODO: Implement this function.
                 // Throw an error if the coordinates are invalid.
             }
 
