@@ -19,25 +19,19 @@ namespace geometry {
             NEGATIVE = -1,
         };
 
-        enum FaceOrientation {
-            X_POS = 1,
-            X_NEG = 2,
-            Y_POS = 4,
-            Y_NEG = 8,
-            Z_POS = 16,
-            Z_NEG = 32,
-        };
-
         Vec3 origin;
         Vec3 dir;
         Coordinate orientation;
-
-        // Vec3 inv_dir; // TODO: precompute this for better performance
+        Vec3 inv_dir;
 
         explicit constexpr Ray(Vec3 origin, Vec3 dir)
         : origin(origin)
         , dir(dir)
-        , orientation(Coordinate(x_dir(), y_dir(), z_dir())) {}
+        , orientation(Coordinate(x_sign(), y_sign(), z_sign())) {
+            inv_dir.x = dir.x == 0 ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.x;
+            inv_dir.y = dir.y == 0 ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.y;
+            inv_dir.z = dir.z == 0 ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.z;
+        }
 
         IntersectionList traverse(VoxelGrid grid);
 
@@ -46,19 +40,19 @@ namespace geometry {
         }
 
     private:
-        constexpr inline Orientation x_dir() const {
-            return get_dir(dir.x);
+        constexpr inline Orientation x_sign() const {
+            return get_sign(dir.x);
         }
 
-        constexpr inline Orientation y_dir() const {
-            return get_dir(dir.y);
+        constexpr inline Orientation y_sign() const {
+            return get_sign(dir.y);
         }
 
-        constexpr inline Orientation z_dir() const {
-            return get_dir(dir.z);
+        constexpr inline Orientation z_sign() const {
+            return get_sign(dir.z);
         }
 
-        constexpr inline Orientation get_dir(num value) const {
+        constexpr inline Orientation get_sign (num value) const {
             if (value > 0) {
                 return POSITIVE;
             }
