@@ -70,7 +70,9 @@ target_compile_options(stb_image_write PRIVATE
     -Wno-conversion
 )
 
-add_executable(static_renderer src/static_renderer.cpp src/classes/vec3.cpp)
+file(GLOB static_renderer_src CONFIGURE_DEPENDS "src/*.hpp" "src/*.cpp" "src/classes/*.hpp" "src/classes/*.cpp")
+
+add_executable(static_renderer ${static_renderer_src})
 
 # Link the stb_image_write library
 target_link_libraries(static_renderer PRIVATE stb_image_write)
