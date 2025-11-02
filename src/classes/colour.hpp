@@ -124,6 +124,14 @@ namespace texture {
 	// ? Does clamping on every operation have a significant performance penalty? 
 	// ? This could be something to test.
 
+	inline num bounded_rgb(num value) {
+		return std::clamp(value, RGB_MIN, RGB_MAX);
+	}
+
+	inline num bounded_alpha(num alpha) {
+		return std::clamp(alpha, 0.0, 1.0);
+	}
+
     inline Colour operator+(const Colour& u, const Colour& v) noexcept {
 		return Colour(
 			bounded_rgb(u.r + v.r),
@@ -186,17 +194,11 @@ namespace texture {
 
 	// 	return res;
     // }
-	
-	num bounded_rgb(num value) {
-		return std::clamp(value, RGB_MIN, RGB_MAX);
-	}
-
-	num bounded_alpha(num alpha) {
-		return std::clamp(alpha, 0.0, 1.0);
-	}
 
 	// Blend Modes
 	Colour normal_blend(const Colour& u, const Colour& v) noexcept;
+
+	Colour interpolate(const Colour& u, const Colour& v, num ratio) noexcept;
 	
 }
 

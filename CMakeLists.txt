@@ -70,7 +70,7 @@ target_compile_options(stb_image_write PRIVATE
     -Wno-conversion
 )
 
-file(GLOB static_renderer_src CONFIGURE_DEPENDS "src/*.hpp" "src/*.cpp" "src/classes/*.hpp" "src/classes/*.cpp")
+file(GLOB static_renderer_src CONFIGURE_DEPENDS "src/*.cpp" "src/classes/*.cpp")
 
 add_executable(static_renderer ${static_renderer_src})
 
