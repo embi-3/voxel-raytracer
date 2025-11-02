@@ -19,6 +19,15 @@ namespace geometry {
                 NEGATIVE = -1,
             };
 
+            enum Orientation {
+                X_POS = 1,
+                X_NEG = 2,
+                Y_POS = 4,
+                Y_NEG = 8,
+                Z_POS = 16,
+                Z_NEG = 32,
+            };
+
             Vec3 origin;
             Vec3 dir;
             Vec3 orientation;
@@ -45,7 +54,7 @@ namespace geometry {
             inline Direction z_dir() {
                 return get_dir(dir.z);
             }
-            
+
             inline Direction get_dir(num value) {
                 if (value > 0) {
                     return POSITIVE;
