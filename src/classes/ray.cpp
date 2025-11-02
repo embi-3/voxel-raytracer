@@ -3,6 +3,7 @@
 #include <limits>
 
 namespace geometry {
+    // TODO: Remove deprecated code.
     // Intersection geometry::Ray::traverse(VoxelGrid grid) {
     //     // Check if the ray is already in the voxel grid.
     //     if (grid.contains(origin)) {
@@ -33,11 +34,8 @@ namespace geometry {
         Vec3 tdelta = Vec3(dir.x == 0 ? std::numeric_limits<num>::infinity() : grid.scale / dir.x,
                            dir.y == 0 ? std::numeric_limits<num>::infinity() : grid.scale / dir.y,
                            dir.z == 0 ? std::numeric_limits<num>::infinity() : grid.scale / dir.z);
-        Vec3 tstep = orientation; // ? Is (*this) required here?
         num tcur = 0;
-        int x = 0;
-        int y = 0;
-        int z = 0;
+        Coordinate coords;
 
         // Check if the ray is already in the voxel grid.
         if (grid.contains(origin)) {
@@ -58,7 +56,7 @@ namespace geometry {
             }
         }
 
-        grid.get_coords(pos, &x, &y, &z);
+        coords = grid.get_coords(pos);
 
         // Iteratively find the next voxel using floating-point comparisons.
         while (grid.contains(at(tcur))) {
@@ -66,23 +64,25 @@ namespace geometry {
             if (tmax.x <= tmax.y && tmax.x <= tmax.z) {
                 tcur = tmax.x;
                 tmax.x += tdelta.x;
-                x += orientation.x;
+                coords.x += orientation.x;
             }
 
             if (tmax.y <= tmax.x && tmax.y <= tmax.z) {
                 tcur = tmax.y;
                 tmax.y += tdelta.y;
-                y += orientation.y;
+                coords.y += orientation.y;
             }
 
             if (tmax.z <= tmax.x && tmax.z <= tmax.y) {
                 tcur = tmax.z;
                 tmax.z += tdelta.z;
-                z += orientation.z;
+                coords.z += orientation.z;
             }
 
             // TODO: Check that get_voxel actually returns a valid Voxel.
-            objects.push_back(Intersection(grid.get_voxel(x, y, z), tcur));
+            objects.push_back(Intersection(grid.get_voxel(coords), tcur));
         }
+
+        return objects;
     }
 } // namespace geometry

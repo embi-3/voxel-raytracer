@@ -13,13 +13,13 @@ namespace geometry {
 
     class Ray {
     public:
-        enum Direction {
+        enum Orientation {
             POSITIVE = 1,
             ZERO = 0,
             NEGATIVE = -1,
         };
 
-        enum Orientation {
+        enum FaceOrientation {
             X_POS = 1,
             X_NEG = 2,
             Y_POS = 4,
@@ -30,31 +30,35 @@ namespace geometry {
 
         Vec3 origin;
         Vec3 dir;
-        Vec3 orientation;
+        Coordinate orientation;
 
         // Vec3 inv_dir; // TODO: precompute this for better performance
 
         explicit constexpr Ray(Vec3 origin, Vec3 dir)
         : origin(origin)
         , dir(dir)
-        , orientation(Vec3(x_dir(), y_dir(), z_dir())) {}
+        , orientation(Coordinate(x_dir(), y_dir(), z_dir())) {}
 
         IntersectionList traverse(VoxelGrid grid);
 
+        inline Vec3 at(num t) {
+            return origin + t * dir;
+        }
+
     private:
-        constexpr inline Direction x_dir() const {
+        constexpr inline Orientation x_dir() const {
             return get_dir(dir.x);
         }
 
-        constexpr inline Direction y_dir() const {
+        constexpr inline Orientation y_dir() const {
             return get_dir(dir.y);
         }
 
-        constexpr inline Direction z_dir() const {
+        constexpr inline Orientation z_dir() const {
             return get_dir(dir.z);
         }
 
-        constexpr inline Direction get_dir(num value) const {
+        constexpr inline Orientation get_dir(num value) const {
             if (value > 0) {
                 return POSITIVE;
             }

@@ -47,7 +47,7 @@ namespace geometry {
             return Voxel();
         }
 
-        Coordinate get_coords(Vec3 pos) {
+        Coordinate get_coords([[maybe_unused]] Vec3 pos) {
             return Coordinate();
         }
 

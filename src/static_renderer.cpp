@@ -64,7 +64,7 @@ int main() {
     auto focal_length = 1.0;
     auto viewport_height = 2.0;
     auto viewport_width = viewport_height * (double(image_width) / image_height);
-    auto camera_center = geometry::Point3(0, 0, 0);
+    auto camera_center = geometry::Vec3(0, 0, 0);
 
     // calculate horizontal and vertical viewport vectors
     auto viewport_u = geometry::Vec3(viewport_width, 0, 0);
