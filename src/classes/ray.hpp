@@ -2,10 +2,10 @@
 #define RAY_H
 
 #include "../common.hpp"
+#include "intersection.hpp"
 #include "vec3.hpp"
 #include "voxel.hpp"
 #include "voxel_grid.hpp"
-#include "intersection.hpp"
 #include <vector>
 
 namespace geometry {
@@ -37,10 +37,6 @@ namespace geometry {
             explicit constexpr Ray(Vec3 origin, Vec3 dir) : origin(origin), dir(dir), orientation(Vec3(x_dir(), y_dir(), z_dir())) {}
 
             IntersectionList traverse(VoxelGrid grid);
-
-            Vec3 at(num t) const {
-                return origin + t * dir;
-            }
 
         private:
             constexpr inline Direction x_dir() const {

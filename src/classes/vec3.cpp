@@ -1,6 +1,6 @@
 #include "vec3.hpp"
 
-namespace geometry {    
+namespace geometry {
     // ! Double check this does what it should.
     Vec3 Vec3::reflect(const Vec3& n) const {
         const Vec3 v(*this);
@@ -9,5 +9,5 @@ namespace geometry {
 
     Vec3 Vec3::normalise() const {
         return *this / length();
-    }  
-}
+    }
+} // namespace geometry

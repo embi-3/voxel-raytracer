@@ -5,12 +5,15 @@
 
 namespace geometry {
     class Interval {
-        public:
-            bool isValid;
-            num start;
-            num end;
+    public:
+        bool isValid;
+        num start;
+        num end;
 
-            constexpr explicit Interval(num start, num end) : isValid(start <= end), start(start), end(end) {}
+        constexpr explicit Interval(num start, num end)
+        : isValid(start <= end)
+        , start(start)
+        , end(end) {}
     };
 } // namespace geometry
 
