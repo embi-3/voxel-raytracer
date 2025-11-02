@@ -1,5 +1,6 @@
 #include "ray.hpp"
 #include "aabb.hpp"
+#include <limits>
 
 namespace geometry
 {
@@ -30,7 +31,11 @@ namespace geometry
 
         Vec3 pos;
         Vec3 tmax;
-        Vec3 tdelta = Vec3(grid.scale / dir.x, grid.scale / dir.y, grid.scale / dir.z);
+        Vec3 tdelta = Vec3(
+            dir.x == 0 ? std::numeric_limits<num>::infinity() : grid.scale / dir.x, 
+            dir.y == 0 ? std::numeric_limits<num>::infinity() : grid.scale / dir.y, 
+            dir.z == 0 ? std::numeric_limits<num>::infinity() : grid.scale / dir.z
+        );
         Vec3 tstep = orientation; // ? Is (*this) required here?
         num tcur = 0;
         int x = 0;
