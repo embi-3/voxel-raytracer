@@ -37,19 +37,19 @@ namespace geometry {
             height = world_size;
         }
 
-        Voxel get_voxel([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int z) {
-            // TODO: Implement a function for accessing voxels in the grid by index.
-            return Voxel();
-        }
-
-        Voxel get_voxel_at_pos([[maybe_unused]] Vec3 pos) {
+        Voxel get_voxel([[maybe_unused]] Coordinate coords) {
             // TODO: Implement a function for accessing voxels in the grid by coordinates.
             return Voxel();
         }
 
-        // TODO: Think of a more elegant way to pass out three integers.
-        // Perhaps make a Coordinate class, or turn Vec3 into a template.
-        void get_coords(Vec3 pos, int* x, int* y, int* z) {}
+        Voxel get_voxel([[maybe_unused]] Vec3 pos) {
+            // TODO: Implement a function for accessing voxels in the grid by position.
+            return Voxel();
+        }
+
+        Coordinate get_coords(Vec3 pos) {
+            return Coordinate();
+        }
 
         void set_voxel([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int z) {
             // Throw an error if the coordinates are invalid.

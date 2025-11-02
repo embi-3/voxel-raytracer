@@ -8,29 +8,23 @@
 #include <iostream>
 
 namespace geometry {
-    class Vec3 {
+    template <typename T> class Triple {
     public:
         // Zero constructor
-        constexpr Vec3() noexcept = default;
+        constexpr Triple() noexcept = default;
 
-        // is this necessary?
-        explicit constexpr Vec3(const num val) noexcept
-        : x(val)
-        , y(val)
-        , z(val) {}
-
-        constexpr Vec3(const num x, const num y, const num z) noexcept
+        constexpr Triple(const T x, const T y, const T z) noexcept
         : x(x)
         , y(y)
         , z(z) {}
 
         // Inverse operator
-        Vec3 operator-() const noexcept {
-            return Vec3(-x, -y, -z);
+        Triple operator-() const noexcept {
+            return Triple(-x, -y, -z);
         }
 
         // Vector addition assignment operator
-        Vec3& operator+=(const Vec3& rhs) noexcept {
+        Triple& operator+=(const Triple& rhs) noexcept {
             x += rhs.x;
             y += rhs.y;
             z += rhs.z;
@@ -38,12 +32,12 @@ namespace geometry {
         }
 
         // Vector subtraction assignment operator
-        Vec3& operator-=(const Vec3& rhs) noexcept {
+        Triple& operator-=(const Triple& rhs) noexcept {
             return *this += -rhs;
         }
 
         // Scalar multiplication assignment operator
-        Vec3& operator*=(num t) noexcept {
+        Triple& operator*=(T t) noexcept {
             x *= t;
             y *= t;
             z *= t;
@@ -51,75 +45,83 @@ namespace geometry {
         }
 
         // Scalar division assignment operator
-        Vec3& operator/=(num t) {
-            return (*this *= (static_cast<num>(1) / t));
+        Triple& operator/=(T t) {
+            return (*this *= (static_cast<T>(1) / t));
         }
 
         // Magnitude
-        num length() const noexcept {
+        T length() const noexcept {
             return std::sqrt(length_squared());
         }
 
         // Magnitude squared
-        num length_squared() const noexcept {
+        T length_squared() const noexcept {
             return (x * x) + (y * y) + (z * z);
         }
 
         // Dot product
-        num dot(const Vec3& rhs) const noexcept {
+        T dot(const Triple& rhs) const noexcept {
             return (x * rhs.x) + (y * rhs.y) + (z * rhs.z);
         }
 
         // Cross product
-        Vec3 cross(const Vec3& rhs) const noexcept {
-            return Vec3((y * rhs.z) - (z * rhs.y), (z * rhs.x) - (x * rhs.z), (x * rhs.y) - (y * rhs.x));
+        Triple cross(const Triple& rhs) const noexcept {
+            return Triple((y * rhs.z) - (z * rhs.y), (z * rhs.x) - (x * rhs.z), (x * rhs.y) - (y * rhs.x));
         }
 
         // ? Should this function name be shortened?
-        Vec3 into_reciprocal() const {
-            return Vec3(1 / x, 1 / y, 1 / z);
+        Triple into_reciprocal() const {
+            return Triple(1 / x, 1 / y, 1 / z);
         }
 
         // ! Double check this does what it should.
-        Vec3 reflect(const Vec3& n) const;
+        Triple reflect(const Triple& n) const;
 
-        Vec3 normalise() const;
+        Triple normalise() const;
 
         // Components
-        num x = 0;
-        num y = 0;
-        num z = 0;
+        T x = 0;
+        T y = 0;
+        T z = 0;
     };
 
-    using Point3 = Vec3;
+    using Vec3 = Triple<num>;
+    using Coordinate = Triple<int>;
 
     // Vector Non-Member Utility Functions
-    inline std::ostream& operator<<(std::ostream& out, const Vec3& v) {
-        return out << "Vec3(" << v.x << ", " << v.y << ", " << v.z << ")";
+    template <typename T>
+    inline std::ostream& operator<<(std::ostream& out, const Triple<T>& v) {
+        return out << "Triple(" << v.x << ", " << v.y << ", " << v.z << ")";
     }
 
-    inline Vec3 operator+(const Vec3& u, const Vec3& v) noexcept {
-        return Vec3(u.x + v.x, u.y + v.y, u.z + v.z);
+    template <typename T>
+    inline Triple<T> operator+(const Triple<T>& u, const Triple<T>& v) noexcept {
+        return Triple(u.x + v.x, u.y + v.y, u.z + v.z);
     }
 
-    inline Vec3 operator-(const Vec3& u, const Vec3& v) noexcept {
-        return Vec3(u.x - v.x, u.y - v.y, u.z - v.z);
+    template <typename T>
+    inline Triple<T> operator-(const Triple<T>& u, const Triple<T>& v) noexcept {
+        return Triple(u.x - v.x, u.y - v.y, u.z - v.z);
     }
 
-    inline Vec3 operator*(const Vec3& u, const Vec3& v) noexcept {
-        return Vec3(u.x * v.x, u.y * v.y, u.z * v.z);
+    template <typename T>
+    inline Triple<T> operator*(const Triple<T>& u, const Triple<T>& v) noexcept {
+        return Triple(u.x * v.x, u.y * v.y, u.z * v.z);
     }
 
-    inline Vec3 operator*(num t, const Vec3& v) noexcept {
-        return Vec3(t * v.x, t * v.y, t * v.z);
+    template <typename T>
+    inline Triple<T> operator*(T t, const Triple<T>& v) noexcept {
+        return Triple(t * v.x, t * v.y, t * v.z);
     }
 
-    inline Vec3 operator*(const Vec3& v, num t) noexcept {
+    template <typename T>
+    inline Triple<T> operator*(const Triple<T>& v, T t) noexcept {
         return t * v;
     }
 
-    inline Vec3 operator/(const Vec3& v, num t) {
-        return (static_cast<num>(1) / t) * v;
+    template <typename T>
+    inline Triple<T> operator/(const Triple<T>& v, T t) {
+        return (static_cast<T>(1) / t) * v;
     }
 } // namespace geometry
 
