@@ -13,6 +13,7 @@
 namespace geometry {
     class VoxelGrid {
         public:
+            // TODO: Precompute the bounding box for a VoxelGrid during initialisation.
             // Create a sparse 3D array for storing voxels.
             Vec3 origin = Vec3();
             num scale = 100;    // size of a voxel, in pixels.
@@ -42,9 +43,15 @@ namespace geometry {
                 return Voxel();
             }
 
-            Voxel get_voxel_at_coords([[maybe_unused]] Vec3 pos) {
+            Voxel get_voxel_at_pos([[maybe_unused]] Vec3 pos) {
                 // TODO: Implement a function for accessing voxels in the grid by coordinates.
                 return Voxel();
+            }
+
+            // TODO: Think of a more elegant way to pass out three integers.
+            // Perhaps make a Coordinate class, or turn Vec3 into a template.
+            void get_coords(Vec3 pos, int *x, int *y, int *z) {
+
             }
 
             void set_voxel([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int z) {
@@ -52,9 +59,9 @@ namespace geometry {
             }
 
             bool contains(Vec3 position) {
-                return std::abs(position.x - origin.x) <= width
-                    && std::abs(position.y - origin.y) <= length
-                    && std::abs(position.z - origin.z) <= height;
+                return std::abs(position.x - origin.x) <= (width - 0.5) * scale
+                    && std::abs(position.y - origin.y) <= (length - 0.5) * scale
+                    && std::abs(position.z - origin.z) <= (height - 0.5) * scale;
             }
     };
 }
