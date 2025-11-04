@@ -45,8 +45,8 @@ namespace geometry {
         else {
             Interval interval = intersection(grid.bounding_box);
             if (interval.isValid) {
-                pos = at(interval.start);
-                tmax = Vec3(interval.start);
+                pos = at(interval.min);
+                tmax = Vec3(interval.min);
                 tmax += tdelta;
             }
             else {
