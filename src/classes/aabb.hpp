@@ -3,9 +3,7 @@
 
 #include "../common.hpp"
 #include "interval.hpp"
-#include "ray.hpp"
 #include "vec3.hpp"
-#include "voxel_grid.hpp"
 
 namespace geometry {
     // Axis Aligned Bounding Box
@@ -14,16 +12,10 @@ namespace geometry {
         Vec3 min;
         Vec3 max;
 
+        explicit constexpr AABB() = default;
         explicit constexpr AABB(Vec3 min, Vec3 max)
         : min(min)
         , max(max){};
-
-        // Implement the slab method for computing a Ray-AABB intersection.
-        Interval intersection(Ray ray);
-
-        bool intersects(Ray ray) {
-            return intersection(ray).isValid;
-        }
     };
 } // namespace geometry
 

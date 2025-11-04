@@ -13,7 +13,7 @@ namespace geometry {
 
     class Ray {
     public:
-        enum Orientation {
+        enum class Orientation {
             POSITIVE = 1,
             ZERO = 0,
             NEGATIVE = -1,
@@ -21,19 +21,23 @@ namespace geometry {
 
         Vec3 origin;
         Vec3 dir;
-        Coordinate orientation;
+        Int3 orientation;
         Vec3 inv_dir;
 
         explicit constexpr Ray(Vec3 origin, Vec3 dir)
         : origin(origin)
         , dir(dir)
-        , orientation(Coordinate(x_sign(), y_sign(), z_sign())) {
+        , orientation(Int3(static_cast<int>(x_sign()), static_cast<int>(y_sign()), static_cast<int>(z_sign()))) {
             inv_dir.x = dir.x == 0 ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.x;
             inv_dir.y = dir.y == 0 ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.y;
             inv_dir.z = dir.z == 0 ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.z;
         }
 
         IntersectionList traverse(VoxelGrid grid);
+
+        Interval intersection(AABB bounding_box);
+
+        bool intersects(AABB bounding_box);
 
         inline Vec3 at(num t) {
             return origin + t * dir;
@@ -54,13 +58,13 @@ namespace geometry {
 
         constexpr inline Orientation get_sign(num value) const {
             if (value > 0) {
-                return POSITIVE;
+                return Orientation::POSITIVE;
             }
             else if (value < 0) {
-                return NEGATIVE;
+                return Orientation::NEGATIVE;
             }
             else {
-                return ZERO;
+                return Orientation::ZERO;
             }
         }
     };

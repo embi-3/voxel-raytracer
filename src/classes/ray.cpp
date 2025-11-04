@@ -31,9 +31,9 @@ namespace geometry {
 
         Vec3 pos;
         Vec3 tmax;
-        Vec3 tdelta = Vec3(dir.x == 0 ? std::numeric_limits<num>::infinity() : grid.scale / dir.x,
-                           dir.y == 0 ? std::numeric_limits<num>::infinity() : grid.scale / dir.y,
-                           dir.z == 0 ? std::numeric_limits<num>::infinity() : grid.scale / dir.z);
+        Vec3 tdelta = Vec3(dir.x == 0 ? std::numeric_limits<num>::infinity() : grid.scale.x / dir.x,
+                           dir.y == 0 ? std::numeric_limits<num>::infinity() : grid.scale.y / dir.y,
+                           dir.z == 0 ? std::numeric_limits<num>::infinity() : grid.scale.z / dir.z);
         num tcur = 0;
         Coordinate coords;
 
@@ -43,8 +43,7 @@ namespace geometry {
             tmax = tdelta;
         }
         else {
-            AABB bounding_box = AABB(grid.min_bounds, grid.max_bounds);
-            Interval interval = bounding_box.intersection(*this);
+            Interval interval = intersection(grid.bounding_box);
             if (interval.isValid) {
                 pos = at(interval.start);
                 tmax = Vec3(interval.start);
@@ -84,5 +83,31 @@ namespace geometry {
         }
 
         return objects;
+    }
+
+    Interval geometry::Ray::intersection(AABB bounding_box) {
+        num t_min = 0;
+        num t_max = std::numeric_limits<num>::infinity();
+
+        num x_min = (origin.x - bounding_box.min.x) * inv_dir.x;
+        num x_max = (origin.x - bounding_box.max.x) * inv_dir.x;
+        num y_min = (origin.y - bounding_box.min.y) * inv_dir.y;
+        num y_max = (origin.y - bounding_box.max.y) * inv_dir.y;
+        num z_min = (origin.z - bounding_box.min.z) * inv_dir.z;
+        num z_max = (origin.z - bounding_box.max.z) * inv_dir.z;
+
+        t_min = std::max(x_min, t_min);
+        t_min = std::max(y_min, t_min);
+        t_min = std::max(z_min, t_min);
+
+        t_max = std::min(x_max, t_max);
+        t_max = std::min(y_max, t_max);
+        t_max = std::min(z_max, t_max);
+
+        return Interval(t_min, t_max);
+    }
+
+    bool geometry::Ray::intersects(AABB bounding_box) {
+        return intersection(bounding_box).isValid;
     }
 } // namespace geometry

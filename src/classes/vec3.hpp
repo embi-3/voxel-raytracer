@@ -99,7 +99,8 @@ namespace geometry {
     };
 
     using Vec3 = Triple<num>;
-    using Coordinate = Triple<int>;
+    using Int3 = Triple<int>;
+    using Coordinate = Triple<unsigned int>;
 
     // Vector Non-Member Utility Functions
     template<typename T>
