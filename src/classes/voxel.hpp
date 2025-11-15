@@ -13,14 +13,24 @@ constexpr int NUM_FACES = 6;
 namespace geometry {
     class Voxel {
         using Faces = std::array<texture::Colour, NUM_FACES>;
-
+        using Colour = texture::Colour;
+        using Material = texture::Material;
     public:
         bool opaque = true;
-        // geometry::Vec3 coords = geometry::Vec3(); // ! We shouldn't store the coordinates for the voxel in itself.
-        // Faces colours = {}; // ! This is really bad code.
-        // texture::Material material = Material();
+        Faces colours;
+        Material material = Material();
 
-        explicit constexpr Voxel() = default;
+        explicit constexpr Voxel() {
+            colours.fill(Colour::white());
+        };
+
+        explicit constexpr Voxel(Colour colour) {
+            colours.fill(colour);
+        }
+
+        explicit constexpr Voxel(Colour face1, Colour face2, Colour face3, Colour face4, Colour face5, Colour face6) {
+            colours = {face1, face2, face3, face4, face5, face6};
+        }
     };
 } // namespace geometry
 #endif // VOXEL_H

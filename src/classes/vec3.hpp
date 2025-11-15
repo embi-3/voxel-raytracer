@@ -100,7 +100,7 @@ namespace geometry {
 
     using Vec3 = Triple<num>;
     using Int3 = Triple<int>;
-    using Coordinate = Triple<unsigned int>;
+    using Coordinate = Triple<unsigned int>; // ! May have to make this a long if larger models are needed.
 
     // Vector Non-Member Utility Functions
     template<typename T>

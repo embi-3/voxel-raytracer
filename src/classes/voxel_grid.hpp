@@ -41,31 +41,58 @@ namespace geometry {
             VoxelGrid();
         }
 
-        Voxel get_voxel([[maybe_unused]] Coordinate coords) {
-            // TODO: Implement a function for accessing voxels in the grid by coordinates.
-            return Voxel();
+        // TODO: Check if this returns shallow or deep copy of the Voxel.d
+        Voxel get_voxel(Coordinate coords) {
+            unsigned int index = flatten(coords);
+            return world.at(index);
         }
 
-        Voxel get_voxel([[maybe_unused]] Vec3 pos) {
-            // TODO: Implement a function for accessing voxels in the grid by position.
-            return Voxel();
+        Voxel get_voxel(Vec3 pos) {
+            return get_voxel(get_coords(pos));
         }
 
-        Coordinate get_coords([[maybe_unused]] Vec3 pos) {
-            return Coordinate();
+        Coordinate get_coords(Vec3 pos) {
+            if (contains(pos)) {
+                unsigned int x = std::round(pos.x);
+                unsigned int y = std::round(pos.y);
+                unsigned int z = std::round(pos.z);
+                return Coordinate(x, y, z);
+            } else {
+                // Return a coordinate that is clearly an error. We could handle this error more elegantly but
+                // this is good enough for debugging purposes.
+                return Coordinate(std::numeric_limits<unsigned int>().max());
+            }
         }
 
-        void set_voxel([[maybe_unused]] int x, [[maybe_unused]] int y, [[maybe_unused]] int z) {
+        void set_voxel([[maybe_unused]] unsigned int x, [[maybe_unused]] unsigned int y, [[maybe_unused]] unsigned int z) {
             // Throw an error if the coordinates are invalid.
         }
 
-        bool contains(Vec3 position) {
-            return position.x - origin.x <= (size.x - 0.5) * scale.x
-                && position.y - origin.y <= (size.y - 0.5) * scale.y
-                && position.z - origin.z <= (size.z - 0.5) * scale.z
-                && origin.x - position.x >= 0.5 * scale.x
-                && origin.y - position.y >= 0.5 * scale.y
-                && origin.z - position.z >= 0.5 * scale.z;
+        bool contains(Vec3 pos) {
+            return pos.x - origin.x <= (size.x - 0.5) * scale.x
+                && pos.y - origin.y <= (size.y - 0.5) * scale.y
+                && pos.z - origin.z <= (size.z - 0.5) * scale.z
+                && origin.x - pos.x >= 0.5 * scale.x
+                && origin.y - pos.y >= 0.5 * scale.y
+                && origin.z - pos.z >= 0.5 * scale.z;
+        }
+
+        bool contains(Coordinate coords) {
+            return coords.x < size.x && coords.y < size.y && coords.z < size.z;
+        }
+    
+    private:
+        // ! If the coordinates are too large, this may return an index outside the VoxelGrid!
+        unsigned int flatten(Coordinate coords) {
+            return coords.x * size.x + coords.y * size.y + coords.z * size.z;
+        }
+
+        // ! If index is too large, this may return a coordinate outside the VoxelGrid!
+        Coordinate unflatten(unsigned int index) {            
+            unsigned int x = index / (size.y + size.z);
+            unsigned int y = (index - x * (size.y + size.z)) / size.z;
+            unsigned int z = index - x * (size.y + size.z) - y * size.z;
+            return Coordinate(x, y, z);
         }
     };
 } // namespace geometry
