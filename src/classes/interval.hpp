@@ -7,13 +7,13 @@ namespace geometry {
     class Interval {
     public:
         bool isValid;
-        num start;
-        num end;
+        num min;
+        num max;
 
-        constexpr explicit Interval(num start, num end)
-        : isValid(start <= end)
-        , start(start)
-        , end(end) {}
+        constexpr explicit Interval(num min, num end)
+        : isValid(min <= end)
+        , min(min)
+        , max(end) {}
     };
 } // namespace geometry
 

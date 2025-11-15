@@ -81,7 +81,7 @@ namespace geometry {
         }
 
         // ! Double check this does what it should.
-        
+
         // ! Double check this does what it should.
         Triple reflect(const Triple& n) const {
             const Triple v(*this);
@@ -99,7 +99,8 @@ namespace geometry {
     };
 
     using Vec3 = Triple<num>;
-    using Coordinate = Triple<int>;
+    using Int3 = Triple<int>;
+    using Coordinate = Triple<unsigned int>; // ! May have to make this a long if larger models are needed.
 
     // Vector Non-Member Utility Functions
     template<typename T>
