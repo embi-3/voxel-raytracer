@@ -42,20 +42,20 @@ namespace geometry {
         }
 
         // TODO: Check if this returns shallow or deep copy of the Voxel.d
-        Voxel get_voxel(Coordinate coords) {
+        Voxel at(Coordinate coords) {
             unsigned int index = flatten(coords);
             return world.at(index);
         }
 
-        Voxel get_voxel(Vec3 pos) {
-            return get_voxel(get_coords(pos));
+        Voxel at(Vec3 pos) {
+            return at(get_coords(pos));
         }
 
         Coordinate get_coords(Vec3 pos) {
             if (contains(pos)) {
-                unsigned int x = std::round(pos.x);
-                unsigned int y = std::round(pos.y);
-                unsigned int z = std::round(pos.z);
+                unsigned int x = std::round(pos.x / scale.x);
+                unsigned int y = std::round(pos.y / scale.y);
+                unsigned int z = std::round(pos.z / scale.z);
                 return Coordinate(x, y, z);
             } else {
                 // Return a coordinate that is clearly an error. We could handle this error more elegantly but
@@ -64,6 +64,7 @@ namespace geometry {
             }
         }
 
+        // TODO: Remove this if at does the same thing.
         void set_voxel([[maybe_unused]] unsigned int x, [[maybe_unused]] unsigned int y, [[maybe_unused]] unsigned int z) {
             // Throw an error if the coordinates are invalid.
         }
@@ -79,6 +80,31 @@ namespace geometry {
 
         bool contains(Coordinate coords) {
             return coords.x < size.x && coords.y < size.y && coords.z < size.z;
+        }
+
+        // Returns the distance between the centres of two voxels in 3D space, including scaling.
+        num space_dist(Coordinate coord1, Coordinate coord2) {
+            return sqrt(
+                pow((coord1.x - coord2.x) * scale.x, 2)
+                + pow((coord1.y - coord2.y) * scale.y, 2)
+                + pow((coord1.z - coord2.z) * scale.z, 2)
+            );
+        }
+
+        // Returns the distance between the centres of two voxels, disregarding grid scaling.
+        num pos_dist(Coordinate coord1, Coordinate coord2) {
+            return sqrt(
+                pow(coord1.x - coord2.x, 2)
+                + pow(coord1.y - coord2.y, 2)
+                + pow(coord1.z - coord2.z, 2)
+            );
+        }
+
+        // Returns the Manhattan (taxicab) distance between two voxels.
+        num man_dist(Coordinate coord1, Coordinate coord2) {
+            return abs(coord1.x - coord2.x)
+                + abs(coord1.y - coord2.y)
+                + abs(coord1.z - coord2.z);
         }
     
     private:
