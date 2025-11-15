@@ -41,14 +41,18 @@ namespace geometry {
             VoxelGrid();
         }
 
-        // TODO: Check if this returns shallow or deep copy of the Voxel.d
-        Voxel at(Coordinate coords) {
+        // TODO: Check if this returns shallow or deep copy of the Voxel.
+        inline Voxel at(Coordinate coords) {
             unsigned int index = flatten(coords);
             return world.at(index);
         }
 
-        Voxel at(Vec3 pos) {
+        inline Voxel at(Vec3 pos) {
             return at(get_coords(pos));
+        }
+
+        inline Voxel at(unsigned int x, unsigned int y, unsigned int z) {
+            return at(Coordinate(x, y, z));
         }
 
         Coordinate get_coords(Vec3 pos) {
@@ -91,7 +95,7 @@ namespace geometry {
             );
         }
 
-        // Returns the distance between the centres of two voxels, disregarding grid scaling.
+        // Returns the distance between the centres of two voxels in grid space, ignoring scaling.
         num pos_dist(Coordinate coord1, Coordinate coord2) {
             return sqrt(
                 pow(coord1.x - coord2.x, 2)
@@ -105,6 +109,28 @@ namespace geometry {
             return abs(coord1.x - coord2.x)
                 + abs(coord1.y - coord2.y)
                 + abs(coord1.z - coord2.z);
+        }
+
+        void create_sphere(Coordinate centre, unsigned int radius) {
+            for (int x = centre.x - radius; x < centre.x + radius; x++) {
+                for (int y = centre.y - radius; y < centre.y + radius; y++) {
+                    for (int z = centre.z - radius; z < centre.z + radius; z++) {
+                        if (space_dist(centre, Coordinate(x, y, z)) <= radius) {
+                            at(x, y, z) = Voxel();
+                        }
+                    }
+                }
+            }
+        }
+
+        void create_cube(Coordinate centre, unsigned int radius) {
+            for (int x = centre.x - radius; x < centre.x + radius; x++) {
+                for (int y = centre.y - radius; y < centre.y + radius; y++) {
+                    for (int z = centre.z - radius; z < centre.z + radius; z++) {
+                        at(x, y, z) = Voxel();
+                    }
+                }
+            }
         }
     
     private:
