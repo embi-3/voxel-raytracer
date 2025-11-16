@@ -21,13 +21,13 @@ namespace geometry {
 
         Vec3 origin;
         Vec3 dir;
-        Int3 orientation;
+        Coordinate orientation;
         Vec3 inv_dir;
 
         explicit constexpr Ray(Vec3 origin, Vec3 dir)
         : origin(origin)
         , dir(dir)
-        , orientation(Int3(static_cast<int>(x_sign()), static_cast<int>(y_sign()), static_cast<int>(z_sign()))) {
+        , orientation(Coordinate(static_cast<int>(x_sign()), static_cast<int>(y_sign()), static_cast<int>(z_sign()))) {
             inv_dir.x = dir.x == 0 ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.x;
             inv_dir.y = dir.y == 0 ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.y;
             inv_dir.z = dir.z == 0 ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.z;

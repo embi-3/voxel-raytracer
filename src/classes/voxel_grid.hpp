@@ -27,40 +27,50 @@ namespace geometry {
             initialise();
         }
 
-        explicit VoxelGrid(Vec3 origin)
-        : origin(origin) {
+        explicit VoxelGrid(Vec3 centre) {
+            origin = centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
             initialise();
         }
 
-        explicit VoxelGrid(unsigned int world_size, Vec3 pos = Vec3()) {
-            size = Coordinate(world_size);
-            origin = pos;
+        explicit VoxelGrid(unsigned int world_size) {
+            size = Coordinate(static_cast<int>(world_size));
             initialise();
         }
 
-        explicit VoxelGrid(unsigned int x, unsigned int y, unsigned int z, Vec3 origin = Vec3())
-        : origin(origin) {
-            size = Coordinate(x, y, z);
+        explicit VoxelGrid(unsigned int world_size, Vec3 centre) {
+            size = Coordinate(static_cast<int>(world_size));
+            origin = centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
+            initialise();
+        }
+
+        explicit VoxelGrid(unsigned int x, unsigned int y, unsigned int z) {
+            size = Coordinate(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z));
+            initialise();
+        }
+
+        explicit VoxelGrid(unsigned int x, unsigned int y, unsigned int z, Vec3 centre) {
+            size = Coordinate(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z));
+            origin = centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
             initialise();
         }
 
         // TODO: Check if this returns shallow or deep copy of the Voxel.
-        inline optional<Voxel> at(Coordinate coords) {
+        inline Voxel get_voxel(Coordinate coords) {
             unsigned int index = flatten(coords);
-            if (index >= size.x * size.y * size.z) {
+            if (static_cast<int>(index) >= size.x * size.y * size.z) {
                 std::cerr << "[!] Invalid coordinates: " << coords << " -> " << index << "\n";
-                return {};
+                return Voxel::empty();
             }
 
             // ! DEBUG
             // std::cout << index << "\n";
-            
+
             return world.at(index);
         }
 
-        inline optional<Voxel> at(Vec3 pos) {
-            auto coords = at(get_coords(pos));
-            if (!coords.has_value()) {
+        inline Voxel get_voxel(Vec3 pos) {
+            auto coords = get_voxel(get_coords(pos));
+            if (!coords.is_opaque()) {
                 // ! DEBUG
                 std::cout << pos << "\n";
             }
@@ -68,39 +78,39 @@ namespace geometry {
             return coords;
         }
 
-        inline optional<Voxel> at(unsigned int x, unsigned int y, unsigned int z) {
-            return at(Coordinate(x, y, z));
+        inline Voxel get_voxel(unsigned int x, unsigned int y, unsigned int z) {
+            return get_voxel(Coordinate(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z)));
         }
 
         Coordinate get_coords(Vec3 pos) {
             if (contains(pos)) {
-                unsigned int x = static_cast<unsigned int>(round_to_zero((pos.x - origin.x) / scale.x));
-                unsigned int y = static_cast<unsigned int>(round_to_zero((pos.y - origin.y) / scale.y));
-                unsigned int z = static_cast<unsigned int>(round_to_zero((pos.z - origin.z) / scale.z));
+                int x = static_cast<int>(round_to_zero((pos.x - origin.x) / scale.x));
+                int y = static_cast<int>(round_to_zero((pos.y - origin.y) / scale.y));
+                int z = static_cast<int>(round_to_zero((pos.z - origin.z) / scale.z));
                 // ! DEBUG
-                std::cout << pos << ", " << origin << " -> " << Coordinate(x, y, z) << "\n";
+                // std::cout << pos << ", " << origin << " -> " << Coordinate(x, y, z) << "\n";
                 return Coordinate(x, y, z);
             }
             else {
                 // Return a coordinate that is clearly an error. We could handle this error more elegantly but
                 // this is good enough for debugging purposes.
-                return Coordinate(std::numeric_limits<unsigned int>().max());
+                return Coordinate(std::numeric_limits<int>().max());
             }
         }
 
         // ! May return a position outside of the bounding box.
         // TODO: Make this properly check the coordinates are inside the grid.
         Vec3 get_pos(Coordinate coords) {
-            return origin + Vec3(
-                (coords.x + 0.5) * scale.x,
-                (coords.y + 0.5) * scale.y,
-                (coords.z + 0.5) * scale.z
-            );
+            return origin + Vec3((coords.x + 0.5) * scale.x, (coords.y + 0.5) * scale.y, (coords.z + 0.5) * scale.z);
         }
 
-        // TODO: Remove this if at does the same thing.
-        void set_voxel([[maybe_unused]] unsigned int x, [[maybe_unused]] unsigned int y, [[maybe_unused]] unsigned int z) {
-            // Throw an error if the coordinates are invalid.
+        void set_voxel(int x, int y, int z, Voxel voxel) {
+            // TODO: Throw an error if the coordinates are invalid.
+            world.at(flatten(static_cast<unsigned int>(x), static_cast<unsigned int>(y), static_cast<unsigned int>(z))) = voxel;
+        }
+
+        void set_voxel(Coordinate coords, Voxel voxel) {
+            set_voxel(coords.x, coords.y, coords.z, voxel);
         }
 
         bool contains(Vec3 pos) {
@@ -108,7 +118,7 @@ namespace geometry {
         }
 
         bool contains(Coordinate coords) {
-            return coords.x < size.x && coords.y < size.y && coords.z < size.z;
+            return coords.x >= 0 && coords.x < size.x && coords.y >= 0 && coords.y < size.y && coords.z >= 0 && coords.z < size.z;
         }
 
         // Returns the distance between the centres of two voxels in 3D space, including scaling.
@@ -124,41 +134,42 @@ namespace geometry {
 
         // Returns the Manhattan (taxicab) distance between two voxels.
         num man_dist(Coordinate coord1, Coordinate coord2) {
-            return abs(static_cast<int>(coord1.x - coord2.x)) + abs(static_cast<int>(coord1.y - coord2.y)) + abs(static_cast<int>(coord1.z - coord2.z));
+            return abs(coord1.x - coord2.x) + abs(coord1.y - coord2.y)
+                   + abs(coord1.z - coord2.z);
         }
 
-        void create_sphere(Coordinate centre, unsigned int radius) {
+        void create_sphere(Coordinate centre, num radius) {
             // ! DEBUG
             std::cerr << "Sphere:\n";
-            std::cerr << "x: " << std::max(centre.x - radius, 0u) << "-" << centre.x + radius << "\n";
-            std::cerr << "y: " << std::max(centre.y - radius, 0u) << "-" << centre.y + radius << "\n";
-            std::cerr << "z: " << std::max(centre.z - radius, 0u) << "-" << centre.z + radius << "\n";
+            std::cerr << "x: " << static_cast<int>(std::max(static_cast<num>(centre.x) - radius, 0.0)) << "-" << centre.x + radius << "\n";
+            std::cerr << "y: " << static_cast<int>(std::max(static_cast<num>(centre.y) - radius, 0.0)) << "-" << centre.y + radius << "\n";
+            std::cerr << "z: " << static_cast<int>(std::max(static_cast<num>(centre.z) - radius, 0.0)) << "-" << centre.z + radius << "\n";
 
-            for (unsigned int x = std::max(centre.x - radius, 0u); x < centre.x + radius && x < size.x; x++) {
-                for (unsigned int y = std::max(centre.y - radius, 0u); y < centre.y + radius && x < size.y; y++) {
-                    for (unsigned int z = std::max(centre.z - radius, 0u); z < centre.z + radius && x < size.z; z++) {
+            for (int x = static_cast<int>(std::max(static_cast<num>(centre.x) - radius, 0.0)); x <= centre.x + radius && x < size.x; x++) {
+                for (int y = static_cast<int>(std::max(static_cast<num>(centre.y) - radius, 0.0)); y <= centre.y + radius && x < size.y; y++) {
+                    for (int z = static_cast<int>(std::max(static_cast<num>(centre.z) - radius, 0.0)); z <= centre.z + radius && x < size.z; z++) {
                         if (space_dist(centre, Coordinate(x, y, z)) <= radius) {
-                            at(x, y, z) = Voxel();
+                            // ! DEBUG
+                            std::cerr << Coordinate(x, y, z) << "\n";
+                            set_voxel(x, y, z, Voxel());
                         }
                     }
                 }
             }
         }
 
-        void create_cube(Coordinate centre, unsigned int size) {
-            // ! DEBUG
-            std::cerr << "Sphere:\n";
-            std::cerr << "x: " << std::max(centre.x - size / 2, 0u) << "-" << (centre.x + size) / 2 << "\n";
-            std::cerr << "y: " << std::max(centre.y - size / 2, 0u) << "-" << (centre.y + size) / 2 << "\n";
-            std::cerr << "z: " << std::max(centre.z - size / 2, 0u) << "-" << (centre.z + size) / 2 << "\n";
-
-            for (unsigned int x = std::max(centre.x - size / 2, 0u); 2 * x < 2 * centre.x + size; x++) {
-                for (unsigned int y = std::max(centre.y - size / 2, 0u); 2 * y < 2 * centre.y + size; y++) {
-                    for (unsigned int z = std::max(centre.z - size / 2, 0u); 2 * z < 2 * centre.z + size; z++) {
+        void create_cube(Coordinate coords) {
+            set_voxel(coords, Voxel());
+        }
+        
+        void create_cube(Coordinate min, Coordinate max) {
+            for (int x = std::max(min.x, 0); x <= std::min(max.x, size.x - 1); x++) {
+                for (int y = std::max(min.y, 0); y <= std::min(max.y, size.y - 1); y++) {
+                    for (int z = std::max(min.z, 0); z <= std::min(max.z, size.z - 1); z++) {
                         // ! DEBUG
                         // std::cerr << x << ", "<< y << ", " << z << "\n";
                         // std::cerr << get_pos(Coordinate(x, y, z)) << "\n";
-                        at(x, y, z) = Voxel();
+                        set_voxel(x, y, z, Voxel());
                     }
                 }
             }
@@ -167,25 +178,32 @@ namespace geometry {
     private:
         // ! If the coordinates are too large, this may return an index outside the VoxelGrid!
         inline unsigned int flatten(Coordinate coords) {
-            return flatten(coords.x, coords.y, coords.z);
+            return flatten(static_cast<unsigned int>(coords.x), static_cast<unsigned int>(coords.y), static_cast<unsigned int>(coords.z));
         }
 
         inline unsigned int flatten(unsigned int x, unsigned int y, unsigned int z) {
-            return x * size.y * size.z + y * size.z + z;
+            return x * static_cast<unsigned int>(size.y) * static_cast<unsigned int>(size.z) + y * static_cast<unsigned int>(size.z) + z;
         }
 
         // ! If index is too large, this may return a coordinate outside the VoxelGrid!
         inline Coordinate unflatten(unsigned int index) {
-            unsigned int x = index / (size.y + size.z);
-            unsigned int y = (index - x * (size.y + size.z)) / size.z;
-            unsigned int z = index - x * (size.y + size.z) - y * size.z;
+            int x = static_cast<int>(index) / (size.y + size.z);
+            int y = (static_cast<int>(index) - x * (size.y + size.z)) / size.z;
+            int z = static_cast<int>(index) - x * (size.y + size.z) - y * size.z;
             return Coordinate(x, y, z);
         }
 
         inline void initialise() {
-            world.resize(size.x * size.y * size.z);
             // ! DEBUG
-            std::cout << "  > " << world.size() << " of " << world.capacity() << " bytes used" << "\n";
+            std::cout << "   > Allocating space..." << "\n";
+            world.resize(static_cast<size_t>(size.x * size.y * size.z));
+            
+            // ! DEBUG
+            std::cout << "   > Zeroing memory..." << "\n";
+            std::fill(world.begin(), world.end(), Voxel::empty());
+            // ! DEBUG
+            std::cout << "  > " << world.size() << " of " << world.capacity() << " bytes used"
+                      << "\n";
 
             Vec3 min_bounds = origin - Vec3(0.5 * scale.x, 0.5 * scale.y, 0.5 * scale.z);
             Vec3 max_bounds = origin + Vec3((size.x - 0.5) * scale.x, (size.y - 0.5) * scale.y, (size.z - 0.5) * scale.z);

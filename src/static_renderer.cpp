@@ -55,13 +55,13 @@ int main() {
     freopen("output.txt", "a", stderr);
 
     // ! DEBUG
-    std::cout << "===========================================\n\n" << "> Starting...\n";
+    std::cout << "===========================================\n\n"
+              << "> Starting...\n";
     const auto start = high_resolution_clock::now();
 
     int image_width = 400;
     int image_height = 200;
 
-    
     // ! DEBUG
     std::cout << "> Initialising camera...\n";
     Camera camera = Camera(image_width, image_height);
@@ -73,16 +73,22 @@ int main() {
 
     // ! DEBUG
     std::cout << "> Creating grid...\n";
-    VoxelGrid grid = VoxelGrid(10, Vec3(0, 0, 5));
-    
+    VoxelGrid grid = VoxelGrid(32, Vec3(-15, 10, 20));
+
     // ! DEBUG
     // std::cerr << "min: " << grid.bounding_box.min << ", max: " << grid.bounding_box.max << "\n";
-    // grid.at(5, 5, 5) = Voxel();
-    
+    // grid.get_voxel(5, 5, 5) = Voxel();
+    // grid.set_voxel(5, 5, 5, Voxel());
+
+    // std::cout << grid.get_voxel(5, 5, 5).value().is_opaque() << "\n";
+
     // TODO: Test shapes that go outside the boundary of the grid and see what happens.
-    std::cout << "> Creating shapes...\n";
-    grid.create_sphere(Coordinate(4, 6, 3), 2);
-    // grid.create_cube(Coordinate(5, 5, 5), 10);
+    std::cerr << "> Creating shapes...\n" << std::flush;
+    grid.create_sphere(Coordinate(16, 16, 16), 10);
+    // grid.create_cube(Coordinate(0, 0, 0));
+    // grid.create_cube(Coordinate(0, 0, 1));
+    // grid.create_cube(Coordinate(15, 15, 0));
+    // grid.create_cube(Coordinate(5, 5, 10));
 
     scene.push_back(grid);
 
@@ -91,7 +97,10 @@ int main() {
     std::cout << "> Rendering scene...\n";
     GradientShader gradient_shader = GradientShader();
     WhiteShader white_shader = WhiteShader();
-    auto pixels = camera.render(scene, white_shader);
+    RedShader red_shader = RedShader();
+    DistanceShader distance_shader = DistanceShader();
+    NormalShader normal_shader = NormalShader();
+    auto pixels = camera.render(scene, normal_shader);
     create_png(static_cast<std::size_t>(image_width), static_cast<std::size_t>(image_height), pixels);
 
     const auto end = high_resolution_clock::now();

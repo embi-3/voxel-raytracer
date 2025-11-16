@@ -9,10 +9,10 @@
 namespace geometry {
     class Scene {
     public:
-        std::vector<VoxelGrid> grids;
+        std::vector<VoxelGrid*> grids;
 
-        auto push_back(VoxelGrid grid) {
-            grids.push_back(grid);
+        auto push_back(VoxelGrid& grid) {
+            grids.push_back(&grid);
         }
 
         // TODO: Remove these functions if unneeded.

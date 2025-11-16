@@ -23,6 +23,11 @@ namespace texture {
         num a = 0; // range: [0, 1]
 
         explicit constexpr Colour() noexcept = default;
+        explicit constexpr Colour(const num v, const num a = 1) noexcept
+        : r(v)
+        , g(v)
+        , b(v)
+        , a(a) {}
         explicit constexpr Colour(const num r, const num g, const num b, const num a = 1) noexcept
         : r(r)
         , g(g)

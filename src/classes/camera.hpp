@@ -38,10 +38,7 @@ namespace renderer {
             Camera(image_height, image_width, 1.0, 2.0);
         }
 
-        explicit Camera(int image_width = 1920,
-                                  int image_height = 1080,
-                                  num focal_length = 1.0,
-                                  num viewport_height = 2.0)
+        explicit Camera(int image_width = 1920, int image_height = 1080, num focal_length = 1.0, num viewport_height = 2.0)
         : image_width(image_width)
         , image_height(image_height)
         , focal_length(focal_length)
@@ -64,18 +61,18 @@ namespace renderer {
         }
 
         std::vector<Pixel> render(Scene scene, Shader& shader) {
-            // int progress = 0;
-            // int total_pixels = image_height * image_width;
-            // int current_pixels = 0;
-            // int chunk = total_pixels / 10;
+            int progress = 0;
+            int total_pixels = image_height * image_width;
+            int current_pixels = 0;
+            int chunk = total_pixels / 10;
             auto pixels = std::vector<Pixel>{}; // array of pixels
             for (int j = 0; j < image_height; j++) {
                 for (int i = 0; i < image_width; i++) {
-                    // current_pixels = j * image_width + i;
-                    // if (current_pixels / chunk >= progress) {
-                    //     // ! DEBUG
-                    //     std::cout << "- " << (++progress * 10) << "% done" << " \n";
-                    // }
+                    current_pixels = j * image_width + i;
+                    if (current_pixels / chunk >= progress) {
+                        // ! DEBUG
+                        std::cout << "- " << (++progress * 10) << "% done" << " \n";
+                    }
                     auto pixel_center = upper_left_pixel + (i * delta_x) + (j * delta_y);
                     auto ray_direction = pixel_center - camera_center;
                     auto r = Ray{camera_center, ray_direction};
@@ -83,6 +80,13 @@ namespace renderer {
                     // ! DEBUG
                     // std::cerr << r.origin << " | " << r.dir << "\n";
                     auto intersections = r.traverse(scene);
+                    if (intersections.empty()) {
+                        // ! DEBUG
+                        // std::cout << "0";
+                    } else {
+                        // ! DEBUG
+                        // std::cout << "x";
+                    }
                     auto pixel_colour = shader.fragment(intersections);
                     // ! DEBUG
                     // if (!pixel_colour.is_transparent()) {
@@ -90,6 +94,8 @@ namespace renderer {
                     // }
                     pixels.push_back(pixel_colour);
                 }
+                // ! DEBUG
+                // std::cout << "\n";
             }
             return pixels;
         }
