@@ -1,0 +1,113 @@
+#ifndef CAMERA_H
+#define CAMERA_H
+
+#include "../common.hpp"
+#include "colour.hpp"
+#include "interval.hpp"
+#include "ray.hpp"
+#include "scene.hpp"
+#include "shaders/shader.hpp"
+#include "vec3.hpp"
+
+#include <vector>
+
+namespace renderer {
+    using Pixel = texture::Colour;
+    using namespace geometry;
+    using namespace shader;
+    class Camera {
+    public:
+        int image_width;
+        int image_height;
+        num aspect_ratio;
+        num focal_length;
+        Vec3 camera_center = Vec3();
+        num viewport_height;
+        num viewport_width;
+        Vec3 upper_left_pixel;
+        Vec3 delta_u;
+        Vec3 delta_v;
+
+        // TODO: Remove this if not necessary.
+        explicit constexpr Camera() {
+            Camera(1920, 1080, 1.0, 2.0);
+        }
+
+        explicit constexpr Camera(int image_width, num aspect_ratio) {
+            image_height = std::max(int(image_width / aspect_ratio), 1);
+            Camera(image_height, image_width, 1.0, 2.0);
+        }
+
+        explicit Camera(int image_width = 1920,
+                                  int image_height = 1080,
+                                  num focal_length = 1.0,
+                                  num viewport_height = 2.0)
+        : image_width(image_width)
+        , image_height(image_height)
+        , focal_length(focal_length)
+        , viewport_height(viewport_height) {
+            aspect_ratio = image_width / image_height;
+
+            viewport_width = viewport_height * (double(image_width) / image_height);
+
+            // calculate horizontal and vertical viewport vectors
+            auto viewport_u = Vec3(viewport_width, 0, 0);
+            auto viewport_v = Vec3(0, -viewport_height, 0);
+
+            // delta vectors from pixel to pixel
+            delta_u = viewport_u / image_width;
+            delta_v = viewport_v / image_height;
+
+            // vector for upper left pixel
+            auto viewport_upper_left = camera_center - Vec3(0, 0, focal_length) - viewport_u / 2 - viewport_v / 2;
+            upper_left_pixel = viewport_upper_left + 0.5 * (delta_u + delta_v);
+        }
+
+        std::vector<Pixel> render(Scene scene, Shader& shader) {
+            int progress = 0;
+            int total_pixels = image_height * image_width;
+            int current_pixels = 0;
+            int chunk = total_pixels / 10;
+            auto pixels = std::vector<Pixel>{}; // array of pixels
+            for (int j = 0; j < image_height; j++) {
+                for (int i = 0; i < image_width; i++) {
+                    current_pixels = j * image_width + i;
+                    if (current_pixels / chunk >= progress) {
+                        // ! DEBUG
+                        std::cout << "- " << (++progress * 10) << "% done" << " \n";
+                    }
+                    auto pixel_center = upper_left_pixel + (i * delta_u) + (j * delta_v);
+                    auto ray_direction = pixel_center - camera_center;
+                    auto r = Ray{camera_center, ray_direction};
+
+                    auto intersections = r.traverse(scene);
+                    auto pixel_colour = shader.fragment(intersections);
+                    // ! DEBUG
+                    // if (!pixel_colour.is_transparent()) {
+                    //     std::cerr << "[?] " << pixel_colour.to_rgba_string() << "\n";
+                    // }
+                    pixels.push_back(pixel_colour);
+                }
+            }
+            return pixels;
+        }
+
+        std::vector<Pixel> render(VoxelGrid grid, Shader& shader) {
+            auto pixels = std::vector<Pixel>{}; // array of pixels
+            for (int j = 0; j < image_height; j++) {
+                for (int i = 0; i < image_width; i++) {
+                    auto pixel_center = upper_left_pixel + (i * delta_u) + (j * delta_v);
+                    auto ray_direction = pixel_center - camera_center;
+                    auto r = Ray{camera_center, ray_direction};
+
+                    auto intersections = r.traverse(grid);
+                    auto pixel_colour = shader.fragment(intersections);
+                    pixels.push_back(pixel_colour);
+                }
+            }
+            return pixels;
+        }
+    };
+} // namespace renderer
+
+#endif // CAMERA_H
