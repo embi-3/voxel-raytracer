@@ -40,8 +40,8 @@ namespace geometry {
             return Voxel(false);
         }
 
-        constexpr bool is_empty() {
-            return !opaque;
+        constexpr bool is_opaque() {
+            return opaque;
         }
     };
 } // namespace geometry

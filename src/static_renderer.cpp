@@ -50,7 +50,12 @@ void create_png(std::size_t width, std::size_t height, const std::vector<Pixel>&
 
 int main() {
     // ! DEBUG
-    std::cout << "> Starting...\n";
+    std::cerr << "Output is being written to a file!\n";
+    freopen("output.txt", "a", stdout);
+    freopen("output.txt", "a", stderr);
+
+    // ! DEBUG
+    std::cout << "===========================================\n\n" << "> Starting...\n";
     const auto start = high_resolution_clock::now();
 
     int image_width = 400;
@@ -68,14 +73,16 @@ int main() {
 
     // ! DEBUG
     std::cout << "> Creating grid...\n";
-    VoxelGrid grid = VoxelGrid(10, Vec3(-5, -5, 5));
-    std::cerr << "min: " << grid.bounding_box.min << ", max: " << grid.bounding_box.max << "\n";
+    VoxelGrid grid = VoxelGrid(10, Vec3(0, 0, 5));
+    
+    // ! DEBUG
+    // std::cerr << "min: " << grid.bounding_box.min << ", max: " << grid.bounding_box.max << "\n";
     // grid.at(5, 5, 5) = Voxel();
     
     // TODO: Test shapes that go outside the boundary of the grid and see what happens.
     std::cout << "> Creating shapes...\n";
-    grid.create_sphere(Coordinate(4, 6, 3), 5);
-    // grid.create_cube(Coordinate(5, 5, 5), 1);
+    grid.create_sphere(Coordinate(4, 6, 3), 2);
+    // grid.create_cube(Coordinate(5, 5, 5), 10);
 
     scene.push_back(grid);
 
@@ -90,5 +97,5 @@ int main() {
     const auto end = high_resolution_clock::now();
     const auto duration = duration_cast<milliseconds>(end - start).count();
 
-    std::cout << "> Time taken: " << duration << " ms\n";
+    std::cout << "> Time taken: " << duration << " ms\n\n";
 }

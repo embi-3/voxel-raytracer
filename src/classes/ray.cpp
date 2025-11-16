@@ -3,6 +3,8 @@
 #include <limits>
 #include <iostream>
 
+static const num EPSILON = std::numeric_limits<num>::epsilon();
+
 namespace geometry {
     // TODO: Remove deprecated code.
     // Intersection geometry::Ray::traverse(VoxelGrid grid) {
@@ -30,7 +32,7 @@ namespace geometry {
         IntersectionList objects = IntersectionList(dir);
 
         // ! DEBUG
-        // std::cout << "[t] Traversing...\n";
+        // std::cout << "[t] Traversing: " << dir << "\n";
         Vec3 pos;
         Vec3 tmax;
         Vec3 tdelta = Vec3(dir.x == 0 ? std::numeric_limits<num>::infinity() : grid.scale.x * inv_dir.x,
@@ -47,24 +49,17 @@ namespace geometry {
             std::cout << "[t] Already in grid!\n";
             pos = origin;
             tmax = tdelta;
-            optional<Voxel> intersect = grid.at(origin);
-            if (intersect.has_value()) {
-                // ! DEBUG
-                std::cerr << "[i] Intersection at: " << at(tcur) << "\n";
-                objects.push_back(Intersection(intersect.value(), tcur));
-            }
         }
         else {
             Interval interval = intersection(grid.bounding_box);
             // ! DEBUG
-            // std::cout << "> Intersection: " << interval.min << ", " << interval.max << "\n";
-            if (interval.isValid) {
+            // std::cout << "[i] Interval: [" << interval.min << ", " << interval.max << "]\n";
+            if (interval.is_valid()) {
                 pos = at(interval.min);
                 tcur = interval.min;
                 tmax = Vec3(interval.min);
                 tmax += tdelta;
-            }
-            else {
+            } else {
                 // If the ray doesn't hit the bounding box, return an empty list.
                 // ! DEBUG
                 std::cerr << "Doesn't intersect!\n";
@@ -73,13 +68,24 @@ namespace geometry {
         }
 
         coords = grid.get_coords(pos);
+        // ! DEBUG
+        // std::cerr << "Coords: " << coords << "\n";
 
         // Iteratively find the next voxel using floating-point comparisons.
         while (grid.contains(at(tcur))) {
+            // ! DEBUG
+            // std::cerr << "[c] " << coords << "\n";
+            optional<Voxel> intersect = grid.at(coords);
+            if (intersect.has_value() && intersect.value().is_opaque()) {
+                // ! DEBUG
+                // std::cerr << "[i] Intersection at: " << at(tcur) << "\n";
+                objects.push_back(Intersection(intersect.value(), tcur));
+            }
+
             // Update the Amanatides-Woo algorithm to handle diagonals.
             if (tmax.x <= tmax.y && tmax.x <= tmax.z) {
                 // ! DEBUG
-                std::cerr << "min x\n";
+                // std::cerr << "min x\n";
                 tcur = tmax.x;
                 tmax.x += tdelta.x;
                 coords.x = static_cast<unsigned int>(std::max(static_cast<int>(coords.x) + orientation.x, 0));
@@ -87,7 +93,7 @@ namespace geometry {
 
             if (tmax.y <= tmax.x && tmax.y <= tmax.z) {
                 // ! DEBUG
-                std::cerr << "min y\n";
+                // std::cerr << "min y\n";
                 tcur = tmax.y;
                 tmax.y += tdelta.y;
                 coords.y = static_cast<unsigned int>(std::max(static_cast<int>(coords.y) + orientation.y, 0));
@@ -95,19 +101,10 @@ namespace geometry {
 
             if (tmax.z <= tmax.x && tmax.z <= tmax.y) {
                 // ! DEBUG
-                std::cerr << "min z\n";
+                // std::cerr << "min z\n";
                 tcur = tmax.z;
                 tmax.z += tdelta.z;
                 coords.z = static_cast<unsigned int>(std::max(static_cast<int>(coords.z) + orientation.z, 0));
-            }
-
-            // ! DEBUG
-            std::cerr << "[c] " << coords << "\n";
-            optional<Voxel> intersect = grid.at(coords);
-            if (intersect.has_value()) {
-                // ! DEBUG
-                std::cerr << "[i] Intersection at: " << at(tcur) << "\n";
-                objects.push_back(Intersection(intersect.value(), tcur));
             }
         }
  
@@ -124,13 +121,15 @@ namespace geometry {
             // ! DEBUG
             // std::cout << count++ << "\n";
             // Avoid redundant traversals by checking bounding box intersection first.
+            // std::cout << intersection((*grid).bounding_box) << ": ";
+            
             if (intersects((*grid).bounding_box)) {
                 // ! DEBUG
-                // std::cout << dir << " intersects [" << (*grid).bounding_box.min << ", " << (*grid).bounding_box.max << "]\n";
+                // std::cout << "intersection\n";
                 IntersectionList intersections = traverse(*grid);
                 
                 // ! DEBUG
-                // std::cerr << "[i] " << intersections.items.size() << "\n";
+                // std::cerr << "[i] " << intersections.items.size() << " intersection(s) with " << dir << "\n";
                 // Insert all the new intersections into the object list.
                 objects.insert(objects.end(), intersections.begin(), intersections.end());
             }
@@ -143,12 +142,12 @@ namespace geometry {
         num t_min = 0;
         num t_max = std::numeric_limits<num>::infinity();
 
-        num x_min = (origin.x - bounding_box.min.x) * inv_dir.x;
-        num x_max = (origin.x - bounding_box.max.x) * inv_dir.x;
-        num y_min = (origin.y - bounding_box.min.y) * inv_dir.y;
-        num y_max = (origin.y - bounding_box.max.y) * inv_dir.y;
-        num z_min = (origin.z - bounding_box.min.z) * inv_dir.z;
-        num z_max = (origin.z - bounding_box.max.z) * inv_dir.z;
+        num x_min = (bounding_box.min.x - origin.x) * inv_dir.x;
+        num x_max = (bounding_box.max.x - origin.x) * inv_dir.x;
+        num y_min = (bounding_box.min.y - origin.y) * inv_dir.y;
+        num y_max = (bounding_box.max.y - origin.y) * inv_dir.y;
+        num z_min = (bounding_box.min.z - origin.z) * inv_dir.z;
+        num z_max = (bounding_box.max.z - origin.z) * inv_dir.z;
 
         t_min = std::max(x_min, t_min);
         t_min = std::max(y_min, t_min);
@@ -162,6 +161,6 @@ namespace geometry {
     }
 
     bool geometry::Ray::intersects(AABB bounding_box) {
-        return intersection(bounding_box).isValid;
+        return intersection(bounding_box).is_valid();
     }
 } // namespace geometry

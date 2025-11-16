@@ -48,7 +48,7 @@ namespace geometry {
         inline optional<Voxel> at(Coordinate coords) {
             unsigned int index = flatten(coords);
             if (index >= size.x * size.y * size.z) {
-                std::cerr << "[!] Invalid index: " << index << "\n";
+                std::cerr << "[!] Invalid coordinates: " << coords << " -> " << index << "\n";
                 return {};
             }
 
@@ -59,7 +59,13 @@ namespace geometry {
         }
 
         inline optional<Voxel> at(Vec3 pos) {
-            return at(get_coords(pos));
+            auto coords = at(get_coords(pos));
+            if (!coords.has_value()) {
+                // ! DEBUG
+                std::cout << pos << "\n";
+            }
+
+            return coords;
         }
 
         inline optional<Voxel> at(unsigned int x, unsigned int y, unsigned int z) {
@@ -68,9 +74,11 @@ namespace geometry {
 
         Coordinate get_coords(Vec3 pos) {
             if (contains(pos)) {
-                unsigned int x = static_cast<unsigned int>(std::round(pos.x / scale.x));
-                unsigned int y = static_cast<unsigned int>(std::round(pos.y / scale.y));
-                unsigned int z = static_cast<unsigned int>(std::round(pos.z / scale.z));
+                unsigned int x = static_cast<unsigned int>(round_to_zero((pos.x - origin.x) / scale.x));
+                unsigned int y = static_cast<unsigned int>(round_to_zero((pos.y - origin.y) / scale.y));
+                unsigned int z = static_cast<unsigned int>(round_to_zero((pos.z - origin.z) / scale.z));
+                // ! DEBUG
+                std::cout << pos << ", " << origin << " -> " << Coordinate(x, y, z) << "\n";
                 return Coordinate(x, y, z);
             }
             else {
@@ -78,6 +86,16 @@ namespace geometry {
                 // this is good enough for debugging purposes.
                 return Coordinate(std::numeric_limits<unsigned int>().max());
             }
+        }
+
+        // ! May return a position outside of the bounding box.
+        // TODO: Make this properly check the coordinates are inside the grid.
+        Vec3 get_pos(Coordinate coords) {
+            return origin + Vec3(
+                (coords.x + 0.5) * scale.x,
+                (coords.y + 0.5) * scale.y,
+                (coords.z + 0.5) * scale.z
+            );
         }
 
         // TODO: Remove this if at does the same thing.
@@ -110,6 +128,12 @@ namespace geometry {
         }
 
         void create_sphere(Coordinate centre, unsigned int radius) {
+            // ! DEBUG
+            std::cerr << "Sphere:\n";
+            std::cerr << "x: " << std::max(centre.x - radius, 0u) << "-" << centre.x + radius << "\n";
+            std::cerr << "y: " << std::max(centre.y - radius, 0u) << "-" << centre.y + radius << "\n";
+            std::cerr << "z: " << std::max(centre.z - radius, 0u) << "-" << centre.z + radius << "\n";
+
             for (unsigned int x = std::max(centre.x - radius, 0u); x < centre.x + radius && x < size.x; x++) {
                 for (unsigned int y = std::max(centre.y - radius, 0u); y < centre.y + radius && x < size.y; y++) {
                     for (unsigned int z = std::max(centre.z - radius, 0u); z < centre.z + radius && x < size.z; z++) {
@@ -122,11 +146,18 @@ namespace geometry {
         }
 
         void create_cube(Coordinate centre, unsigned int size) {
+            // ! DEBUG
+            std::cerr << "Sphere:\n";
+            std::cerr << "x: " << std::max(centre.x - size / 2, 0u) << "-" << (centre.x + size) / 2 << "\n";
+            std::cerr << "y: " << std::max(centre.y - size / 2, 0u) << "-" << (centre.y + size) / 2 << "\n";
+            std::cerr << "z: " << std::max(centre.z - size / 2, 0u) << "-" << (centre.z + size) / 2 << "\n";
+
             for (unsigned int x = std::max(centre.x - size / 2, 0u); 2 * x < 2 * centre.x + size; x++) {
                 for (unsigned int y = std::max(centre.y - size / 2, 0u); 2 * y < 2 * centre.y + size; y++) {
                     for (unsigned int z = std::max(centre.z - size / 2, 0u); 2 * z < 2 * centre.z + size; z++) {
                         // ! DEBUG
-                        // std::cout << x << ", "<< y << ", " << z << "\n";
+                        // std::cerr << x << ", "<< y << ", " << z << "\n";
+                        // std::cerr << get_pos(Coordinate(x, y, z)) << "\n";
                         at(x, y, z) = Voxel();
                     }
                 }
@@ -156,9 +187,19 @@ namespace geometry {
             // ! DEBUG
             std::cout << "  > " << world.size() << " of " << world.capacity() << " bytes used" << "\n";
 
-            Vec3 min_bounds = origin;
-            Vec3 max_bounds = origin + Vec3(size.x * scale.x, size.y * scale.y, size.z * scale.z);
+            Vec3 min_bounds = origin - Vec3(0.5 * scale.x, 0.5 * scale.y, 0.5 * scale.z);
+            Vec3 max_bounds = origin + Vec3((size.x - 0.5) * scale.x, (size.y - 0.5) * scale.y, (size.z - 0.5) * scale.z);
             bounding_box = AABB(min_bounds, max_bounds);
+        }
+
+        // Rounds negative numbers up to 0, and positive numbers down to 0.
+        inline num round_to_zero(num input) {
+            num integer;
+            num decimal = std::modf(input, &integer);
+            if (std::abs(decimal) <= 0.5) {
+                return integer;
+            }
+            return integer + std::copysign(1, input);
         }
     };
 } // namespace geometry
