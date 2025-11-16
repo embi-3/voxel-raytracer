@@ -5,6 +5,9 @@
 // using num = int;
 // #elifdef USE_SINGLE_PRECISION
 
+#include <optional>
+using std::optional;
+
 #ifdef USE_SINGLE_PRECISION
 using num = float;
 #else

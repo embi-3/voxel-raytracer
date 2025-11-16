@@ -120,6 +120,10 @@ namespace texture {
         inline uint8_t b_int() const {
             return static_cast<uint8_t>(b);
         }
+
+        inline bool is_transparent() const {
+            return a == 0;
+        }
     };
 
     // Operator Overloads

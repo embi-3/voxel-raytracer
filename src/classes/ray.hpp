@@ -3,14 +3,14 @@
 
 #include "../common.hpp"
 #include "intersection.hpp"
+#include "intersection_list.hpp"
+#include "scene.hpp"
 #include "vec3.hpp"
 #include "voxel.hpp"
 #include "voxel_grid.hpp"
 #include <vector>
 
 namespace geometry {
-    using IntersectionList = std::vector<Intersection>;
-
     class Ray {
     public:
         enum class Orientation {
@@ -34,6 +34,8 @@ namespace geometry {
         }
 
         IntersectionList traverse(VoxelGrid grid);
+
+        IntersectionList traverse(Scene scene);
 
         Interval intersection(AABB bounding_box);
 

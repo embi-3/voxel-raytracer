@@ -1,6 +1,7 @@
 #include "ray.hpp"
 #include "aabb.hpp"
 #include <limits>
+#include <iostream>
 
 namespace geometry {
     // TODO: Remove deprecated code.
@@ -25,32 +26,48 @@ namespace geometry {
     //     // ? At times like this I wish for an Option type.
     // }
 
-    // ? Perhaps this can be extended to work for multiple VoxelGrids?
     IntersectionList geometry::Ray::traverse(VoxelGrid grid) {
-        IntersectionList objects = {};
+        IntersectionList objects = IntersectionList(dir);
 
+        // ! DEBUG
+        // std::cout << "[t] Traversing...\n";
         Vec3 pos;
         Vec3 tmax;
-        Vec3 tdelta = Vec3(dir.x == 0 ? std::numeric_limits<num>::infinity() : grid.scale.x / dir.x,
-                           dir.y == 0 ? std::numeric_limits<num>::infinity() : grid.scale.y / dir.y,
-                           dir.z == 0 ? std::numeric_limits<num>::infinity() : grid.scale.z / dir.z);
+        Vec3 tdelta = Vec3(dir.x == 0 ? std::numeric_limits<num>::infinity() : grid.scale.x * inv_dir.x,
+                           dir.y == 0 ? std::numeric_limits<num>::infinity() : grid.scale.y * inv_dir.y,
+                           dir.z == 0 ? std::numeric_limits<num>::infinity() : grid.scale.z * inv_dir.z);
         num tcur = 0;
         Coordinate coords;
 
+        // ! DEBUG
+        // std::cout << "[t] Traversal initialised...\n";
+
         // Check if the ray is already in the voxel grid.
         if (grid.contains(origin)) {
+            std::cout << "[t] Already in grid!\n";
             pos = origin;
             tmax = tdelta;
+            optional<Voxel> intersect = grid.at(origin);
+            if (intersect.has_value()) {
+                // ! DEBUG
+                std::cerr << "[i] Intersection at: " << at(tcur) << "\n";
+                objects.push_back(Intersection(intersect.value(), tcur));
+            }
         }
         else {
             Interval interval = intersection(grid.bounding_box);
+            // ! DEBUG
+            // std::cout << "> Intersection: " << interval.min << ", " << interval.max << "\n";
             if (interval.isValid) {
                 pos = at(interval.min);
+                tcur = interval.min;
                 tmax = Vec3(interval.min);
                 tmax += tdelta;
             }
             else {
                 // If the ray doesn't hit the bounding box, return an empty list.
+                // ! DEBUG
+                std::cerr << "Doesn't intersect!\n";
                 return objects;
             }
         }
@@ -61,25 +78,62 @@ namespace geometry {
         while (grid.contains(at(tcur))) {
             // Update the Amanatides-Woo algorithm to handle diagonals.
             if (tmax.x <= tmax.y && tmax.x <= tmax.z) {
+                // ! DEBUG
+                std::cerr << "min x\n";
                 tcur = tmax.x;
                 tmax.x += tdelta.x;
-                coords.x += orientation.x;
+                coords.x = static_cast<unsigned int>(std::max(static_cast<int>(coords.x) + orientation.x, 0));
             }
 
             if (tmax.y <= tmax.x && tmax.y <= tmax.z) {
+                // ! DEBUG
+                std::cerr << "min y\n";
                 tcur = tmax.y;
                 tmax.y += tdelta.y;
-                coords.y += orientation.y;
+                coords.y = static_cast<unsigned int>(std::max(static_cast<int>(coords.y) + orientation.y, 0));
             }
 
             if (tmax.z <= tmax.x && tmax.z <= tmax.y) {
+                // ! DEBUG
+                std::cerr << "min z\n";
                 tcur = tmax.z;
                 tmax.z += tdelta.z;
-                coords.z += orientation.z;
+                coords.z = static_cast<unsigned int>(std::max(static_cast<int>(coords.z) + orientation.z, 0));
             }
 
-            // TODO: Check that get_voxel actually returns a valid Voxel.
-            objects.push_back(Intersection(grid.get_voxel(coords), tcur));
+            // ! DEBUG
+            std::cerr << "[c] " << coords << "\n";
+            optional<Voxel> intersect = grid.at(coords);
+            if (intersect.has_value()) {
+                // ! DEBUG
+                std::cerr << "[i] Intersection at: " << at(tcur) << "\n";
+                objects.push_back(Intersection(intersect.value(), tcur));
+            }
+        }
+ 
+        return objects;
+    }
+
+    IntersectionList geometry::Ray::traverse(Scene scene) {
+        auto grids = scene.grids;
+
+        IntersectionList objects = IntersectionList(dir);
+        // ! DEBUG
+        // int count = 0;
+        for (std::vector<VoxelGrid>::iterator grid = grids.begin(); grid != grids.end(); ++grid) {
+            // ! DEBUG
+            // std::cout << count++ << "\n";
+            // Avoid redundant traversals by checking bounding box intersection first.
+            if (intersects((*grid).bounding_box)) {
+                // ! DEBUG
+                // std::cout << dir << " intersects [" << (*grid).bounding_box.min << ", " << (*grid).bounding_box.max << "]\n";
+                IntersectionList intersections = traverse(*grid);
+                
+                // ! DEBUG
+                // std::cerr << "[i] " << intersections.items.size() << "\n";
+                // Insert all the new intersections into the object list.
+                objects.insert(objects.end(), intersections.begin(), intersections.end());
+            }
         }
 
         return objects;

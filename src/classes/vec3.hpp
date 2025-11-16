@@ -1,5 +1,7 @@
 // Based on code from https://raytracing.github.io/books/RayTracingInOneWeekend.html
 
+// TODO: Rename this file.
+
 #ifndef VEC3_H
 #define VEC3_H
 
@@ -105,7 +107,7 @@ namespace geometry {
     // Vector Non-Member Utility Functions
     template<typename T>
     inline std::ostream& operator<<(std::ostream& out, const Triple<T>& v) {
-        return out << "Triple(" << v.x << ", " << v.y << ", " << v.z << ")";
+        return out << "(" << v.x << ", " << v.y << ", " << v.z << ")";
     }
 
     template<typename T>
