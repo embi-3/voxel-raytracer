@@ -2,8 +2,8 @@
 #define VOXELGRID_H
 
 #include "../common.hpp"
-#include "voxel.hpp"
 #include "aabb.hpp"
+#include "voxel.hpp"
 #include <cmath>
 #include <iostream>
 
@@ -18,50 +18,62 @@ namespace geometry {
         Coordinate size = Coordinate(32); // Default world dimensions
 
         Vec3 origin = Vec3();
-        std::vector<Voxel> world;
+        std::vector<Voxel> world = {};
 
         // Precompute the bounding box of the grid for performance.
         AABB bounding_box;
 
         explicit VoxelGrid() {
-            world.reserve(size.x * size.y * size.z); // TODO: Change the way voxels are stored.
-            
-            Vec3 min_bounds = origin - Vec3(0.5 * scale.x, 0.5 * scale.y, 0.5 * scale.z);
-            Vec3 max_bounds = origin + Vec3((size.x - 0.5) * scale.x, (size.y - 0.5) * scale.y, (size.z - 0.5) * scale.z);
-            bounding_box = AABB(min_bounds, max_bounds);
+            initialise();
         }
 
-        explicit VoxelGrid(unsigned int world_size) {
+        explicit VoxelGrid(Vec3 origin)
+        : origin(origin) {
+            initialise();
+        }
+
+        explicit VoxelGrid(unsigned int world_size, Vec3 pos = Vec3()) {
             size = Coordinate(world_size);
-            VoxelGrid();
+            origin = pos;
+            initialise();
         }
 
-        explicit VoxelGrid(unsigned int x, unsigned int y, unsigned int z) {
+        explicit VoxelGrid(unsigned int x, unsigned int y, unsigned int z, Vec3 origin = Vec3())
+        : origin(origin) {
             size = Coordinate(x, y, z);
-            VoxelGrid();
+            initialise();
         }
 
         // TODO: Check if this returns shallow or deep copy of the Voxel.
-        inline Voxel at(Coordinate coords) {
+        inline optional<Voxel> at(Coordinate coords) {
             unsigned int index = flatten(coords);
+            if (index >= size.x * size.y * size.z) {
+                std::cerr << "[!] Invalid index: " << index << "\n";
+                return {};
+            }
+
+            // ! DEBUG
+            // std::cout << index << "\n";
+            
             return world.at(index);
         }
 
-        inline Voxel at(Vec3 pos) {
+        inline optional<Voxel> at(Vec3 pos) {
             return at(get_coords(pos));
         }
 
-        inline Voxel at(unsigned int x, unsigned int y, unsigned int z) {
+        inline optional<Voxel> at(unsigned int x, unsigned int y, unsigned int z) {
             return at(Coordinate(x, y, z));
         }
 
         Coordinate get_coords(Vec3 pos) {
             if (contains(pos)) {
-                unsigned int x = std::round(pos.x / scale.x);
-                unsigned int y = std::round(pos.y / scale.y);
-                unsigned int z = std::round(pos.z / scale.z);
+                unsigned int x = static_cast<unsigned int>(std::round(pos.x / scale.x));
+                unsigned int y = static_cast<unsigned int>(std::round(pos.y / scale.y));
+                unsigned int z = static_cast<unsigned int>(std::round(pos.z / scale.z));
                 return Coordinate(x, y, z);
-            } else {
+            }
+            else {
                 // Return a coordinate that is clearly an error. We could handle this error more elegantly but
                 // this is good enough for debugging purposes.
                 return Coordinate(std::numeric_limits<unsigned int>().max());
@@ -74,12 +86,7 @@ namespace geometry {
         }
 
         bool contains(Vec3 pos) {
-            return pos.x - origin.x <= (size.x - 0.5) * scale.x
-                && pos.y - origin.y <= (size.y - 0.5) * scale.y
-                && pos.z - origin.z <= (size.z - 0.5) * scale.z
-                && origin.x - pos.x >= 0.5 * scale.x
-                && origin.y - pos.y >= 0.5 * scale.y
-                && origin.z - pos.z >= 0.5 * scale.z;
+            return bounding_box.contains(pos);
         }
 
         bool contains(Coordinate coords) {
@@ -88,33 +95,24 @@ namespace geometry {
 
         // Returns the distance between the centres of two voxels in 3D space, including scaling.
         num space_dist(Coordinate coord1, Coordinate coord2) {
-            return sqrt(
-                pow((coord1.x - coord2.x) * scale.x, 2)
-                + pow((coord1.y - coord2.y) * scale.y, 2)
-                + pow((coord1.z - coord2.z) * scale.z, 2)
-            );
+            return sqrt(pow((coord1.x - coord2.x) * scale.x, 2) + pow((coord1.y - coord2.y) * scale.y, 2)
+                        + pow((coord1.z - coord2.z) * scale.z, 2));
         }
 
         // Returns the distance between the centres of two voxels in grid space, ignoring scaling.
         num pos_dist(Coordinate coord1, Coordinate coord2) {
-            return sqrt(
-                pow(coord1.x - coord2.x, 2)
-                + pow(coord1.y - coord2.y, 2)
-                + pow(coord1.z - coord2.z, 2)
-            );
+            return sqrt(pow(coord1.x - coord2.x, 2) + pow(coord1.y - coord2.y, 2) + pow(coord1.z - coord2.z, 2));
         }
 
         // Returns the Manhattan (taxicab) distance between two voxels.
         num man_dist(Coordinate coord1, Coordinate coord2) {
-            return abs(coord1.x - coord2.x)
-                + abs(coord1.y - coord2.y)
-                + abs(coord1.z - coord2.z);
+            return abs(static_cast<int>(coord1.x - coord2.x)) + abs(static_cast<int>(coord1.y - coord2.y)) + abs(static_cast<int>(coord1.z - coord2.z));
         }
 
         void create_sphere(Coordinate centre, unsigned int radius) {
-            for (int x = centre.x - radius; x < centre.x + radius; x++) {
-                for (int y = centre.y - radius; y < centre.y + radius; y++) {
-                    for (int z = centre.z - radius; z < centre.z + radius; z++) {
+            for (unsigned int x = std::max(centre.x - radius, 0u); x < centre.x + radius && x < size.x; x++) {
+                for (unsigned int y = std::max(centre.y - radius, 0u); y < centre.y + radius && x < size.y; y++) {
+                    for (unsigned int z = std::max(centre.z - radius, 0u); z < centre.z + radius && x < size.z; z++) {
                         if (space_dist(centre, Coordinate(x, y, z)) <= radius) {
                             at(x, y, z) = Voxel();
                         }
@@ -123,28 +121,44 @@ namespace geometry {
             }
         }
 
-        void create_cube(Coordinate centre, unsigned int radius) {
-            for (int x = centre.x - radius; x < centre.x + radius; x++) {
-                for (int y = centre.y - radius; y < centre.y + radius; y++) {
-                    for (int z = centre.z - radius; z < centre.z + radius; z++) {
+        void create_cube(Coordinate centre, unsigned int size) {
+            for (unsigned int x = std::max(centre.x - size / 2, 0u); 2 * x < 2 * centre.x + size; x++) {
+                for (unsigned int y = std::max(centre.y - size / 2, 0u); 2 * y < 2 * centre.y + size; y++) {
+                    for (unsigned int z = std::max(centre.z - size / 2, 0u); 2 * z < 2 * centre.z + size; z++) {
+                        // ! DEBUG
+                        // std::cout << x << ", "<< y << ", " << z << "\n";
                         at(x, y, z) = Voxel();
                     }
                 }
             }
         }
-    
+
     private:
         // ! If the coordinates are too large, this may return an index outside the VoxelGrid!
-        unsigned int flatten(Coordinate coords) {
-            return coords.x * size.x + coords.y * size.y + coords.z * size.z;
+        inline unsigned int flatten(Coordinate coords) {
+            return flatten(coords.x, coords.y, coords.z);
+        }
+
+        inline unsigned int flatten(unsigned int x, unsigned int y, unsigned int z) {
+            return x * size.y * size.z + y * size.z + z;
         }
 
         // ! If index is too large, this may return a coordinate outside the VoxelGrid!
-        Coordinate unflatten(unsigned int index) {            
+        inline Coordinate unflatten(unsigned int index) {
             unsigned int x = index / (size.y + size.z);
             unsigned int y = (index - x * (size.y + size.z)) / size.z;
             unsigned int z = index - x * (size.y + size.z) - y * size.z;
             return Coordinate(x, y, z);
+        }
+
+        inline void initialise() {
+            world.resize(size.x * size.y * size.z);
+            // ! DEBUG
+            std::cout << "  > " << world.size() << " of " << world.capacity() << " bytes used" << "\n";
+
+            Vec3 min_bounds = origin;
+            Vec3 max_bounds = origin + Vec3(size.x * scale.x, size.y * scale.y, size.z * scale.z);
+            bounding_box = AABB(min_bounds, max_bounds);
         }
     };
 } // namespace geometry
