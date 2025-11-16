@@ -28,7 +28,8 @@ namespace geometry {
         }
 
         explicit VoxelGrid(Vec3 centre) {
-            origin = centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
+            origin =
+                centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
             initialise();
         }
 
@@ -39,7 +40,8 @@ namespace geometry {
 
         explicit VoxelGrid(unsigned int world_size, Vec3 centre) {
             size = Coordinate(static_cast<int>(world_size));
-            origin = centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
+            origin =
+                centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
             initialise();
         }
 
@@ -50,7 +52,8 @@ namespace geometry {
 
         explicit VoxelGrid(unsigned int x, unsigned int y, unsigned int z, Vec3 centre) {
             size = Coordinate(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z));
-            origin = centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
+            origin =
+                centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
             initialise();
         }
 
@@ -106,7 +109,8 @@ namespace geometry {
 
         void set_voxel(int x, int y, int z, Voxel voxel) {
             // TODO: Throw an error if the coordinates are invalid.
-            world.at(flatten(static_cast<unsigned int>(x), static_cast<unsigned int>(y), static_cast<unsigned int>(z))) = voxel;
+            world.at(flatten(static_cast<unsigned int>(x), static_cast<unsigned int>(y), static_cast<unsigned int>(z))) =
+                voxel;
         }
 
         void set_voxel(Coordinate coords, Voxel voxel) {
@@ -118,7 +122,8 @@ namespace geometry {
         }
 
         bool contains(Coordinate coords) {
-            return coords.x >= 0 && coords.x < size.x && coords.y >= 0 && coords.y < size.y && coords.z >= 0 && coords.z < size.z;
+            return coords.x >= 0 && coords.x < size.x && coords.y >= 0 && coords.y < size.y && coords.z >= 0
+                   && coords.z < size.z;
         }
 
         // Returns the distance between the centres of two voxels in 3D space, including scaling.
@@ -134,20 +139,31 @@ namespace geometry {
 
         // Returns the Manhattan (taxicab) distance between two voxels.
         num man_dist(Coordinate coord1, Coordinate coord2) {
-            return abs(coord1.x - coord2.x) + abs(coord1.y - coord2.y)
-                   + abs(coord1.z - coord2.z);
+            return abs(coord1.x - coord2.x) + abs(coord1.y - coord2.y) + abs(coord1.z - coord2.z);
         }
 
         void create_sphere(Coordinate centre, num radius) {
             // ! DEBUG
             std::cerr << "Sphere:\n";
-            std::cerr << "x: " << static_cast<int>(std::max(static_cast<num>(centre.x) - radius, 0.0)) << "-" << centre.x + radius << "\n";
-            std::cerr << "y: " << static_cast<int>(std::max(static_cast<num>(centre.y) - radius, 0.0)) << "-" << centre.y + radius << "\n";
-            std::cerr << "z: " << static_cast<int>(std::max(static_cast<num>(centre.z) - radius, 0.0)) << "-" << centre.z + radius << "\n";
+            std::cerr << "x: " << static_cast<int>(std::max(static_cast<num>(centre.x) - radius, 0.0)) << "-"
+                      << centre.x + radius << "\n";
+            std::cerr << "y: " << static_cast<int>(std::max(static_cast<num>(centre.y) - radius, 0.0)) << "-"
+                      << centre.y + radius << "\n";
+            std::cerr << "z: " << static_cast<int>(std::max(static_cast<num>(centre.z) - radius, 0.0)) << "-"
+                      << centre.z + radius << "\n";
 
-            for (int x = static_cast<int>(std::max(static_cast<num>(centre.x) - radius, 0.0)); x <= centre.x + radius && x < size.x; x++) {
-                for (int y = static_cast<int>(std::max(static_cast<num>(centre.y) - radius, 0.0)); y <= centre.y + radius && x < size.y; y++) {
-                    for (int z = static_cast<int>(std::max(static_cast<num>(centre.z) - radius, 0.0)); z <= centre.z + radius && x < size.z; z++) {
+            for (int x = static_cast<int>(std::max(static_cast<num>(centre.x) - radius, 0.0));
+                 x <= centre.x + radius && x < size.x;
+                 x++)
+            {
+                for (int y = static_cast<int>(std::max(static_cast<num>(centre.y) - radius, 0.0));
+                     y <= centre.y + radius && x < size.y;
+                     y++)
+                {
+                    for (int z = static_cast<int>(std::max(static_cast<num>(centre.z) - radius, 0.0));
+                         z <= centre.z + radius && x < size.z;
+                         z++)
+                    {
                         if (space_dist(centre, Coordinate(x, y, z)) <= radius) {
                             // ! DEBUG
                             std::cerr << Coordinate(x, y, z) << "\n";
@@ -161,7 +177,7 @@ namespace geometry {
         void create_cube(Coordinate coords) {
             set_voxel(coords, Voxel());
         }
-        
+
         void create_cube(Coordinate min, Coordinate max) {
             for (int x = std::max(min.x, 0); x <= std::min(max.x, size.x - 1); x++) {
                 for (int y = std::max(min.y, 0); y <= std::min(max.y, size.y - 1); y++) {
@@ -178,11 +194,14 @@ namespace geometry {
     private:
         // ! If the coordinates are too large, this may return an index outside the VoxelGrid!
         inline unsigned int flatten(Coordinate coords) {
-            return flatten(static_cast<unsigned int>(coords.x), static_cast<unsigned int>(coords.y), static_cast<unsigned int>(coords.z));
+            return flatten(static_cast<unsigned int>(coords.x),
+                           static_cast<unsigned int>(coords.y),
+                           static_cast<unsigned int>(coords.z));
         }
 
         inline unsigned int flatten(unsigned int x, unsigned int y, unsigned int z) {
-            return x * static_cast<unsigned int>(size.y) * static_cast<unsigned int>(size.z) + y * static_cast<unsigned int>(size.z) + z;
+            return x * static_cast<unsigned int>(size.y) * static_cast<unsigned int>(size.z)
+                   + y * static_cast<unsigned int>(size.z) + z;
         }
 
         // ! If index is too large, this may return a coordinate outside the VoxelGrid!
@@ -195,11 +214,13 @@ namespace geometry {
 
         inline void initialise() {
             // ! DEBUG
-            std::cout << "   > Allocating space..." << "\n";
+            std::cout << "   > Allocating space..."
+                      << "\n";
             world.resize(static_cast<size_t>(size.x * size.y * size.z));
-            
+
             // ! DEBUG
-            std::cout << "   > Zeroing memory..." << "\n";
+            std::cout << "   > Zeroing memory..."
+                      << "\n";
             std::fill(world.begin(), world.end(), Voxel::empty());
             // ! DEBUG
             std::cout << "  > " << world.size() << " of " << world.capacity() << " bytes used"

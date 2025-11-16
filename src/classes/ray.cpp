@@ -101,7 +101,8 @@ namespace geometry {
                 coords.x += orientation.x;
                 if (orientation.x == 1) {
                     normal = FaceOrientation::X_POS;
-                } else {
+                }
+                else {
                     normal = FaceOrientation::X_NEG;
                 }
             }
@@ -114,7 +115,8 @@ namespace geometry {
                 coords.y += orientation.y;
                 if (orientation.y == 1) {
                     normal = FaceOrientation::Y_POS;
-                } else {
+                }
+                else {
                     normal = FaceOrientation::Y_NEG;
                 }
             }
@@ -127,7 +129,8 @@ namespace geometry {
                 coords.z += orientation.z;
                 if (orientation.z == 1) {
                     normal = FaceOrientation::Z_POS;
-                } else {
+                }
+                else {
                     normal = FaceOrientation::Z_NEG;
                 }
             }
@@ -142,7 +145,7 @@ namespace geometry {
         IntersectionList objects = IntersectionList(dir);
         // ! DEBUG
         // int count = 0;
-        for (std::vector<VoxelGrid *>::iterator grid = grids.begin(); grid != grids.end(); ++grid) {
+        for (std::vector<VoxelGrid*>::iterator grid = grids.begin(); grid != grids.end(); ++grid) {
             // ! DEBUG
             // std::cout << count++ << "\n";
             // Avoid redundant traversals by checking bounding box intersection first.
@@ -158,7 +161,8 @@ namespace geometry {
                 // std::cerr << "[i] " << intersections.items.size() << " intersection(s) with " << dir << "\n";
                 // Insert all the new intersections into the object list.
                 objects.insert(objects.end(), intersections.begin(), intersections.end());
-            } else {
+            }
+            else {
                 // ! DEBUG
                 // std::cout << "doesn't intersect\n";
             }
@@ -178,7 +182,8 @@ namespace geometry {
         num z_min = ((orientation.z == 1 ? bounding_box.min.z : bounding_box.max.z) - origin.z) * inv_dir.z;
         num z_max = ((orientation.z == 1 ? bounding_box.max.z : bounding_box.min.z) - origin.z) * inv_dir.z;
 
-        // std::cout << "x: " << Interval(x_min, x_max) << ", y: " << Interval(y_min, y_max) << ", z: " << Interval(z_min, z_max) << "\n";
+        // std::cout << "x: " << Interval(x_min, x_max) << ", y: " << Interval(y_min, y_max) << ", z: " <<
+        // Interval(z_min, z_max) << "\n";
 
         t_min = std::max(x_min, t_min);
         t_min = std::max(y_min, t_min);

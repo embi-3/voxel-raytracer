@@ -50,9 +50,9 @@ void create_png(std::size_t width, std::size_t height, const std::vector<Pixel>&
 
 int main() {
     // ! DEBUG
-    std::cerr << "Output is being written to a file!\n";
-    freopen("output.txt", "a", stdout);
-    freopen("output.txt", "a", stderr);
+    // std::cerr << "Output is being written to a file!\n";
+    // freopen("output.txt", "a", stdout);
+    // freopen("output.txt", "a", stderr);
 
     // ! DEBUG
     std::cout << "===========================================\n\n"

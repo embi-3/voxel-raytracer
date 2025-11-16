@@ -71,7 +71,8 @@ namespace renderer {
                     current_pixels = j * image_width + i;
                     if (current_pixels / chunk >= progress) {
                         // ! DEBUG
-                        std::cout << "- " << (++progress * 10) << "% done" << " \n";
+                        std::cout << "- " << (++progress * 10) << "% done"
+                                  << " \n";
                     }
                     auto pixel_center = upper_left_pixel + (i * delta_x) + (j * delta_y);
                     auto ray_direction = pixel_center - camera_center;
@@ -83,7 +84,8 @@ namespace renderer {
                     if (intersections.empty()) {
                         // ! DEBUG
                         // std::cout << "0";
-                    } else {
+                    }
+                    else {
                         // ! DEBUG
                         // std::cout << "x";
                     }
