@@ -10,74 +10,61 @@ namespace geometry {
     IntersectionList geometry::Ray::traverse(VoxelGrid grid) {
         IntersectionList objects = IntersectionList(dir);
 
-        Direction normal = Direction(NONE);
-
         // ! DEBUG
         std::cout << "[t] Traversing: " << dir << "\n";
-        Vec3 pos;
         Vec3 tmax;
         Vec3 tdelta = Vec3(dir.x == 0 ? infinity : fabs(grid.scale.x * inv_dir.x),
                            dir.y == 0 ? infinity : fabs(grid.scale.y * inv_dir.y),
                            dir.z == 0 ? infinity : fabs(grid.scale.z * inv_dir.z));
         num tcur = 0;
+        Direction normal = Direction(NONE);
         Coordinate coords;
 
         // ! DEBUG
         // std::cout << "[t] Traversal initialised...\n";
         std::cout << "[t] Delta: " << tdelta << "\n";
 
-        // Check if the ray is already in the voxel grid.
-        if (grid.contains(origin)) {
-            std::cout << "[t] Already in grid!\n";
-            pos = origin;
-            tmax = tdelta;
+        Vec3 min;
+        Vec3 max;
+        Interval interval = intersection(grid.bounding_box, min, max);
+
+        // ! DEBUG
+        std::cout << "[t] Interval: [" << interval.min << ", " << interval.max << "]\n";
+        if (interval.is_valid()) {
+            tcur = interval.min;
+            
+            // Calculate the first t which intersects with each coordinate plane.
+            // If it's infinity, don't bother.
+            // ! Double check the order of multiplications / divisions is correct!
+            num first_x = (max.x == infinity ? infinity : std::max(min.x, max.x - (floor((max.x - interval.min) * dir.x / grid.scale.x) * grid.scale.x * inv_dir.x)));
+            num first_y = (max.y == infinity ? infinity : std::max(min.y, max.y - (floor((max.y - interval.min) * dir.y / grid.scale.y) * grid.scale.y * inv_dir.y)));
+            num first_z = (max.z == infinity ? infinity : std::max(min.z, max.z - (floor((max.z - interval.min) * dir.z / grid.scale.z) * grid.scale.z * inv_dir.z)));
+
+            tmax = Vec3(first_x, first_y, first_z);
+
+            std::cerr << "pos: " << at(tcur) << ", tcur: " << tcur << ", tmax: " << tmax << "\n";
+
+            if (tmax.x == tcur) {
+                normal += Direction::from_x_orient(orientation.x);
+                tmax.x += tdelta.x;
+            }
+            if (tmax.y == tcur) {
+                normal += Direction::from_y_orient(orientation.y);
+                tmax.y += tdelta.y;
+            }
+            if (tmax.z == tcur) {
+                normal += Direction::from_y_orient(orientation.z);
+                tmax.z += tdelta.z;
+            }
         }
         else {
-            Vec3 min;
-            Vec3 max;
-            Interval interval = intersection(grid.bounding_box, normal, min, max);
-
+            // If the ray doesn't hit the bounding box, return an empty list.
             // ! DEBUG
-            std::cout << "[t] Interval: [" << interval.min << ", " << interval.max << "]\n";
-            if (interval.is_valid()) {
-                pos = at(interval.min);
-                tcur = interval.min;
-                
-                // Calculate the first t which intersects with each coordinate plane.
-                // If it's infinity, don't bother.
-                // ! Double check the order of multiplications / divisions is correct!
-                num first_x = (max.x == infinity ? infinity : std::max(min.x, max.x - (floor((max.x - interval.min) * dir.x / grid.scale.x) * grid.scale.x * inv_dir.x)));
-                num first_y = (max.y == infinity ? infinity : std::max(min.y, max.y - (floor((max.y - interval.min) * dir.y / grid.scale.y) * grid.scale.y * inv_dir.y)));
-                num first_z = (max.z == infinity ? infinity : std::max(min.z, max.z - (floor((max.z - interval.min) * dir.z / grid.scale.z) * grid.scale.z * inv_dir.z)));
-                
-                // ! DEBUG
-                // std::cerr << max.z * inv_dir.x
-
-                tmax = Vec3(first_x, first_y, first_z);
-
-                std::cerr << "pos: " << pos << ", tcur: " << tcur << ", tmax: " << tmax << "\n";
-
-                if (normal.is_x()) {
-                    tmax.x += tdelta.x;
-                }
-                if (normal.is_y()) {
-                    tmax.y += tdelta.y;
-                }
-                if (normal.is_z()) {
-                    tmax.z += tdelta.z;
-                } else {
-                    tmax += tdelta;
-                }
-            }
-            else {
-                // If the ray doesn't hit the bounding box, return an empty list.
-                // ! DEBUG
-                std::cerr << "Doesn't intersect!\n";
-                return objects;
-            }
+            std::cerr << "Doesn't intersect!\n";
+            return objects;
         }
 
-        coords = grid.get_coords(pos, orientation);
+        coords = grid.get_coords(at(tcur), orientation);
         // ! DEBUG
         std::cerr << "Starting coords: " << coords << "\n";
 
@@ -183,17 +170,13 @@ namespace geometry {
 
         return objects;
     }
+
     Interval geometry::Ray::intersection(AABB bounding_box) {
-        Direction dummy;
-        return intersection(bounding_box, dummy);
-    }
-
-    Interval geometry::Ray::intersection(AABB bounding_box, Direction &normal) {
         Vec3 dummy;
-        return intersection(bounding_box, normal, dummy, dummy);
+        return intersection(bounding_box, dummy, dummy);
     }
 
-    Interval geometry::Ray::intersection(AABB bounding_box, Direction &normal, Vec3 &tmin, Vec3 &tmax) {
+    Interval geometry::Ray::intersection(AABB bounding_box, Vec3 &tmin, Vec3 &tmax) {
         num t_min = 0;
         num t_max = infinity;
 
@@ -213,18 +196,6 @@ namespace geometry {
         t_max = std::min(x_max, t_max);
         t_max = std::min(y_max, t_max);
         t_max = std::min(z_max, t_max);
-
-        normal = Direction(NONE);
-
-        if (t_min == x_min) {
-            normal.dir = static_cast<uint8_t>(normal.dir + (orientation.x == 1 ? X_POS : X_NEG));
-        }
-        if (t_min == y_min) {
-            normal.dir = static_cast<uint8_t>(normal.dir + (orientation.y == 1 ? Y_POS : Y_NEG));
-        }
-        if (t_min == z_min) {
-            normal.dir = static_cast<uint8_t>(normal.dir + (orientation.z == 1 ? Z_POS : Z_NEG));
-        }
 
         tmin = Vec3(x_min, y_min, z_min);
         tmax = Vec3(x_max, y_max, z_max);

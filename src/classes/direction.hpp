@@ -59,8 +59,47 @@ namespace geometry {
         bool is_z() const {
             return is_zpos() || is_zneg();
         }
+
+        const static Direction from_x_orient(int orientation) {
+            if (orientation == 1) {
+                return Direction(X_POS);
+            } else if (orientation == -1) {
+                return Direction(X_NEG);
+            } else {
+                return Direction(NONE);
+            }
+        }
+
+        const static Direction from_y_orient(int orientation) {
+            if (orientation == 1) {
+                return Direction(Y_POS);
+            } else if (orientation == -1) {
+                return Direction(Y_NEG);
+            } else {
+                return Direction(NONE);
+            }
+        }
+
+        const static Direction from_z_orient(int orientation) {
+            if (orientation == 1) {
+                return Direction(Z_POS);
+            } else if (orientation == -1) {
+                return Direction(Z_NEG);
+            } else {
+                return Direction(NONE);
+            }
+        }
+
+        Direction& operator+=(const Direction& rhs) noexcept {
+            dir |= rhs.dir;
+            return *this;
+        }
     };
     
+    inline Direction operator+(const Direction& u, const Direction& v) noexcept {
+        return Direction(u.dir | v.dir);
+    }
+
     inline std::ostream& operator<<(std::ostream& out, const Direction& dir) {
         std::string str = "";
         if (dir.is_none()) {
