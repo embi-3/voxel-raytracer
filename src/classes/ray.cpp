@@ -10,15 +10,20 @@ using namespace helper;
 namespace geometry {
     static const num infinity = std::numeric_limits<num>::infinity();
 
+<<<<<<< HEAD
     IntersectionList geometry::Ray::traverse(VoxelGrid& grid) {
+=======
+    IntersectionList geometry::Ray::traverse(const VoxelGrid& grid) {
+>>>>>>> render
         IntersectionList objects = IntersectionList(dir);
 
         Vec3 tmax;
-        Vec3 tdelta = Vec3(dir.x == 0 ? infinity : fabs(grid.scale.x * inv_dir.x),
-                           dir.y == 0 ? infinity : fabs(grid.scale.y * inv_dir.y),
-                           dir.z == 0 ? infinity : fabs(grid.scale.z * inv_dir.z));
+        Vec3 tdelta = Vec3(equals_zero(dir.x) ? infinity : fabs(grid.scale.x * inv_dir.x),
+                           equals_zero(dir.y) ? infinity : fabs(grid.scale.y * inv_dir.y),
+                           equals_zero(dir.z) ? infinity : fabs(grid.scale.z * inv_dir.z));
         num tcur = 0;
         Direction normal = Direction(NONE);
+        Coordinate step = orientation.sign();
         Coordinate coords;
 
         Vec3 min;
@@ -53,15 +58,15 @@ namespace geometry {
             tmax = Vec3(first_x, first_y, first_z);
 
             if (equals(tmax.x, tcur)) {
-                normal += Direction::from_x_orient(orientation.x);
+                normal += orientation.x();
                 tmax.x += tdelta.x;
             }
             if (equals(tmax.y, tcur)) {
-                normal += Direction::from_y_orient(orientation.y);
+                normal += orientation.y();
                 tmax.y += tdelta.y;
             }
             if (equals(tmax.z, tcur)) {
-                normal += Direction::from_y_orient(orientation.z);
+                normal += orientation.z();
                 tmax.z += tdelta.z;
             }
         }
@@ -91,39 +96,22 @@ namespace geometry {
             if (tmax_temp.x <= tmax_temp.y && tmax_temp.x <= tmax_temp.z) {
                 tcur = tmax_temp.x;
                 tmax.x += tdelta.x;
-                coords.x += orientation.x;
-                if (orientation.x == 1) {
-                    normal.dir += X_POS;
-                }
-                else {
-                    normal.dir += X_NEG;
-                }
+                coords.x += step.x;
+                normal += orientation.x();
             }
 
             if (tmax_temp.y <= tmax_temp.x && tmax_temp.y <= tmax_temp.z) {
                 tcur = tmax_temp.y;
                 tmax.y += tdelta.y;
-                coords.y += orientation.y;
-
-                if (orientation.y == 1) {
-                    normal.dir += Y_POS;
-                }
-                else {
-                    normal.dir += Y_NEG;
-                }
+                coords.y += step.y;
+                normal += orientation.y();
             }
 
             if (tmax_temp.z <= tmax_temp.x && tmax_temp.z <= tmax_temp.y) {
                 tcur = tmax_temp.z;
                 tmax.z += tdelta.z;
-                coords.z += orientation.z;
-
-                if (orientation.z == 1) {
-                    normal.dir += Z_POS;
-                }
-                else {
-                    normal.dir += Z_NEG;
-                }
+                coords.z += step.z;
+                normal += orientation.z();
             }
         }
 
@@ -153,12 +141,12 @@ namespace geometry {
         num t_min = 0;
         num t_max = infinity;
 
-        num x_min = ((orientation.x == 1 ? bounding_box.min.x : bounding_box.max.x) - origin.x) * inv_dir.x;
-        num x_max = ((orientation.x == 1 ? bounding_box.max.x : bounding_box.min.x) - origin.x) * inv_dir.x;
-        num y_min = ((orientation.y == 1 ? bounding_box.min.y : bounding_box.max.y) - origin.y) * inv_dir.y;
-        num y_max = ((orientation.y == 1 ? bounding_box.max.y : bounding_box.min.y) - origin.y) * inv_dir.y;
-        num z_min = ((orientation.z == 1 ? bounding_box.min.z : bounding_box.max.z) - origin.z) * inv_dir.z;
-        num z_max = ((orientation.z == 1 ? bounding_box.max.z : bounding_box.min.z) - origin.z) * inv_dir.z;
+        num x_min = (orientation.x().is_none() ? -infinity : ((orientation.is_xpos() ? bounding_box.min.x : bounding_box.max.x) - origin.x) * inv_dir.x);
+        num x_max = (orientation.x().is_none() ? infinity : ((orientation.is_xpos() ? bounding_box.max.x : bounding_box.min.x) - origin.x) * inv_dir.x);
+        num y_min = (orientation.y().is_none() ? -infinity : ((orientation.is_ypos() ? bounding_box.min.y : bounding_box.max.y) - origin.y) * inv_dir.y);
+        num y_max = (orientation.y().is_none() ? infinity : ((orientation.is_ypos() ? bounding_box.max.y : bounding_box.min.y) - origin.y) * inv_dir.y);
+        num z_min = (orientation.z().is_none() ? -infinity : ((orientation.is_zpos() ? bounding_box.min.z : bounding_box.max.z) - origin.z) * inv_dir.z);
+        num z_max = (orientation.z().is_none() ? infinity : ((orientation.is_zpos() ? bounding_box.max.z : bounding_box.min.z) - origin.z) * inv_dir.z);
 
         t_min = std::max(x_min, t_min);
         t_min = std::max(y_min, t_min);

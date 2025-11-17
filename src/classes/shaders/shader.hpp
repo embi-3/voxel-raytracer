@@ -88,7 +88,7 @@ namespace shader {
         Colour fragment(IntersectionList list) override {
             if (!list.empty()) {
                 Vec3 dir = list.ray_dir.normalise();
-                Colour colour = Colour(255 * dir.x, 255 * dir.y, 255 * dir.z);
+                Colour colour = Colour(122.5) + Colour(122.5 * dir.x, 122.5 * dir.y, 122.5 * dir.z);
 
                 return colour;
             }
