@@ -148,13 +148,13 @@ namespace geometry {
 
         void create_sphere(Coordinate centre, num radius) {
             // ! DEBUG
-            std::cerr << "Sphere:\n";
-            std::cerr << "x: " << static_cast<int>(std::max(static_cast<num>(centre.x) - radius, 0.0)) << "-"
-                      << centre.x + radius << "\n";
-            std::cerr << "y: " << static_cast<int>(std::max(static_cast<num>(centre.y) - radius, 0.0)) << "-"
-                      << centre.y + radius << "\n";
-            std::cerr << "z: " << static_cast<int>(std::max(static_cast<num>(centre.z) - radius, 0.0)) << "-"
-                      << centre.z + radius << "\n";
+            // std::cerr << "Sphere:\n";
+            // std::cerr << "x: " << static_cast<int>(std::max(static_cast<num>(centre.x) - radius, 0.0)) << "-"
+            //           << centre.x + radius << "\n";
+            // std::cerr << "y: " << static_cast<int>(std::max(static_cast<num>(centre.y) - radius, 0.0)) << "-"
+            //           << centre.y + radius << "\n";
+            // std::cerr << "z: " << static_cast<int>(std::max(static_cast<num>(centre.z) - radius, 0.0)) << "-"
+            //           << centre.z + radius << "\n";
 
             for (int x = static_cast<int>(std::max(static_cast<num>(centre.x) - radius, 0.0));
                  x <= centre.x + radius && x < size.x;

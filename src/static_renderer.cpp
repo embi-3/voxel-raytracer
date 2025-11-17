@@ -62,12 +62,12 @@ int main() {
               << "> Starting...\n";
     const auto start = high_resolution_clock::now();
 
-    int image_width = 400;
-    int image_height = 200;
+    // int image_width = 400;
+    // int image_height = 200;
     
     // ! Try odd dimensions to test edge cases with 0.
-    // int image_width = 401;
-    // int image_height = 201;
+    int image_width = 401;
+    int image_height = 201;
 
     // ! DEBUG
     std::cout << "> Initialising camera...\n";
@@ -80,7 +80,7 @@ int main() {
 
     // ! DEBUG
     std::cout << "> Creating grid...\n";
-    VoxelGrid grid = VoxelGrid(32, Vec3(15.5, 15.5, 20));
+    VoxelGrid grid = VoxelGrid(32, Vec3(0, 0, 20));
 
     // ! DEBUG
     std::cerr << "min: " << grid.bounding_box.min << ", max: " << grid.bounding_box.max << "\n";
@@ -91,9 +91,9 @@ int main() {
 
     // TODO: Test shapes that go outside the boundary of the grid and see what happens.
     std::cerr << "> Creating shapes...\n" << std::flush;
-    // grid.create_sphere(Coordinate(16, 16, 16), 10);
+    grid.create_sphere(Coordinate(16, 16, 16), 10);
     // grid.create_sphere(Coordinate(10, 5, 5), 4);
-    grid.create_cube(Coordinate(6, 6, 6), Coordinate(26, 26, 26));
+    // grid.create_cube(Coordinate(6, 6, 6), Coordinate(26, 26, 26));
     // grid.create_cube(Coordinate(0, 0, 1));
     // grid.create_cube(Coordinate(15, 15, 0));
     // grid.create_cube(Coordinate(5, 5, 10));
@@ -107,7 +107,7 @@ int main() {
     WhiteShader white_shader = WhiteShader();
     RedShader red_shader = RedShader();
     DistanceShader distance_shader = DistanceShader();
-    NormalShader normal_shader = NormalShader();
+    OrientationShader normal_shader = OrientationShader();
     RayShader ray_shader = RayShader();
     auto pixels = camera.render(scene, ray_shader);
     create_png(static_cast<std::size_t>(image_width), static_cast<std::size_t>(image_height), pixels);

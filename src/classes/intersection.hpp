@@ -12,7 +12,8 @@ namespace geometry {
     public:
         Voxel voxel; // for colour and material data
         num distance = 0; // for depth shader.
-        Direction normal = Direction(NONE);
+        Direction orientation = Direction(NONE);
+        Vec3 normal;
 
         explicit constexpr Intersection(Voxel voxel)
         : voxel(voxel) {}
@@ -22,7 +23,7 @@ namespace geometry {
         explicit constexpr Intersection(Voxel voxel, num distance, Direction normal)
         : voxel(voxel)
         , distance(distance)
-        , normal(normal) {}
+        , orientation(normal) {}
 
         static constexpr Intersection invalid() {
             return Intersection(Voxel(), -1);

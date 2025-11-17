@@ -52,28 +52,28 @@ namespace shader {
         }
     };
 
-    class NormalShader: public Shader {
+    class OrientationShader: public Shader {
     public:
         Colour fragment(IntersectionList list) override {
             if (!list.empty()) {
-                Direction normal = (list.items.at(0)).normal;
+                Direction orientation = (list.items.at(0)).orientation;
                 Colour colour = Colour::black();
-                if (normal.is_xpos()) {
+                if (orientation.is_xpos()) {
                     colour += Colour::red();
                 }
-                if (normal.is_xneg()) {
+                if (orientation.is_xneg()) {
                     colour += Colour::magenta();
                 }
-                if (normal.is_ypos()) {
+                if (orientation.is_ypos()) {
                     colour += Colour::blue();
                 }
-                if (normal.is_yneg()) {
+                if (orientation.is_yneg()) {
                     colour += Colour::yellow();
                 }
-                if (normal.is_zpos()) {
+                if (orientation.is_zpos()) {
                     colour += Colour::green();
                 }
-                if (normal.is_zneg()) {
+                if (orientation.is_zneg()) {
                     colour += Colour::cyan();
                 }
 
