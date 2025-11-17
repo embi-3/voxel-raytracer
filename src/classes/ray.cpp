@@ -144,8 +144,6 @@ namespace geometry {
         num z_min = (orientation.z().is_none() ? -infinity : ((orientation.is_zpos() ? bounding_box.min.z : bounding_box.max.z) - origin.z) * inv_dir.z);
         num z_max = (orientation.z().is_none() ? infinity : ((orientation.is_zpos() ? bounding_box.max.z : bounding_box.min.z) - origin.z) * inv_dir.z);
 
-        std::cout << "x: " << Interval(x_min, x_max) << ", y: " << Interval(y_min, y_max) << ", z: " << Interval(z_min, z_max) << "\n";
-
         t_min = std::max(x_min, t_min);
         t_min = std::max(y_min, t_min);
         t_min = std::max(z_min, t_min);

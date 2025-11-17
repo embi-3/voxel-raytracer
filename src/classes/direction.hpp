@@ -20,10 +20,10 @@ namespace geometry {
 
         constexpr Direction() {}
         constexpr Direction(uint8_t dir) : dir(dir) {}
-        constexpr Direction(Vec3 dir) {
-            uint8_t x_dir = Direction::from_x_orient(dir.x).dir;
-            uint8_t y_dir = Direction::from_y_orient(dir.y).dir;
-            uint8_t z_dir = Direction::from_z_orient(dir.z).dir;
+        constexpr Direction(Vec3 direction) {
+            uint8_t x_dir = Direction::from_x_orient(direction.x).dir;
+            uint8_t y_dir = Direction::from_y_orient(direction.y).dir;
+            uint8_t z_dir = Direction::from_z_orient(direction.z).dir;
 
             dir = x_dir | y_dir | z_dir;
         }
