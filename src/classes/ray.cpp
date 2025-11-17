@@ -10,11 +10,7 @@ using namespace helper;
 namespace geometry {
     static const num infinity = std::numeric_limits<num>::infinity();
 
-<<<<<<< HEAD
-    IntersectionList geometry::Ray::traverse(VoxelGrid& grid) {
-=======
-    IntersectionList geometry::Ray::traverse(const VoxelGrid& grid) {
->>>>>>> render
+    IntersectionList Ray::traverse(const VoxelGrid& grid) {
         IntersectionList objects = IntersectionList(dir);
 
         Vec3 tmax;

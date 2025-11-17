@@ -86,7 +86,7 @@ namespace renderer {
             return pixels;
         }
 
-        std::vector<Pixel> render(VoxelGrid grid, Shader& shader) {
+        std::vector<Pixel> render(VoxelGrid& grid, Shader& shader) {
             auto pixels = std::vector<Pixel>{}; // array of pixels
             for (int j = 0; j < image_height; j++) {
                 for (int i = 0; i < image_width; i++) {
