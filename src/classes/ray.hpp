@@ -2,6 +2,7 @@
 #define RAY_H
 
 #include "../common.hpp"
+#include "../helper.hpp"
 #include "intersection.hpp"
 #include "intersection_list.hpp"
 #include "scene.hpp"
@@ -9,6 +10,8 @@
 #include "voxel.hpp"
 #include "voxel_grid.hpp"
 #include <vector>
+
+using namespace helper;
 
 namespace geometry {
     class Ray {
@@ -28,7 +31,7 @@ namespace geometry {
             inv_dir.z = equals_zero(dir.z) ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.z;
         }
 
-        IntersectionList traverse(VoxelGrid grid);
+        IntersectionList traverse(VoxelGrid& grid);
 
         IntersectionList traverse(Scene scene);
 

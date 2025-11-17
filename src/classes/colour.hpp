@@ -2,6 +2,7 @@
 #define COLOUR_H
 
 #include "../common.hpp"
+#include "../helper.hpp"
 #include "vec3.hpp"
 
 #include <algorithm>
@@ -127,7 +128,7 @@ namespace texture {
         }
 
         inline bool is_transparent() const {
-            return equals_zero(a);
+            return helper::equals_zero(a);
         }
     };
 
