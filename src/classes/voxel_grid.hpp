@@ -70,7 +70,7 @@ namespace geometry {
         }
 
         // ! The orientation is used to distinguish ties for coordinates on the border of voxels.
-        Coordinate get_coords(Vec3 pos, Coordinate orientation) {
+        Coordinate get_coords(Vec3 pos, Direction orientation) {
             if (contains(pos)) {
                 num x_scaled = (pos.x - origin.x) / scale.x;
                 num y_scaled = (pos.y - origin.y) / scale.y;
@@ -81,17 +81,17 @@ namespace geometry {
                 // std::cerr << x_scaled << "\n";
 
                 if (std::abs(x_scaled - 0.5 - floor(x_scaled - 0.5)) < epsilon) {
-                    x_scaled = (orientation.x == 1 ? ceil(x_scaled) : floor(x_scaled));
+                    x_scaled = (orientation.is_xpos() ? ceil(x_scaled) : floor(x_scaled));
                     // ! DEBUG
                     // std::cerr << "> Adjusted -> " << x_scaled << "\n";
                 }
                 
                 if (std::abs(y_scaled - 0.5 - floor(y_scaled - 0.5)) < epsilon) {
-                    y_scaled = (orientation.y == 1 ? ceil(y_scaled) : floor(y_scaled));
+                    y_scaled = (orientation.is_ypos() ? ceil(y_scaled) : floor(y_scaled));
                 }
                 
                 if (std::abs(z_scaled - 0.5 - floor(z_scaled - 0.5)) < epsilon) {
-                    z_scaled = (orientation.z == 1 ? ceil(z_scaled) : floor(z_scaled));
+                    z_scaled = (orientation.is_zpos() ? ceil(z_scaled) : floor(z_scaled));
                 }
                 // ! DEBUG
                 // std::cout << pos << ", " << origin << " -> " << Coordinate(x, y, z) << "\n";

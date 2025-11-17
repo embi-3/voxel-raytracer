@@ -91,9 +91,9 @@ int main() {
 
     // TODO: Test shapes that go outside the boundary of the grid and see what happens.
     std::cerr << "> Creating shapes...\n" << std::flush;
-    grid.create_sphere(Coordinate(16, 16, 16), 10);
+    // grid.create_sphere(Coordinate(16, 16, 16), 10);
     // grid.create_sphere(Coordinate(10, 5, 5), 4);
-    // grid.create_cube(Coordinate(6, 6, 6), Coordinate(26, 26, 26));
+    grid.create_cube(Coordinate(6, 6, 6), Coordinate(26, 26, 26));
     // grid.create_cube(Coordinate(0, 0, 1));
     // grid.create_cube(Coordinate(15, 15, 0));
     // grid.create_cube(Coordinate(5, 5, 10));

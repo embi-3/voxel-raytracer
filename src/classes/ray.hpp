@@ -13,21 +13,16 @@
 namespace geometry {
     class Ray {
     public:
-        enum class Orientation {
-            POSITIVE = 1,
-            ZERO = 0,
-            NEGATIVE = -1,
-        };
-
         Vec3 origin;
         Vec3 dir;
-        Coordinate orientation;
+        Direction orientation;
         Vec3 inv_dir;
 
         explicit constexpr Ray(Vec3 origin, Vec3 dir)
         : origin(origin)
-        , dir(dir)
-        , orientation(Coordinate(static_cast<int>(x_sign()), static_cast<int>(y_sign()), static_cast<int>(z_sign()))) {
+        , dir(dir) 
+        , orientation(Direction(dir))
+        {
             inv_dir.x = dir.x == 0 ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.x;
             inv_dir.y = dir.y == 0 ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.y;
             inv_dir.z = dir.z == 0 ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.z;
@@ -44,31 +39,6 @@ namespace geometry {
 
         inline Vec3 at(num t) {
             return origin + t * dir;
-        }
-
-    private:
-        constexpr inline Orientation x_sign() const {
-            return get_sign(dir.x);
-        }
-
-        constexpr inline Orientation y_sign() const {
-            return get_sign(dir.y);
-        }
-
-        constexpr inline Orientation z_sign() const {
-            return get_sign(dir.z);
-        }
-
-        constexpr inline Orientation get_sign(num value) const {
-            if (value > 0) {
-                return Orientation::POSITIVE;
-            }
-            else if (value < 0) {
-                return Orientation::NEGATIVE;
-            }
-            else {
-                return Orientation::ZERO;
-            }
         }
     };
 } // namespace geometry
