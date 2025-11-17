@@ -14,9 +14,9 @@ namespace geometry {
         IntersectionList objects = IntersectionList(dir);
 
         Vec3 tmax;
-        Vec3 tdelta = Vec3(dir.x == 0 ? infinity : fabs(grid.scale.x * inv_dir.x),
-                           dir.y == 0 ? infinity : fabs(grid.scale.y * inv_dir.y),
-                           dir.z == 0 ? infinity : fabs(grid.scale.z * inv_dir.z));
+        Vec3 tdelta = Vec3(equals_zero(dir.x) ? infinity : fabs(grid.scale.x * inv_dir.x),
+                           equals_zero(dir.y) ? infinity : fabs(grid.scale.y * inv_dir.y),
+                           equals_zero(dir.z) ? infinity : fabs(grid.scale.z * inv_dir.z));
         num tcur = 0;
         Direction normal = Direction(NONE);
         Coordinate step = orientation.sign();

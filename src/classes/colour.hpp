@@ -127,7 +127,7 @@ namespace texture {
         }
 
         inline bool is_transparent() const {
-            return a == 0;
+            return equals_zero(a);
         }
     };
 

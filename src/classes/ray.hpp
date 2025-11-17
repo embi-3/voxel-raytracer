@@ -23,9 +23,9 @@ namespace geometry {
         , dir(dir) 
         , orientation(Direction(dir))
         {
-            inv_dir.x = dir.x == 0 ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.x;
-            inv_dir.y = dir.y == 0 ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.y;
-            inv_dir.z = dir.z == 0 ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.z;
+            inv_dir.x = equals_zero(dir.x) ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.x;
+            inv_dir.y = equals_zero(dir.y) ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.y;
+            inv_dir.z = equals_zero(dir.z) ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.z;
         }
 
         IntersectionList traverse(VoxelGrid grid);
