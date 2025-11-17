@@ -56,7 +56,7 @@ namespace geometry {
         }
 
         // TODO: Check if this returns shallow or deep copy of the Voxel.
-        inline Voxel get_voxel(Coordinate coords) {
+        inline Voxel get_voxel(Coordinate coords) const {
             unsigned int index = flatten(coords);
             if (static_cast<int>(index) >= size.x * size.y * size.z) {
                 std::cerr << "[!] Invalid coordinates for grid: " << coords << " -> " << index << "\n";
@@ -67,7 +67,7 @@ namespace geometry {
         }
 
         // ! The orientation is used to distinguish ties for coordinates on the border of voxels.
-        Coordinate get_coords(Vec3 pos, Direction orientation) {
+        Coordinate get_coords(Vec3 pos, Direction orientation) const {
             if (contains(pos)) {
                 num x_scaled = (pos.x - origin.x) / scale.x;
                 num y_scaled = (pos.y - origin.y) / scale.y;
@@ -97,7 +97,7 @@ namespace geometry {
         }
 
         // ! May return a position outside of the bounding box.
-        Vec3 get_pos(Coordinate coords) {
+        Vec3 get_pos(Coordinate coords) const {
             return origin + Vec3(coords.x * scale.x, coords.y * scale.y, coords.z* scale.z);
         }
 
@@ -111,28 +111,28 @@ namespace geometry {
             set_voxel(coords.x, coords.y, coords.z, voxel);
         }
 
-        bool contains(Vec3 pos) {
+        bool contains(Vec3 pos) const {
             return bounding_box.contains(pos);
         }
 
-        bool contains(Coordinate coords) {
+        bool contains(Coordinate coords) const {
             return coords.x >= 0 && coords.x < size.x && coords.y >= 0 && coords.y < size.y && coords.z >= 0
                    && coords.z < size.z;
         }
 
         // Returns the distance between the centres of two voxels in 3D space, including scaling.
-        num space_dist(Coordinate coord1, Coordinate coord2) {
+        num space_dist(Coordinate coord1, Coordinate coord2) const {
             return sqrt(pow((coord1.x - coord2.x) * scale.x, 2) + pow((coord1.y - coord2.y) * scale.y, 2)
                         + pow((coord1.z - coord2.z) * scale.z, 2));
         }
 
         // Returns the distance between the centres of two voxels in grid space, ignoring scaling.
-        num pos_dist(Coordinate coord1, Coordinate coord2) {
+        num pos_dist(Coordinate coord1, Coordinate coord2) const {
             return sqrt(pow(coord1.x - coord2.x, 2) + pow(coord1.y - coord2.y, 2) + pow(coord1.z - coord2.z, 2));
         }
 
         // Returns the Manhattan (taxicab) distance between two voxels.
-        num man_dist(Coordinate coord1, Coordinate coord2) {
+        num man_dist(Coordinate coord1, Coordinate coord2) const {
             return abs(coord1.x - coord2.x) + abs(coord1.y - coord2.y) + abs(coord1.z - coord2.z);
         }
 
@@ -173,19 +173,19 @@ namespace geometry {
 
     private:
         // ! If the coordinates are too large, this may return an index outside the VoxelGrid!
-        inline unsigned int flatten(Coordinate coords) {
+        inline unsigned int flatten(Coordinate coords) const {
             return flatten(static_cast<unsigned int>(coords.x),
                            static_cast<unsigned int>(coords.y),
                            static_cast<unsigned int>(coords.z));
         }
 
-        inline unsigned int flatten(unsigned int x, unsigned int y, unsigned int z) {
+        inline unsigned int flatten(unsigned int x, unsigned int y, unsigned int z) const {
             return x * static_cast<unsigned int>(size.y) * static_cast<unsigned int>(size.z)
                    + y * static_cast<unsigned int>(size.z) + z;
         }
 
         // ! If index is too large, this may return a coordinate outside the VoxelGrid!
-        inline Coordinate unflatten(unsigned int index) {
+        inline Coordinate unflatten(unsigned int index) const {
             int x = static_cast<int>(index) / (size.y + size.z);
             int y = (static_cast<int>(index) - x * (size.y + size.z)) / size.z;
             int z = static_cast<int>(index) - x * (size.y + size.z) - y * size.z;
@@ -213,7 +213,7 @@ namespace geometry {
         }
 
         // Rounds negative numbers up to 0, and positive numbers down to 0.
-        inline num round_to_zero(num input) {
+        inline num round_to_zero(num input) const {
             num integer;
             num decimal = std::modf(input, &integer);
             if (std::abs(decimal) <= 0.5) {

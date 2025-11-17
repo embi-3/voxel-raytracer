@@ -17,7 +17,7 @@ namespace geometry {
         : min(min)
         , max(max){};
 
-        bool contains(Vec3 pos) {
+        bool contains(Vec3 pos) const {
             return epsilon >= min.x - pos.x && pos.x - max.x <= epsilon && epsilon >= min.y - pos.y
                    && pos.y - max.y <= epsilon && epsilon >= min.z - pos.z && pos.z - max.z <= epsilon;
         }
