@@ -80,6 +80,7 @@ namespace renderer {
 
                     // ! DEBUG
                     // std::cerr << r.origin << " | " << r.dir << "\n";
+                    std::cerr << "Pixel: (" << i << ", " << j << ")\n";
                     auto intersections = r.traverse(scene);
                     if (intersections.empty()) {
                         // ! DEBUG
@@ -90,6 +91,7 @@ namespace renderer {
                         // std::cout << "x";
                     }
                     auto pixel_colour = shader.fragment(intersections);
+                    std::cout << "Colour: " << pixel_colour << "\n";
                     // ! DEBUG
                     // if (!pixel_colour.is_transparent()) {
                     //     std::cerr << "[?] " << pixel_colour.to_rgba_string() << "\n";

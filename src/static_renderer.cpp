@@ -50,9 +50,9 @@ void create_png(std::size_t width, std::size_t height, const std::vector<Pixel>&
 
 int main() {
     // ! DEBUG
-    // std::cerr << "Output is being written to a file!\n";
-    // freopen("output.txt", "a", stdout);
-    // freopen("output.txt", "a", stderr);
+    std::cerr << "Output is being written to a file!\n";
+    freopen("output.txt", "a", stdout);
+    freopen("output.txt", "a", stderr);
 
     // ! DEBUG
     std::cout << "===========================================\n\n"
@@ -73,10 +73,10 @@ int main() {
 
     // ! DEBUG
     std::cout << "> Creating grid...\n";
-    VoxelGrid grid = VoxelGrid(32, Vec3(-15, 10, 20));
+    VoxelGrid grid = VoxelGrid(32, Vec3(-20, 15, 20));
 
     // ! DEBUG
-    // std::cerr << "min: " << grid.bounding_box.min << ", max: " << grid.bounding_box.max << "\n";
+    std::cerr << "min: " << grid.bounding_box.min << ", max: " << grid.bounding_box.max << "\n";
     // grid.get_voxel(5, 5, 5) = Voxel();
     // grid.set_voxel(5, 5, 5, Voxel());
 
@@ -85,7 +85,7 @@ int main() {
     // TODO: Test shapes that go outside the boundary of the grid and see what happens.
     std::cerr << "> Creating shapes...\n" << std::flush;
     grid.create_sphere(Coordinate(16, 16, 16), 10);
-    // grid.create_cube(Coordinate(0, 0, 0));
+    // grid.create_cube(Coordinate(6, 6, 6), Coordinate(26, 26, 26));
     // grid.create_cube(Coordinate(0, 0, 1));
     // grid.create_cube(Coordinate(15, 15, 0));
     // grid.create_cube(Coordinate(5, 5, 10));

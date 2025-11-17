@@ -9,9 +9,7 @@
 
 #include <vector>
 
-#define MAX_WORLD_SIZE 100
-
-namespace geometry {
+namespace geometry {    
     class VoxelGrid {
     public:
         Vec3 scale = Vec3(1); // Size of a voxel in 3D space
@@ -97,6 +95,7 @@ namespace geometry {
             else {
                 // Return a coordinate that is clearly an error. We could handle this error more elegantly but
                 // this is good enough for debugging purposes.
+                std::cerr << pos << " is not in bounds: [" << bounding_box.min << ", " << bounding_box.max << "]\n";
                 return Coordinate(std::numeric_limits<int>().max());
             }
         }
@@ -223,8 +222,9 @@ namespace geometry {
                       << "\n";
             std::fill(world.begin(), world.end(), Voxel::empty());
             // ! DEBUG
-            std::cout << "  > " << world.size() << " of " << world.capacity() << " bytes used"
+            std::cout << "   > " << world.size() << " of " << world.capacity() << " bytes used"
                       << "\n";
+            std::cout << "   > origin at " << origin <<"\n";
 
             Vec3 min_bounds = origin - Vec3(0.5 * scale.x, 0.5 * scale.y, 0.5 * scale.z);
             Vec3 max_bounds = origin + Vec3((size.x - 0.5) * scale.x, (size.y - 0.5) * scale.y, (size.z - 0.5) * scale.z);

@@ -4,8 +4,6 @@
 #include <iostream>
 #include <limits>
 
-static const num EPSILON = std::numeric_limits<num>::epsilon();
-
 namespace geometry {
     // TODO: Remove deprecated code.
     // Intersection geometry::Ray::traverse(VoxelGrid grid) {
@@ -50,52 +48,67 @@ namespace geometry {
 
         // Check if the ray is already in the voxel grid.
         if (grid.contains(origin)) {
-            // std::cout << "[t] Already in grid!\n";
+            std::cout << "[t] Already in grid!\n";
             pos = origin;
             tmax = tdelta;
         }
         else {
-            Interval interval = intersection(grid.bounding_box);
+            Interval interval = intersection(grid.bounding_box, normal, tmax);
             // ! DEBUG
-            // std::cout << "[t] Interval: [" << interval.min << ", " << interval.max << "]\n";
+            std::cout << "[t] Interval: [" << interval.min << ", " << interval.max << "]\n";
             if (interval.is_valid()) {
                 pos = at(interval.min);
                 tcur = interval.min;
-                tmax = Vec3(interval.min);
-                tmax += tdelta;
+                if (normal == FaceOrientation::X_POS || normal == FaceOrientation::X_NEG) {
+                    tmax.x += tdelta.x;
+                } else if (normal == FaceOrientation::Y_POS || normal == FaceOrientation::Y_NEG) {
+                    tmax.y += tdelta.y;
+                } else if (normal == FaceOrientation::Z_POS || normal == FaceOrientation::Z_NEG) {
+                    tmax.z += tdelta.z;
+                } else {
+                    tmax += tdelta;
+                }
+                std::cerr << "pos: " << pos << ", tcur: " << tcur << ", tmax: " << tmax << "\n";
             }
             else {
                 // If the ray doesn't hit the bounding box, return an empty list.
                 // ! DEBUG
-                // std::cerr << "Doesn't intersect!\n";
+                std::cerr << "Doesn't intersect!\n";
                 return objects;
             }
         }
 
         coords = grid.get_coords(pos);
         // ! DEBUG
-        // std::cerr << "Coords: " << coords << "\n";
+        std::cerr << "Coords: " << coords << "\n";
 
         // Iteratively find the next voxel using floating-point comparisons.
         while (grid.contains(coords)) {
             // ! DEBUG
-            // std::cerr << "[c] " << coords << ": [" << tcur << "] " << at(tcur) << "\n";
-            std::cerr << "[c] tmax: " << tmax << "\n";
+            std::cerr << "[c] " << coords << ": [" << tcur << "] " << at(tcur) << " " << normal << " - " << grid.get_coords(at(tcur)) << "\n";
+            // std::cerr << "[c] tmax: " << tmax << "\n";
             Voxel intersect = grid.get_voxel(coords);
             if (intersect.is_opaque()) {
                 // ! DEBUG
                 // ? This debug buffers when writing to a file for some reason?
-                std::cerr << "[i] Intersection at: [" << tcur << "] " << at(tcur) << "\n";
+                std::cerr << "[i] ray: " << dir << ", dist: " << tcur * dir.length() << ", pos: " << at(tcur) << ", coords: " << grid.get_coords(at(tcur)) << ", normal: " << normal << "\n";
+                // std::cerr << "[i] ray: " << dir << ", coords: " << at(tcur) << ", normal: " << normal << "\n";
                 objects.push_back(Intersection(intersect, tcur * dir.length(), normal));
 
                 // ! TEMP
                 break;
             }
 
+            // Create a temporary variable so any traversal updates don't affect the current iteration.
+            Vec3 tmax_temp = tmax;
+
+            // ! DEBUG
+            std::cerr << "tmax: " << tmax_temp << "\n";
+
             // Update the Amanatides-Woo algorithm to handle diagonals.
-            if (tmax.x <= tmax.y && tmax.x <= tmax.z) {
+            if (tmax_temp.x <= tmax_temp.y && tmax_temp.x <= tmax_temp.z) {
                 // ! DEBUG
-                std::cerr << "min x\n";
+                // std::cerr << "min x\n";
                 tcur = tmax.x;
                 tmax.x += tdelta.x;
                 coords.x += orientation.x;
@@ -107,9 +120,9 @@ namespace geometry {
                 }
             }
 
-            if (tmax.y <= tmax.x && tmax.y <= tmax.z) {
+            if (tmax_temp.y <= tmax_temp.x && tmax_temp.y <= tmax_temp.z) {
                 // ! DEBUG
-                std::cerr << "min y\n";
+                // std::cerr << "min y\n";
                 tcur = tmax.y;
                 tmax.y += tdelta.y;
                 coords.y += orientation.y;
@@ -121,9 +134,9 @@ namespace geometry {
                 }
             }
 
-            if (tmax.z <= tmax.x && tmax.z <= tmax.y) {
+            if (tmax_temp.z <= tmax_temp.x && tmax_temp.z <= tmax_temp.y) {
                 // ! DEBUG
-                std::cerr << "min z\n";
+                // std::cerr << "min z\n";
                 tcur = tmax.z;
                 tmax.z += tdelta.z;
                 coords.z += orientation.z;
@@ -170,8 +183,17 @@ namespace geometry {
 
         return objects;
     }
-
     Interval geometry::Ray::intersection(AABB bounding_box) {
+        FaceOrientation dummy;
+        return intersection(bounding_box, dummy);
+    }
+
+    Interval geometry::Ray::intersection(AABB bounding_box, FaceOrientation &normal) {
+        Vec3 dummy;
+        return intersection(bounding_box, normal, dummy);
+    }
+
+    Interval geometry::Ray::intersection(AABB bounding_box, FaceOrientation &normal, Vec3 &tmin) {
         num t_min = 0;
         num t_max = std::numeric_limits<num>::infinity();
 
@@ -192,6 +214,16 @@ namespace geometry {
         t_max = std::min(x_max, t_max);
         t_max = std::min(y_max, t_max);
         t_max = std::min(z_max, t_max);
+
+        if (t_min == x_min) {
+            normal = (orientation.x == 1 ? FaceOrientation::X_POS : FaceOrientation::X_NEG);
+        } else if (t_min == y_min) {
+            normal = (orientation.y == 1 ? FaceOrientation::Y_POS : FaceOrientation::Y_NEG);
+        } else if (t_min == z_min) {
+            normal = (orientation.z == 1 ? FaceOrientation::Z_POS : FaceOrientation::Z_NEG);
+        }
+
+        tmin = Vec3(x_min, y_min, z_min);
 
         return Interval(t_min, t_max);
     }

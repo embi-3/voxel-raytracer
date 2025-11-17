@@ -16,6 +16,35 @@ namespace geometry {
         Z_POS = 16,
         Z_NEG = 32,
     };
+    
+    inline std::ostream& operator<<(std::ostream& out, const FaceOrientation& f) {
+        auto str = "this is a string";
+        switch (f) {
+            case FaceOrientation::NONE:
+                str = "NONE";
+                break;
+            case FaceOrientation::X_POS:
+                str = "X_POS";
+                break;
+            case FaceOrientation::X_NEG:
+                str = "X_NEG";
+                break;
+            case FaceOrientation::Y_POS:
+                str = "Y_POS";
+                break;
+            case FaceOrientation::Y_NEG:
+                str = "Y_NEG";
+                break;
+            case FaceOrientation::Z_POS:
+                str = "Z_POS";
+                break;
+            case FaceOrientation::Z_NEG:
+                str = "Z_NEG";
+                break;
+        }
+        return out << str;
+    }
+
 
     class Intersection {
     public:

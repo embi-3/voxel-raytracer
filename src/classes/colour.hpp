@@ -158,6 +158,10 @@ namespace texture {
     inline Colour operator*(const Colour& c, const num s) noexcept {
         return Colour(bounded_rgb(s * c.r), bounded_rgb(s * c.g), bounded_rgb(s * c.b), c.a);
     }
+    
+    inline std::ostream& operator<<(std::ostream& out, const Colour& c) {
+        return out << "(" << c.r << ", " << c.g << ", " << c.b << ", " << c.a << ")";
+    }
 
     // Unbounded Operator Overloads
     // ! These have been left here for future testing purposes.
