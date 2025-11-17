@@ -56,23 +56,28 @@ namespace shader {
     public:
         Colour fragment(IntersectionList list) override {
             if (!list.empty()) {
-                FaceOrientation normal = (list.items.at(0)).normal;
-                switch (normal) {
-                    case FaceOrientation::NONE:
-                        return Colour::black();
-                    case FaceOrientation::X_POS:
-                        return Colour::red();
-                    case FaceOrientation::X_NEG:
-                        return Colour::magenta();
-                    case FaceOrientation::Y_POS:
-                        return Colour::blue();
-                    case FaceOrientation::Y_NEG:
-                        return Colour::yellow();
-                    case FaceOrientation::Z_POS:
-                        return Colour::green();
-                    case FaceOrientation::Z_NEG:
-                        return Colour::cyan();
+                Direction normal = (list.items.at(0)).normal;
+                Colour colour = Colour::black();
+                if (normal.is_xpos()) {
+                    colour += Colour::red();
                 }
+                if (normal.is_xneg()) {
+                    colour += Colour::magenta();
+                }
+                if (normal.is_ypos()) {
+                    colour += Colour::blue();
+                }
+                if (normal.is_yneg()) {
+                    colour += Colour::yellow();
+                }
+                if (normal.is_zpos()) {
+                    colour += Colour::green();
+                }
+                if (normal.is_zneg()) {
+                    colour += Colour::cyan();
+                }
+
+                return colour;
             }
             return Colour();
         }

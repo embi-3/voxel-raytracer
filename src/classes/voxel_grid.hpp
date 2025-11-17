@@ -69,28 +69,33 @@ namespace geometry {
             return world.at(index);
         }
 
-        inline Voxel get_voxel(Vec3 pos) {
-            auto coords = get_voxel(get_coords(pos));
-            if (!coords.is_opaque()) {
-                // ! DEBUG
-                std::cout << pos << "\n";
-            }
-
-            return coords;
-        }
-
-        inline Voxel get_voxel(unsigned int x, unsigned int y, unsigned int z) {
-            return get_voxel(Coordinate(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z)));
-        }
-
-        Coordinate get_coords(Vec3 pos) {
+        // ! The orientation is used to distinguish ties for coordinates on the border of voxels.
+        Coordinate get_coords(Vec3 pos, Coordinate orientation) {
             if (contains(pos)) {
-                int x = static_cast<int>(round_to_zero((pos.x - origin.x) / scale.x));
-                int y = static_cast<int>(round_to_zero((pos.y - origin.y) / scale.y));
-                int z = static_cast<int>(round_to_zero((pos.z - origin.z) / scale.z));
+                num x_scaled = (pos.x - origin.x) / scale.x;
+                num y_scaled = (pos.y - origin.y) / scale.y;
+                num z_scaled = (pos.z - origin.z) / scale.z;
+
+
+                // ! DEBUG
+                // std::cerr << x_scaled << "\n";
+
+                if (std::abs(x_scaled - 0.5 - floor(x_scaled - 0.5)) < epsilon) {
+                    x_scaled = (orientation.x == 1 ? ceil(x_scaled) : floor(x_scaled));
+                    // ! DEBUG
+                    // std::cerr << "> Adjusted -> " << x_scaled << "\n";
+                }
+                
+                if (std::abs(y_scaled - 0.5 - floor(y_scaled - 0.5)) < epsilon) {
+                    y_scaled = (orientation.y == 1 ? ceil(y_scaled) : floor(y_scaled));
+                }
+                
+                if (std::abs(z_scaled - 0.5 - floor(z_scaled - 0.5)) < epsilon) {
+                    z_scaled = (orientation.z == 1 ? ceil(z_scaled) : floor(z_scaled));
+                }
                 // ! DEBUG
                 // std::cout << pos << ", " << origin << " -> " << Coordinate(x, y, z) << "\n";
-                return Coordinate(x, y, z);
+                return Coordinate(static_cast<int>(round(x_scaled)), static_cast<int>(round(y_scaled)), static_cast<int>(round(z_scaled)));
             }
             else {
                 // Return a coordinate that is clearly an error. We could handle this error more elegantly but

@@ -1,0 +1,92 @@
+#ifndef DIRECTION_H
+#define DIRECTION_H
+
+#include "../common.hpp"
+#include <string>
+
+namespace geometry {
+    static const uint8_t NONE = 0;
+    static const uint8_t X_POS = 1;
+    static const uint8_t X_NEG = 2;
+    static const uint8_t Y_POS = 4;
+    static const uint8_t Y_NEG = 8;
+    static const uint8_t Z_POS = 16;
+    static const uint8_t Z_NEG = 32;
+
+    class Direction {
+    public:
+        uint8_t dir = 0;
+
+        constexpr Direction() {}
+        constexpr Direction(uint8_t dir) : dir(dir) {}
+
+        bool is_none() const {
+            return dir == 0;
+        }
+
+        bool is_xpos() const {
+            return dir & X_POS;
+        }
+
+        bool is_xneg() const {
+            return dir & X_NEG;
+        }
+
+        bool is_ypos() const {
+            return dir & Y_POS;
+        }
+
+        bool is_yneg() const {
+            return dir & Y_NEG;
+        }
+
+        bool is_zpos() const {
+            return dir & Z_POS;
+        }
+
+        bool is_zneg() const {
+            return dir & Z_NEG;
+        }
+
+        bool is_x() const {
+            return is_xpos() || is_xneg();
+        }
+
+        bool is_y() const {
+            return is_ypos() || is_yneg();
+        }
+
+        bool is_z() const {
+            return is_zpos() || is_zneg();
+        }
+    };
+    
+    inline std::ostream& operator<<(std::ostream& out, const Direction& dir) {
+        std::string str = "";
+        if (dir.is_none()) {
+            str.append("NONE ");
+        }
+        if (dir.is_xpos()) {
+            str.append("X_POS");
+        }
+        if (dir.is_xneg()) {
+            str.append("X_NEG");
+        }
+        if (dir.is_ypos()) {
+            str.append("Y_POS");
+        }
+        if (dir.is_yneg()) {
+            str.append("Y_NEG");
+        }
+        if (dir.is_zpos()) {
+            str.append("Z_POS");
+        }
+        if (dir.is_zneg()) {
+            str.append("Z_NEG");
+        }
+
+        return out << str;
+    }
+} // namespace geometry
+
+#endif // DIRECTION_H

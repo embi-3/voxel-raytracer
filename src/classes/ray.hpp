@@ -38,8 +38,8 @@ namespace geometry {
         IntersectionList traverse(Scene scene);
 
         Interval intersection(AABB bounding_box);
-        Interval intersection(AABB bounding_box, FaceOrientation &normal);
-        Interval intersection(AABB bounding_box, FaceOrientation &normal, Vec3 &tmin);
+        Interval intersection(AABB bounding_box, Direction &normal);
+        Interval intersection(AABB bounding_box, Direction &normal, Vec3 &tmin, Vec3 &tmax);
 
         bool intersects(AABB bounding_box);
 

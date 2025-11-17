@@ -6,7 +6,7 @@
 #include "vec3.hpp"
 
 namespace geometry {
-    static const num EPSILON = 1.E-10;
+    static const num epsilon = 1.E-10;
 
     // Axis Aligned Bounding Box
     class AABB {
@@ -21,21 +21,21 @@ namespace geometry {
 
         bool contains(Vec3 pos) {
             // ! DEBUG
-            // if (EPSILON < min.x - pos.x || pos.x - max.x > EPSILON) {
+            // if (epsilon < min.x - pos.x || pos.x - max.x > epsilon) {
             //     std::cout << "outside x bounds by " << std::max(min.x - pos.x, pos.x - max.x) << "!\n";
             // }
             
-            // if (EPSILON < min.y - pos.y || pos.y - max.y > EPSILON) {
+            // if (epsilon < min.y - pos.y || pos.y - max.y > epsilon) {
             //     std::cout << "outside y bounds by " << std::max(min.y - pos.y, pos.y - max.y) << "!\n";
             // }
             
-            // if (EPSILON < min.z - pos.z || pos.z - max.z > EPSILON) {
+            // if (epsilon < min.z - pos.z || pos.z - max.z > epsilon) {
             //     std::cout << "outside z bounds by " << std::max(min.z - pos.z, pos.z - max.z) << "!\n";
             // }
             
-            return EPSILON >= min.x - pos.x && pos.x - max.x <= EPSILON 
-                && EPSILON >= min.y - pos.y && pos.y - max.y <= EPSILON 
-                && EPSILON >= min.z - pos.z && pos.z - max.z <= EPSILON;
+            return epsilon >= min.x - pos.x && pos.x - max.x <= epsilon 
+                && epsilon >= min.y - pos.y && pos.y - max.y <= epsilon 
+                && epsilon >= min.z - pos.z && pos.z - max.z <= epsilon;
         }
     };
 } // namespace geometry

@@ -61,6 +61,10 @@ int main() {
 
     int image_width = 400;
     int image_height = 200;
+    
+    // ! Try odd dimensions to test edge cases with 0.
+    // int image_width = 401;
+    // int image_height = 201;
 
     // ! DEBUG
     std::cout << "> Initialising camera...\n";
@@ -73,7 +77,7 @@ int main() {
 
     // ! DEBUG
     std::cout << "> Creating grid...\n";
-    VoxelGrid grid = VoxelGrid(32, Vec3(-20, 15, 20));
+    VoxelGrid grid = VoxelGrid(32, Vec3(15.5, 15.5, 20));
 
     // ! DEBUG
     std::cerr << "min: " << grid.bounding_box.min << ", max: " << grid.bounding_box.max << "\n";
