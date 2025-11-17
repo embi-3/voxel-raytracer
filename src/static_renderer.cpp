@@ -49,48 +49,37 @@ void create_png(std::size_t width, std::size_t height, const std::vector<Pixel>&
 }
 
 int main() {
-    // ! DEBUG
-    std::cerr << "Output is being written to a file!\n";
-    freopen("output.txt", "a", stdout);
-    freopen("output.txt", "a", stderr);
+    // ! INFO
+    // std::cerr << "Output is being written to a file!\n";
+    // freopen("output.txt", "a", stdout);
+    // freopen("output.txt", "a", stderr);
 
     // freopen("/dev/null", "a", stdout);
     // freopen("/dev/null", "a", stderr);
 
-    // ! DEBUG
+    // ! INFO
     std::cout << "===========================================\n\n"
               << "> Starting...\n";
     const auto start = high_resolution_clock::now();
 
-    // int image_width = 400;
-    // int image_height = 200;
-    
-    // ! Try odd dimensions to test edge cases with 0.
     int image_width = 401;
     int image_height = 201;
 
-    // ! DEBUG
+    // ! INFO
     std::cout << "> Initialising camera...\n";
     Camera camera = Camera(image_width, image_height);
 
     // Create the scene
-    // ! DEBUG
+    // ! INFO
     std::cout << "> Creating scene...\n";
     Scene scene = Scene();
 
-    // ! DEBUG
+    // ! INFO
     std::cout << "> Creating grid...\n";
     VoxelGrid grid = VoxelGrid(32, Vec3(0, 0, 20));
 
-    // ! DEBUG
-    std::cerr << "min: " << grid.bounding_box.min << ", max: " << grid.bounding_box.max << "\n";
-    // grid.get_voxel(5, 5, 5) = Voxel();
-    // grid.set_voxel(5, 5, 5, Voxel());
-
-    // std::cout << grid.get_voxel(5, 5, 5).value().is_opaque() << "\n";
-
     // TODO: Test shapes that go outside the boundary of the grid and see what happens.
-    std::cerr << "> Creating shapes...\n" << std::flush;
+    std::cout << "> Creating shapes...\n";
     grid.create_sphere(Coordinate(16, 16, 16), 10);
     // grid.create_sphere(Coordinate(10, 5, 5), 4);
     // grid.create_cube(Coordinate(6, 6, 6), Coordinate(26, 26, 26));
@@ -100,15 +89,19 @@ int main() {
 
     scene.push_back(grid);
 
-    // Render the scene
-    // ! DEBUG
-    std::cout << "> Rendering scene...\n";
+    // Create shaders
+    // ! INFO
+    std::cout << "> Creating shaders...\n";
     GradientShader gradient_shader = GradientShader();
     WhiteShader white_shader = WhiteShader();
     RedShader red_shader = RedShader();
     DistanceShader distance_shader = DistanceShader();
-    OrientationShader normal_shader = OrientationShader();
+    OrientationShader orientation_shader = OrientationShader();
     RayShader ray_shader = RayShader();
+
+    // Render the scene
+    // ! INFO
+    std::cout << "> Rendering scene...\n";
     auto pixels = camera.render(scene, ray_shader);
     create_png(static_cast<std::size_t>(image_width), static_cast<std::size_t>(image_height), pixels);
 

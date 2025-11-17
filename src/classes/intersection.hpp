@@ -20,10 +20,10 @@ namespace geometry {
         explicit constexpr Intersection(Voxel voxel, num distance)
         : voxel(voxel)
         , distance(distance) {}
-        explicit constexpr Intersection(Voxel voxel, num distance, Direction normal)
+        explicit constexpr Intersection(Voxel voxel, num distance, Direction orientation)
         : voxel(voxel)
         , distance(distance)
-        , orientation(normal) {}
+        , orientation(orientation) {}
 
         static constexpr Intersection invalid() {
             return Intersection(Voxel(), -1);

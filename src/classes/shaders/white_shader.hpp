@@ -16,10 +16,7 @@ namespace shader {
     public:
         Colour fragment(IntersectionList list) override {
             if (!list.empty()) {
-                // ! DEBUG
-                // ! temporarily make it red for clarity
-                return Colour::red();
-                // return Colour::white();
+                return Colour::white();
             }
             return Colour();
         }

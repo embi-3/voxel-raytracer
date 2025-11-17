@@ -18,7 +18,8 @@ namespace geometry {
         uint8_t dir = 0;
 
         constexpr Direction() {}
-        constexpr Direction(uint8_t dir) : dir(dir) {}
+        constexpr Direction(uint8_t dir)
+        : dir(dir) {}
 
         bool is_none() const {
             return dir == 0;
@@ -63,9 +64,11 @@ namespace geometry {
         const static Direction from_x_orient(int orientation) {
             if (orientation == 1) {
                 return Direction(X_POS);
-            } else if (orientation == -1) {
+            }
+            else if (orientation == -1) {
                 return Direction(X_NEG);
-            } else {
+            }
+            else {
                 return Direction(NONE);
             }
         }
@@ -73,9 +76,11 @@ namespace geometry {
         const static Direction from_y_orient(int orientation) {
             if (orientation == 1) {
                 return Direction(Y_POS);
-            } else if (orientation == -1) {
+            }
+            else if (orientation == -1) {
                 return Direction(Y_NEG);
-            } else {
+            }
+            else {
                 return Direction(NONE);
             }
         }
@@ -83,9 +88,11 @@ namespace geometry {
         const static Direction from_z_orient(int orientation) {
             if (orientation == 1) {
                 return Direction(Z_POS);
-            } else if (orientation == -1) {
+            }
+            else if (orientation == -1) {
                 return Direction(Z_NEG);
-            } else {
+            }
+            else {
                 return Direction(NONE);
             }
         }
@@ -95,7 +102,7 @@ namespace geometry {
             return *this;
         }
     };
-    
+
     inline Direction operator+(const Direction& u, const Direction& v) noexcept {
         return Direction(u.dir | v.dir);
     }

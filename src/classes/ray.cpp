@@ -1,7 +1,7 @@
 #include "ray.hpp"
+#include "../helper.hpp"
 #include "aabb.hpp"
 #include "intersection.hpp"
-#include "../helper.hpp"
 #include <iostream>
 #include <limits>
 
@@ -13,8 +13,6 @@ namespace geometry {
     IntersectionList geometry::Ray::traverse(VoxelGrid grid) {
         IntersectionList objects = IntersectionList(dir);
 
-        // ! DEBUG
-        std::cout << "[t] Traversing: " << dir << "\n";
         Vec3 tmax;
         Vec3 tdelta = Vec3(dir.x == 0 ? infinity : fabs(grid.scale.x * inv_dir.x),
                            dir.y == 0 ? infinity : fabs(grid.scale.y * inv_dir.y),
@@ -23,29 +21,36 @@ namespace geometry {
         Direction normal = Direction(NONE);
         Coordinate coords;
 
-        // ! DEBUG
-        // std::cout << "[t] Traversal initialised...\n";
-        std::cout << "[t] Delta: " << tdelta << "\n";
-
         Vec3 min;
         Vec3 max;
         Interval interval = intersection(grid.bounding_box, min, max);
 
-        // ! DEBUG
-        std::cout << "[t] Interval: [" << interval.min << ", " << interval.max << "]\n";
         if (interval.is_valid()) {
             tcur = interval.min;
-            
+
             // Calculate the first t which intersects with each coordinate plane.
             // If it's infinity, don't bother.
             // ! Double check the order of multiplications / divisions is correct!
-            num first_x = (max.x == infinity ? infinity : std::max(min.x, max.x - (floor((max.x - interval.min) * dir.x / grid.scale.x) * grid.scale.x * inv_dir.x)));
-            num first_y = (max.y == infinity ? infinity : std::max(min.y, max.y - (floor((max.y - interval.min) * dir.y / grid.scale.y) * grid.scale.y * inv_dir.y)));
-            num first_z = (max.z == infinity ? infinity : std::max(min.z, max.z - (floor((max.z - interval.min) * dir.z / grid.scale.z) * grid.scale.z * inv_dir.z)));
+            num first_x =
+                (max.x == infinity
+                     ? infinity
+                     : std::max(
+                         min.x,
+                         max.x - (floor((max.x - interval.min) * dir.x / grid.scale.x) * grid.scale.x * inv_dir.x)));
+            num first_y =
+                (max.y == infinity
+                     ? infinity
+                     : std::max(
+                         min.y,
+                         max.y - (floor((max.y - interval.min) * dir.y / grid.scale.y) * grid.scale.y * inv_dir.y)));
+            num first_z =
+                (max.z == infinity
+                     ? infinity
+                     : std::max(
+                         min.z,
+                         max.z - (floor((max.z - interval.min) * dir.z / grid.scale.z) * grid.scale.z * inv_dir.z)));
 
             tmax = Vec3(first_x, first_y, first_z);
-
-            std::cerr << "pos: " << at(tcur) << ", tcur: " << tcur << ", tmax: " << tmax << "\n";
 
             if (equals(tmax.x, tcur)) {
                 normal += Direction::from_x_orient(orientation.x);
@@ -62,26 +67,15 @@ namespace geometry {
         }
         else {
             // If the ray doesn't hit the bounding box, return an empty list.
-            // ! DEBUG
-            std::cerr << "Doesn't intersect!\n";
             return objects;
         }
 
         coords = grid.get_coords(at(tcur), orientation);
-        // ! DEBUG
-        std::cerr << "Starting coords: " << coords << "\n";
 
         // Iteratively find the next voxel using floating-point comparisons.
         while (grid.contains(coords)) {
-            // ! DEBUG
-            std::cerr << "[c] " << coords << ": [" << tcur << "] " << at(tcur) << " " << normal << " => " << grid.get_coords(at(tcur), orientation) << "\n";
-            // std::cerr << "[c] tmax: " << tmax << "\n";
             Voxel intersect = grid.get_voxel(coords);
             if (intersect.is_opaque()) {
-                // ! DEBUG
-                // ? This debug buffers when writing to a file for some reason?
-                std::cerr << "[i] ray: " << dir << ", dist: " << tcur * dir.length() << ", pos: " << at(tcur) << ", coords: " << grid.get_coords(at(tcur), orientation) << ", normal: " << normal << "\n";
-                // std::cerr << "[i] ray: " << dir << ", coords: " << at(tcur) << ", normal: " << normal << "\n";
                 objects.push_back(Intersection(intersect, tcur * dir.length(), normal));
 
                 // ! TEMP
@@ -91,49 +85,43 @@ namespace geometry {
             // Create a temporary variable so any traversal updates don't affect the current iteration.
             Vec3 tmax_temp = tmax;
 
-            // ! DEBUG
-            std::cerr << "tmax: " << tmax_temp << "\n";
-
             normal = Direction(NONE);
 
             // Update the Amanatides-Woo algorithm to handle diagonals.
             if (tmax_temp.x <= tmax_temp.y && tmax_temp.x <= tmax_temp.z) {
-                // ! DEBUG
-                // std::cerr << "min x\n";
                 tcur = tmax_temp.x;
                 tmax.x += tdelta.x;
                 coords.x += orientation.x;
                 if (orientation.x == 1) {
                     normal.dir += X_POS;
-                } else {
+                }
+                else {
                     normal.dir += X_NEG;
                 }
             }
 
             if (tmax_temp.y <= tmax_temp.x && tmax_temp.y <= tmax_temp.z) {
-                // ! DEBUG
-                // std::cerr << "min y\n";
                 tcur = tmax_temp.y;
                 tmax.y += tdelta.y;
                 coords.y += orientation.y;
 
                 if (orientation.y == 1) {
                     normal.dir += Y_POS;
-                } else {
+                }
+                else {
                     normal.dir += Y_NEG;
                 }
             }
 
             if (tmax_temp.z <= tmax_temp.x && tmax_temp.z <= tmax_temp.y) {
-                // ! DEBUG
-                // std::cerr << "min z\n";
                 tcur = tmax_temp.z;
                 tmax.z += tdelta.z;
                 coords.z += orientation.z;
 
                 if (orientation.z == 1) {
                     normal.dir += Z_POS;
-                } else {
+                }
+                else {
                     normal.dir += Z_NEG;
                 }
             }
@@ -146,28 +134,10 @@ namespace geometry {
         auto grids = scene.grids;
 
         IntersectionList objects = IntersectionList(dir);
-        // ! DEBUG
-        // int count = 0;
         for (std::vector<VoxelGrid*>::iterator grid = grids.begin(); grid != grids.end(); ++grid) {
-            // ! DEBUG
-            // std::cout << count++ << "\n";
-            // Avoid redundant traversals by checking bounding box intersection first.
-            // std::cout << dir << ": ";
-            // std::cout << intersection((*grid).bounding_box) << " - ";
-
             if (intersects((**grid).bounding_box)) {
-                // ! DEBUG
-                // std::cout << "intersects\n";
                 IntersectionList intersections = traverse(**grid);
-
-                // ! DEBUG
-                // std::cerr << "[i] " << intersections.items.size() << " intersection(s) with " << dir << "\n";
-                // Insert all the new intersections into the object list.
                 objects.insert(objects.end(), intersections.begin(), intersections.end());
-            }
-            else {
-                // ! DEBUG
-                // std::cout << "doesn't intersect\n";
             }
         }
 
@@ -179,7 +149,7 @@ namespace geometry {
         return intersection(bounding_box, dummy, dummy);
     }
 
-    Interval geometry::Ray::intersection(AABB bounding_box, Vec3 &tmin, Vec3 &tmax) {
+    Interval geometry::Ray::intersection(AABB bounding_box, Vec3& tmin, Vec3& tmax) {
         num t_min = 0;
         num t_max = infinity;
 
@@ -189,8 +159,6 @@ namespace geometry {
         num y_max = ((orientation.y == 1 ? bounding_box.max.y : bounding_box.min.y) - origin.y) * inv_dir.y;
         num z_min = ((orientation.z == 1 ? bounding_box.min.z : bounding_box.max.z) - origin.z) * inv_dir.z;
         num z_max = ((orientation.z == 1 ? bounding_box.max.z : bounding_box.min.z) - origin.z) * inv_dir.z;
-
-        std::cout << "x: " << Interval(x_min, x_max) << ", y: " << Interval(y_min, y_max) << ", z: " << Interval(z_min, z_max) << "\n";
 
         t_min = std::max(x_min, t_min);
         t_min = std::max(y_min, t_min);

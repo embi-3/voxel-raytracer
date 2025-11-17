@@ -64,42 +64,24 @@ namespace renderer {
             int progress = 0;
             int total_pixels = image_height * image_width;
             int current_pixels = 0;
-            int chunk = total_pixels / 10;
+            int chunk = total_pixels / 100;
             auto pixels = std::vector<Pixel>{}; // array of pixels
             for (int j = 0; j < image_height; j++) {
                 for (int i = 0; i < image_width; i++) {
                     current_pixels = j * image_width + i;
                     if (current_pixels / chunk >= progress) {
-                        // ! DEBUG
-                        std::cout << "- " << (++progress * 10) << "% done"
+                        // ! INFO
+                        std::cout << "- " << (progress++) << "% done"
                                   << " \n";
                     }
                     auto pixel_center = upper_left_pixel + (i * delta_x) + (j * delta_y);
                     auto ray_direction = pixel_center - camera_center;
                     auto r = Ray{camera_center, ray_direction};
 
-                    // ! DEBUG
-                    // std::cerr << r.origin << " | " << r.dir << "\n";
-                    std::cerr << "Pixel: (" << i << ", " << j << ")\n";
                     auto intersections = r.traverse(scene);
-                    if (intersections.empty()) {
-                        // ! DEBUG
-                        // std::cout << "0";
-                    }
-                    else {
-                        // ! DEBUG
-                        // std::cout << "x";
-                    }
                     auto pixel_colour = shader.fragment(intersections);
-                    std::cout << "Colour: " << pixel_colour << "\n";
-                    // ! DEBUG
-                    // if (!pixel_colour.is_transparent()) {
-                    //     std::cerr << "[?] " << pixel_colour.to_rgba_string() << "\n";
-                    // }
                     pixels.push_back(pixel_colour);
                 }
-                // ! DEBUG
-                // std::cout << "\n";
             }
             return pixels;
         }

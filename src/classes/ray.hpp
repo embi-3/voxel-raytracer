@@ -38,7 +38,7 @@ namespace geometry {
         IntersectionList traverse(Scene scene);
 
         Interval intersection(AABB bounding_box);
-        Interval intersection(AABB bounding_box, Vec3 &tmin, Vec3 &tmax);
+        Interval intersection(AABB bounding_box, Vec3& tmin, Vec3& tmax);
 
         bool intersects(AABB bounding_box);
 
