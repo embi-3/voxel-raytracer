@@ -54,6 +54,9 @@ int main() {
     freopen("output.txt", "a", stdout);
     freopen("output.txt", "a", stderr);
 
+    // freopen("/dev/null", "a", stdout);
+    // freopen("/dev/null", "a", stderr);
+
     // ! DEBUG
     std::cout << "===========================================\n\n"
               << "> Starting...\n";
@@ -88,8 +91,9 @@ int main() {
 
     // TODO: Test shapes that go outside the boundary of the grid and see what happens.
     std::cerr << "> Creating shapes...\n" << std::flush;
-    grid.create_sphere(Coordinate(16, 16, 16), 10);
-    // grid.create_cube(Coordinate(6, 6, 6), Coordinate(26, 26, 26));
+    // grid.create_sphere(Coordinate(16, 16, 16), 10);
+    // grid.create_sphere(Coordinate(10, 5, 5), 4);
+    grid.create_cube(Coordinate(6, 6, 6), Coordinate(26, 26, 26));
     // grid.create_cube(Coordinate(0, 0, 1));
     // grid.create_cube(Coordinate(15, 15, 0));
     // grid.create_cube(Coordinate(5, 5, 10));
@@ -104,7 +108,8 @@ int main() {
     RedShader red_shader = RedShader();
     DistanceShader distance_shader = DistanceShader();
     NormalShader normal_shader = NormalShader();
-    auto pixels = camera.render(scene, normal_shader);
+    RayShader ray_shader = RayShader();
+    auto pixels = camera.render(scene, ray_shader);
     create_png(static_cast<std::size_t>(image_width), static_cast<std::size_t>(image_height), pixels);
 
     const auto end = high_resolution_clock::now();
