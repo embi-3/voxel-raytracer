@@ -33,7 +33,7 @@ namespace geometry {
             inv_dir.z = dir.z == 0 ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.z;
         }
 
-        IntersectionList traverse(VoxelGrid grid);
+        IntersectionList traverse(VoxelGrid& grid);
 
         IntersectionList traverse(Scene scene);
 

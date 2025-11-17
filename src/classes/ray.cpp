@@ -10,7 +10,7 @@ using namespace helper;
 namespace geometry {
     static const num infinity = std::numeric_limits<num>::infinity();
 
-    IntersectionList geometry::Ray::traverse(VoxelGrid grid) {
+    IntersectionList geometry::Ray::traverse(VoxelGrid& grid) {
         IntersectionList objects = IntersectionList(dir);
 
         Vec3 tmax;
@@ -134,7 +134,7 @@ namespace geometry {
         auto grids = scene.grids;
 
         IntersectionList objects = IntersectionList(dir);
-        for (std::vector<VoxelGrid*>::iterator grid = grids.begin(); grid != grids.end(); ++grid) {
+        for (auto grid = grids.begin(); grid != grids.end(); ++grid) {
             if (intersects((**grid).bounding_box)) {
                 IntersectionList intersections = traverse(**grid);
                 objects.insert(objects.end(), intersections.begin(), intersections.end());
