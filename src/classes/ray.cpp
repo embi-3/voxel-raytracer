@@ -1,8 +1,11 @@
 #include "ray.hpp"
 #include "aabb.hpp"
 #include "intersection.hpp"
+#include "../helper.hpp"
 #include <iostream>
 #include <limits>
+
+using namespace helper;
 
 namespace geometry {
     static const num infinity = std::numeric_limits<num>::infinity();
@@ -44,15 +47,15 @@ namespace geometry {
 
             std::cerr << "pos: " << at(tcur) << ", tcur: " << tcur << ", tmax: " << tmax << "\n";
 
-            if (tmax.x == tcur) {
+            if (equals(tmax.x, tcur)) {
                 normal += Direction::from_x_orient(orientation.x);
                 tmax.x += tdelta.x;
             }
-            if (tmax.y == tcur) {
+            if (equals(tmax.y, tcur)) {
                 normal += Direction::from_y_orient(orientation.y);
                 tmax.y += tdelta.y;
             }
-            if (tmax.z == tcur) {
+            if (equals(tmax.z, tcur)) {
                 normal += Direction::from_y_orient(orientation.z);
                 tmax.z += tdelta.z;
             }

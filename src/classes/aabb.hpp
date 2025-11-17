@@ -6,8 +6,6 @@
 #include "vec3.hpp"
 
 namespace geometry {
-    static const num epsilon = 1.E-10;
-
     // Axis Aligned Bounding Box
     class AABB {
     public:

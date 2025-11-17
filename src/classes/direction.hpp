@@ -106,22 +106,22 @@ namespace geometry {
             str.append("NONE ");
         }
         if (dir.is_xpos()) {
-            str.append("X_POS");
+            str.append("X_POS ");
         }
         if (dir.is_xneg()) {
-            str.append("X_NEG");
+            str.append("X_NEG ");
         }
         if (dir.is_ypos()) {
-            str.append("Y_POS");
+            str.append("Y_POS ");
         }
         if (dir.is_yneg()) {
-            str.append("Y_NEG");
+            str.append("Y_NEG ");
         }
         if (dir.is_zpos()) {
-            str.append("Z_POS");
+            str.append("Z_POS ");
         }
         if (dir.is_zneg()) {
-            str.append("Z_NEG");
+            str.append("Z_NEG ");
         }
 
         return out << str;

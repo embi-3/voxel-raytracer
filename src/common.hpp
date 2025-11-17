@@ -5,11 +5,15 @@
 // using num = int;
 // #elifdef USE_SINGLE_PRECISION
 
-#include <optional>
-using std::optional;
+#ifndef COMMON_H
+#define COMMON_H
 
 #ifdef USE_SINGLE_PRECISION
 using num = float;
 #else
 using num = double;
 #endif
+
+static const num epsilon = 1.E-10;
+
+#endif // COMMON_H
