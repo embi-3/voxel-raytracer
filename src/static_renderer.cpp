@@ -57,7 +57,7 @@ Scene two_spheres() {
 
     // ! INFO
     std::cout << "> Creating grid...\n";
-    auto grid = std::make_unique<ArrayVoxelGrid>(ArrayVoxelGrid(32, Vec3(0, 0, 20)));
+    auto grid = std::make_unique<ArrayVoxelGrid>(32, Vec3(0, 0, 20));
 
     // TODO: Test shapes that go outside the boundary of the grid and see what happens.
     std::cout << "> Creating shapes...\n";
@@ -74,7 +74,7 @@ Scene random_spheres() {
     int num_spheres = 300;
     Scene scene = Scene();
 
-    auto grid = std::make_unique<ArrayVoxelGrid>(ArrayVoxelGrid(world_size, Vec3(0, 0, world_size/2)));
+    auto grid = std::make_unique<ArrayVoxelGrid>(world_size, Vec3(0, 0, world_size/2));
     int x;
     int y;
     int z;
@@ -96,7 +96,7 @@ Scene random_cubes() {
     int num_cubes = 100000;
 
     Scene scene = Scene();
-    auto grid = std::make_unique<ArrayVoxelGrid>(ArrayVoxelGrid(world_size, Vec3(0, 0, 0)));
+    auto grid = std::make_unique<ArrayVoxelGrid>(world_size, Vec3(0, 0, 0));
     int x;
     int y;
     int z;
