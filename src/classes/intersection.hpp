@@ -8,7 +8,7 @@
 #include "voxel.hpp"
 
 namespace geometry {
-    static const Voxel& INVALID_VOXEL = Voxel();
+    static constexpr Voxel INVALID_VOXEL = Voxel();
     
     class Intersection {
     public:
@@ -18,12 +18,12 @@ namespace geometry {
         // TODO: Implement this!
         Vec3 normal;
 
-        explicit constexpr Intersection(const Voxel voxel)
+        explicit constexpr Intersection(Voxel voxel)
         : voxel(voxel) {}
-        explicit constexpr Intersection(const Voxel voxel, num distance)
+        explicit constexpr Intersection(Voxel voxel, num distance)
         : voxel(voxel)
         , distance(distance) {}
-        explicit constexpr Intersection(const Voxel voxel, num distance, Direction orientation)
+        explicit constexpr Intersection(Voxel voxel, num distance, Direction orientation)
         : voxel(voxel)
         , distance(distance)
         , orientation(orientation) {}
