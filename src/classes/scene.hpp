@@ -4,8 +4,8 @@
 #include "../common.hpp"
 #include "voxel_grid.hpp"
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 namespace geometry {
     class Scene {

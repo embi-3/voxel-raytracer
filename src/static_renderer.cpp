@@ -10,16 +10,18 @@
 
 #include <chrono>
 #include <cstdint>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <vector>
-#include <cstdlib>
 
 using Pixel = texture::Colour;
 using namespace texture;
 using namespace geometry;
 using namespace renderer;
 using namespace std::chrono;
+
+bool debug = false;
 
 // Outputs PPM ASCII and PNG
 void create_png(std::size_t width, std::size_t height, const std::vector<Pixel>& pixels) {
@@ -39,7 +41,7 @@ void create_png(std::size_t width, std::size_t height, const std::vector<Pixel>&
         image.push_back(pixel.g_int());
         image.push_back(pixel.b_int());
         // TODO: Check if this is actually doing what it's supposed to.
-        image.push_back(static_cast<uint8_t>(255.999 * pixel.a)); 
+        image.push_back(static_cast<uint8_t>(255.999 * pixel.a));
     }
 
     stbi_write_png((filename + ".png").c_str(),
@@ -68,17 +70,20 @@ Scene two_spheres() {
 }
 
 Scene random_spheres() {
+    int world_size = 200;
+    int num_spheres = 300;
     Scene scene = Scene();
-    auto grid = std::make_unique<ArrayVoxelGrid>(ArrayVoxelGrid(200, Vec3(0, 0, 0)));
+
+    auto grid = std::make_unique<ArrayVoxelGrid>(ArrayVoxelGrid(world_size, Vec3(0, 0, world_size/2)));
     int x;
     int y;
     int z;
     int r;
-    for (int i = 0; i < 200; i++) {
-        x = rand() % 200;
-        y = rand() % 200;
-        z = rand() % 200;
-        r = rand() % 20;
+    for (int i = 0; i < num_spheres; i++) {
+        x = rand() % (9 * world_size / 10);
+        y = rand() % (9 * world_size / 10);
+        z = rand() % (9 * world_size / 10);
+        r = rand() % (world_size / 10);
         grid->create_sphere(Coordinate(x, y, z), r);
     }
     scene.push_back(std::move(grid));
@@ -87,11 +92,11 @@ Scene random_spheres() {
 }
 
 Scene random_cubes() {
-    int world_size = 30;
-    int num_cubes = 100;
+    int world_size = 500;
+    int num_cubes = 100000;
 
     Scene scene = Scene();
-    auto grid = std::make_unique<ArrayVoxelGrid>(ArrayVoxelGrid(world_size, Vec3(0, 0, world_size / 2)));
+    auto grid = std::make_unique<ArrayVoxelGrid>(ArrayVoxelGrid(world_size, Vec3(0, 0, 0)));
     int x;
     int y;
     int z;
@@ -107,9 +112,8 @@ Scene random_cubes() {
 }
 
 int main(int argc, char* argv[]) {
-    static bool debug = false;
-    int image_width = 400;
-    int image_height = 200;
+    int image_width = 1920;
+    int image_height = 1080;
     std::string debug_path = "output.txt";
 
     // Parse command line arguments
@@ -118,22 +122,22 @@ int main(int argc, char* argv[]) {
 
         if (arg == "--width" && i + 1 < argc) {
             image_width = std::atoi(argv[++i]);
-        } 
+        }
         else if (arg == "--height" && i + 1 < argc) {
             image_height = std::atoi(argv[++i]);
-        } 
+        }
         else if (arg == "--path" && i + 1 < argc) {
             debug = true;
         }
         else if (arg == "--debug") {
             debug_path = argv[++i];
-        } 
+        }
         else {
             std::cerr << "Unknown argument: " << arg << "\n";
             return 1;
         }
     }
-    
+
     if (debug) {
         std::cout << "Output is being written to a file!\n";
         freopen(debug_path.c_str(), "a", stdout);
@@ -153,8 +157,8 @@ int main(int argc, char* argv[]) {
     // ! INFO
     std::cout << "> Creating scene...\n";
     // Scene scene = two_spheres();
-    // Scene scene = random_spheres();
-    Scene scene = random_cubes();
+    Scene scene = random_spheres();
+    // Scene scene = random_cubes();
 
     // Create shaders
     // ! INFO

@@ -19,7 +19,8 @@ namespace geometry {
 
         explicit constexpr Voxel() = default;
 
-        explicit constexpr Voxel(Colour colour): colour(colour)  {}
+        explicit constexpr Voxel(Colour colour)
+        : colour(colour) {}
 
         explicit constexpr Voxel(bool opaque)
         : opaque(opaque) {}

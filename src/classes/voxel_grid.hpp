@@ -212,10 +212,9 @@ namespace geometry {
             std::cout << "   > Allocating space..."
                       << "\n";
 
-            std::cout << "   > " << sizeof(Voxel) << " bytes per voxel.\n";
-                    
-            std::cout << "   > " << static_cast<unsigned long>(size.x * size.y * size.z) * sizeof(Voxel) << " bytes required.\n";
-            
+            std::cout << "   > " << static_cast<unsigned long>(size.x * size.y * size.z) * sizeof(Voxel)
+                      << " bytes required (" << sizeof(Voxel) << " bytes per voxel).\n";
+
             world.resize(static_cast<size_t>(size.x * size.y * size.z));
 
             // ! INFO

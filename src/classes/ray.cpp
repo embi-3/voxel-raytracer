@@ -27,7 +27,11 @@ namespace geometry {
         Interval interval = intersection(grid.bounding_box, min, max);
 
         // ! DEBUG
-        std::cout << "[t] Interval: [" << interval.min << ", " << interval.max << "]\n";
+        if (debug) {
+            std::cerr << "[t] Interval: [" << interval.min << ", " << interval.max << "]\n";
+            std::cerr << "[t] Delta: " << tdelta << "\n";
+        }
+
         if (interval.is_valid()) {
             tcur = interval.min;
 
@@ -55,7 +59,10 @@ namespace geometry {
 
             tmax = Vec3(first_x, first_y, first_z);
 
-            std::cerr << "pos: " << at(tcur) << ", tcur: " << tcur << ", tmax: " << tmax << "\n";
+            // ! DEBUG
+            if (debug) {
+                std::cerr << "pos: " << at(tcur) << ", tcur: " << tcur << ", tmax: " << tmax << "\n";
+            }
 
             if (equals(tmax.x, tcur)) {
                 normal += orientation.x();
@@ -76,20 +83,29 @@ namespace geometry {
         }
 
         coords = grid.get_coords(at(tcur), orientation);
-        
+
         // ! DEBUG
-        std::cerr << "Starting coords: " << coords << "\n";
+        if (debug) {
+            std::cerr << "Starting coords: " << coords << "\n";
+        }
 
         // Iteratively find the next voxel using floating-point comparisons.
         while (grid.contains(coords)) {
             // ! DEBUG
-            std::cerr << "[c] " << coords << ": [" << tcur << "] " << at(tcur) << " " << normal << " => " << grid.get_coords(at(tcur), orientation) << "\n";
-            
+            if (debug) {
+                std::cerr << "[c] " << coords << ": [" << tcur << "] " << at(tcur) << " " << normal << " => "
+                          << grid.get_coords(at(tcur), orientation) << "\n";
+            }
+
             Voxel voxel = grid.get_voxel(coords);
             if (voxel.is_opaque()) {
                 // ! DEBUG
-                std::cerr << "[i] ray: " << dir << ", dist: " << tcur * dir.length() << ", pos: " << at(tcur) << ", coords: " << grid.get_coords(at(tcur), orientation) << ", normal: " << normal << "\n";
-               
+                if (debug) {
+                    std::cerr << "[i] ray: " << dir << ", dist: " << tcur * dir.length() << ", pos: " << at(tcur)
+                              << ", coords: " << grid.get_coords(at(tcur), orientation) << ", normal: " << normal
+                              << "\n";
+                }
+
                 objects.push_back(Intersection(voxel, tcur * dir.length(), normal));
 
                 // ! TEMP
@@ -100,7 +116,9 @@ namespace geometry {
             Vec3 tmax_temp = tmax;
 
             // ! DEBUG
-            std::cerr << "tmax: " << tmax_temp << "\n";
+            if (debug) {
+                std::cerr << "tmax: " << tmax_temp << "\n";
+            }
 
             normal = Direction(NONE);
 
@@ -134,13 +152,18 @@ namespace geometry {
         IntersectionList objects = IntersectionList(dir);
         for (auto grid = scene.grids.begin(); grid != scene.grids.end(); ++grid) {
             // ! DEBUG
-            std::cout << "Ray: " << dir << ", Interval: ";
-            std::cout << intersection((**grid).bounding_box) << "\n";
-
+            if (debug) {
+                std::cerr << "Ray: " << dir << "\n";
+            }
             if (intersects((*grid)->bounding_box)) {
                 IntersectionList intersections = traverse(**grid);
                 objects.insert(objects.end(), intersections.begin(), intersections.end());
             }
+        }
+
+        // ! DEBUG
+        if (debug) {
+            std::cerr << "[i] " << objects.items.size() << " intersection(s) with " << dir << "\n";
         }
 
         return objects;
@@ -173,9 +196,12 @@ namespace geometry {
         num z_max = (orientation.z().is_none()
                          ? infinity
                          : ((orientation.is_zpos() ? bounding_box.max.z : bounding_box.min.z) - origin.z) * inv_dir.z);
-                
+
         // ! DEBUG
-        std::cerr << "x: " << Interval(x_min, x_max) << ", y: " << Interval(y_min, y_max) << ", z: " << Interval(z_min, z_max) << "\n";
+        if (debug) {
+            std::cerr << "x: " << Interval(x_min, x_max) << ", y: " << Interval(y_min, y_max)
+                      << ", z: " << Interval(z_min, z_max) << "\n";
+        }
 
         t_min = std::max(x_min, t_min);
         t_min = std::max(y_min, t_min);
