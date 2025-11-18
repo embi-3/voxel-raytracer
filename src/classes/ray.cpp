@@ -36,20 +36,20 @@ namespace geometry {
                 (max.x == infinity
                      ? infinity
                      : std::max(
-                           min.x,
-                           max.x - (floor((max.x - interval.min) * dir.x / grid.scale.x) * grid.scale.x * inv_dir.x)));
+                         min.x,
+                         max.x - (floor((max.x - interval.min) * dir.x / grid.scale.x) * grid.scale.x * inv_dir.x)));
             num first_y =
                 (max.y == infinity
                      ? infinity
                      : std::max(
-                           min.y,
-                           max.y - (floor((max.y - interval.min) * dir.y / grid.scale.y) * grid.scale.y * inv_dir.y)));
+                         min.y,
+                         max.y - (floor((max.y - interval.min) * dir.y / grid.scale.y) * grid.scale.y * inv_dir.y)));
             num first_z =
                 (max.z == infinity
                      ? infinity
                      : std::max(
-                           min.z,
-                           max.z - (floor((max.z - interval.min) * dir.z / grid.scale.z) * grid.scale.z * inv_dir.z)));
+                         min.z,
+                         max.z - (floor((max.z - interval.min) * dir.z / grid.scale.z) * grid.scale.z * inv_dir.z)));
 
             tmax = Vec3(first_x, first_y, first_z);
 

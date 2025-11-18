@@ -12,7 +12,7 @@ namespace shader {
     using namespace texture;
     using namespace geometry;
 
-    class WhiteShader: public Shader {
+    class WhiteShader : public Shader {
     public:
         Colour fragment(IntersectionList list) override {
             if (!list.empty()) {

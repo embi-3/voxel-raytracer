@@ -8,28 +8,28 @@
 #include "voxel.hpp"
 
 namespace geometry {
-    static constexpr Voxel INVALID_VOXEL = Voxel();
-    
+    static Voxel INVALID_VOXEL = Voxel();
+
     class Intersection {
     public:
-        Voxel voxel; // for colour and material data
+        std::reference_wrapper<Voxel> voxel; // for colour and material data
         num distance = 0; // for depth shader.
         Direction orientation = Direction(NONE);
         // TODO: Implement this!
         Vec3 normal;
 
-        explicit constexpr Intersection(Voxel voxel)
+        explicit constexpr Intersection(Voxel& voxel)
         : voxel(voxel) {}
-        explicit constexpr Intersection(Voxel voxel, num distance)
+        explicit constexpr Intersection(Voxel& voxel, num distance)
         : voxel(voxel)
         , distance(distance) {}
-        explicit constexpr Intersection(Voxel voxel, num distance, Direction orientation)
+        explicit constexpr Intersection(Voxel& voxel, num distance, Direction orientation)
         : voxel(voxel)
         , distance(distance)
         , orientation(orientation) {}
 
         static constexpr Intersection invalid() {
-            return Intersection(geometry::INVALID_VOXEL, -1);
+            return Intersection(INVALID_VOXEL, -1);
         }
     };
 

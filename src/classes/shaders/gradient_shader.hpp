@@ -12,7 +12,7 @@ namespace shader {
     using namespace texture;
     using namespace geometry;
 
-    class GradientShader: public Shader {
+    class GradientShader : public Shader {
     public:
         Colour fragment(IntersectionList list) {
             Vec3 unit_direction = list.ray_dir.normalise();

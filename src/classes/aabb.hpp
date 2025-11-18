@@ -15,7 +15,7 @@ namespace geometry {
         explicit constexpr AABB() = default;
         explicit constexpr AABB(Vec3 min, Vec3 max)
         : min(min)
-        , max(max) {};
+        , max(max){};
 
         bool contains(Vec3 pos) const {
             return epsilon >= min.x - pos.x && pos.x - max.x <= epsilon && epsilon >= min.y - pos.y

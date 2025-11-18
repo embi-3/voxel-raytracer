@@ -50,7 +50,7 @@ namespace renderer {
             upper_left_pixel = viewport_upper_left + 0.5 * (delta_x + delta_y);
         }
 
-        std::vector<Pixel> render(Scene scene, Shader& shader) {
+        std::vector<Pixel> render(Scene& scene, Shader& shader) {
             int progress = 0;
             int total_pixels = image_height * image_width;
             int current_pixels = 0;

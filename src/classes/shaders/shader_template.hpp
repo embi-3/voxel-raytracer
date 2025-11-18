@@ -14,7 +14,7 @@ namespace shader {
     using namespace geometry;
 
     // TODO: Name this class!
-    class TemplateShader: public Shader {
+    class TemplateShader : public Shader {
     public:
         Colour fragment(IntersectionList list) override {
             // TODO: Implement this function!
