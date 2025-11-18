@@ -76,7 +76,7 @@ int main() {
 
     // ! INFO
     std::cout << "> Creating grid...\n";
-    auto grid = ArrayVoxelGrid(32, Vec3(0, 0, 20));
+    auto grid = SVOVoxelGrid(32, Vec3(0, 0, 20));
 
     // TODO: Test shapes that go outside the boundary of the grid and see what happens.
     std::cout << "> Creating shapes...\n";

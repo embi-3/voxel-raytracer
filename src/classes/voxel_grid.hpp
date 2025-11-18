@@ -5,6 +5,7 @@
 #include "aabb.hpp"
 #include "voxel.hpp"
 #include <cmath>
+#include <memory>
 #include <iostream>
 
 #include <vector>
@@ -14,85 +15,12 @@ namespace geometry {
     public:
         virtual ~VoxelGrid() = default;
 
-        virtual Voxel get_voxel(Coordinate coords) const = 0;
-
-        virtual Coordinate get_coords(Vec3 pos, Direction orientation) const = 0;
-
-        virtual Vec3 get_pos(Coordinate coords) const = 0;
+        virtual const Voxel& get_voxel(Coordinate coords) const = 0;
 
         virtual void set_voxel(Coordinate coords, Voxel voxel) = 0;
 
-        virtual bool contains(Vec3 pos) const = 0;
-
-        virtual bool contains(Coordinate coords) const = 0;
-
-        virtual num space_dist(Coordinate coord1, Coordinate coord2) const = 0;
-
-        virtual num pos_dist(Coordinate coord1, Coordinate coord2) const = 0;
-
-        virtual num man_dist(Coordinate coord1, Coordinate coord2) const = 0;
-
-        virtual void create_sphere(Coordinate centre, num radius) = 0;
-
-        virtual void create_cube(Coordinate coords) = 0;
-
-        virtual void create_cube(Coordinate min, Coordinate max) = 0;
-
-        Vec3 scale = Vec3(1); // Size of a voxel in 3D space
-        Coordinate size = Coordinate(32); // Default world dimensions
-        Vec3 origin = Vec3(); // (0, 0, 0)
-        AABB bounding_box; // Precompute the bounding box of the grid for performance.
-    };
-
-    class ArrayVoxelGrid : public VoxelGrid {
-    public:
-        explicit ArrayVoxelGrid() {
-            initialise();
-        }
-
-        explicit ArrayVoxelGrid(Vec3 centre) {
-            origin =
-                centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
-            initialise();
-        }
-
-        explicit ArrayVoxelGrid(unsigned int world_size) {
-            size = Coordinate(static_cast<int>(world_size));
-            initialise();
-        }
-
-        explicit ArrayVoxelGrid(unsigned int world_size, Vec3 centre) {
-            size = Coordinate(static_cast<int>(world_size));
-            origin =
-                centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
-            initialise();
-        }
-
-        explicit ArrayVoxelGrid(unsigned int x, unsigned int y, unsigned int z) {
-            size = Coordinate(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z));
-            initialise();
-        }
-
-        explicit ArrayVoxelGrid(unsigned int x, unsigned int y, unsigned int z, Vec3 centre) {
-            size = Coordinate(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z));
-            origin =
-                centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
-            initialise();
-        }
-
-        // TODO: Check if this returns shallow or deep copy of the Voxel.
-        Voxel get_voxel(Coordinate coords) const override {
-            size_t index = flatten(coords);
-            if (index >= static_cast<size_t>(size.x * size.y * size.z)) {
-                std::cerr << "[!] Invalid coordinates for grid: " << coords << " -> " << index << "\n";
-                return Voxel::empty();
-            }
-
-            return world.at(index);
-        }
-
         // ! The orientation is used to distinguish ties for coordinates on the border of voxels.
-        Coordinate get_coords(Vec3 pos, Direction orientation) const override {
+        Coordinate get_coords(Vec3 pos, Direction orientation) const {
             if (contains(pos)) {
                 num x_scaled = (pos.x - origin.x) / scale.x;
                 num y_scaled = (pos.y - origin.y) / scale.y;
@@ -123,40 +51,50 @@ namespace geometry {
         }
 
         // ! May return a position outside of the bounding box.
-        Vec3 get_pos(Coordinate coords) const override {
+        Vec3 get_pos(Coordinate coords) const {
             return origin + Vec3(coords.x * scale.x, coords.y * scale.y, coords.z * scale.z);
         }
 
-        void set_voxel(Coordinate coords, Voxel voxel) override {
-            world.at(flatten(coords)) = voxel;
-        }
-
-        bool contains(Vec3 pos) const override {
+        bool contains(Vec3 pos) const {
             return bounding_box.contains(pos);
         }
 
-        bool contains(Coordinate coords) const override {
+        bool contains(Coordinate coords) const {
             return coords.x >= 0 && coords.x < size.x && coords.y >= 0 && coords.y < size.y && coords.z >= 0
                    && coords.z < size.z;
         }
 
         // Returns the distance between the centres of two voxels in 3D space, including scaling.
-        num space_dist(Coordinate coord1, Coordinate coord2) const override {
+        num space_dist(Coordinate coord1, Coordinate coord2) const {
             return sqrt(pow((coord1.x - coord2.x) * scale.x, 2) + pow((coord1.y - coord2.y) * scale.y, 2)
                         + pow((coord1.z - coord2.z) * scale.z, 2));
         }
 
         // Returns the distance between the centres of two voxels in grid space, ignoring scaling.
-        num pos_dist(Coordinate coord1, Coordinate coord2) const override {
+        num pos_dist(Coordinate coord1, Coordinate coord2) const {
             return sqrt(pow(coord1.x - coord2.x, 2) + pow(coord1.y - coord2.y, 2) + pow(coord1.z - coord2.z, 2));
         }
 
         // Returns the Manhattan (taxicab) distance between two voxels.
-        num man_dist(Coordinate coord1, Coordinate coord2) const override {
+        num man_dist(Coordinate coord1, Coordinate coord2) const {
             return abs(coord1.x - coord2.x) + abs(coord1.y - coord2.y) + abs(coord1.z - coord2.z);
         }
 
-        void create_sphere(Coordinate centre, num radius) override {
+        void create_cube(Coordinate coords) {
+            set_voxel(coords, Voxel());
+        }
+
+        void create_cube(Coordinate min, Coordinate max) {
+            for (int x = std::max(min.x, 0); x <= std::min(max.x, size.x - 1); x++) {
+                for (int y = std::max(min.y, 0); y <= std::min(max.y, size.y - 1); y++) {
+                    for (int z = std::max(min.z, 0); z <= std::min(max.z, size.z - 1); z++) {
+                        set_voxel(Coordinate(x, y, z), Voxel());
+                    }
+                }
+            }
+        }
+
+        void create_sphere(Coordinate centre, num radius) {
             for (int x = static_cast<int>(std::max(static_cast<num>(centre.x) - radius, 0.0));
                  x <= centre.x + radius && x < size.x;
                  x++)
@@ -177,18 +115,60 @@ namespace geometry {
             }
         }
 
-        void create_cube(Coordinate coords) override {
-            set_voxel(coords, Voxel());
+        Vec3 scale = Vec3(1); // Size of a voxel in 3D space
+        Coordinate size = Coordinate(32); // Default world dimensions
+        Vec3 origin = Vec3(); // (0, 0, 0)
+        AABB bounding_box; // Precompute the bounding box of the grid for performance.
+    };
+
+    class ArrayVoxelGrid : public VoxelGrid {
+    public:
+        explicit ArrayVoxelGrid() {
+            initialise();
         }
 
-        void create_cube(Coordinate min, Coordinate max) override {
-            for (int x = std::max(min.x, 0); x <= std::min(max.x, size.x - 1); x++) {
-                for (int y = std::max(min.y, 0); y <= std::min(max.y, size.y - 1); y++) {
-                    for (int z = std::max(min.z, 0); z <= std::min(max.z, size.z - 1); z++) {
-                        set_voxel(Coordinate(x, y, z), Voxel());
-                    }
-                }
+        explicit ArrayVoxelGrid(Vec3 centre) {
+            origin =
+                centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
+            initialise();
+        }
+
+        explicit ArrayVoxelGrid(std::size_t world_size) {
+            size = Coordinate(static_cast<int>(world_size));
+            initialise();
+        }
+
+        explicit ArrayVoxelGrid(std::size_t world_size, Vec3 centre) {
+            size = Coordinate(static_cast<int>(world_size));
+            origin =
+                centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
+            initialise();
+        }
+
+        explicit ArrayVoxelGrid(std::size_t x, std::size_t y, std::size_t z) {
+            size = Coordinate(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z));
+            initialise();
+        }
+
+        explicit ArrayVoxelGrid(std::size_t x, std::size_t y, std::size_t z, Vec3 centre) {
+            size = Coordinate(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z));
+            origin =
+                centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
+            initialise();
+        }
+
+        // TODO: Check if this returns shallow or deep copy of the Voxel.
+        const Voxel& get_voxel(Coordinate coords) const override {
+            size_t index = flatten(coords);
+            if (index >= static_cast<size_t>(size.x * size.y * size.z)) {
+                throw new std::invalid_argument("Coordinates out of bounds.");
             }
+
+            return world.at(index);
+        }
+
+        void set_voxel(Coordinate coords, Voxel voxel) override {
+            world.at(flatten(coords)) = voxel;
         }
 
     private:
@@ -226,6 +206,78 @@ namespace geometry {
             Vec3 max_bounds = origin + Vec3((size.x - 0.5) * scale.x, (size.y - 0.5) * scale.y, (size.z - 0.5) * scale.z);
             bounding_box = AABB(min_bounds, max_bounds);
         }
+    };
+
+    class SVOVoxelGrid : public VoxelGrid {
+    public:
+        explicit SVOVoxelGrid(std::size_t world_size, Vec3 centre) {
+            max_depth = static_cast<std::size_t>(ceil(std::log2(world_size)));
+            size = Coordinate(static_cast<int>(world_size));
+            origin = centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
+
+            Vec3 min_bounds = origin - Vec3(0.5 * scale.x, 0.5 * scale.y, 0.5 * scale.z);
+            Vec3 max_bounds = origin + Vec3((size.x - 0.5) * scale.x, (size.y - 0.5) * scale.y, (size.z - 0.5) * scale.z);
+            bounding_box = AABB(min_bounds, max_bounds);
+        }
+
+        const Voxel& get_voxel(Coordinate coords) const override {
+            if (coords.x >= size.x || coords.y >= size.y || coords.z >= size.z) {
+                throw new std::invalid_argument("Coordinates out of bounds.");
+            }
+
+            const auto* curr = root.get();
+
+            for (std::size_t depth = 0; depth < max_depth && !curr->isLeaf; depth++) {
+                const auto x_bit = (static_cast<std::size_t>(coords.x) >> (max_depth - depth - 1)) & 1u;
+                const auto y_bit = (static_cast<std::size_t>(coords.y) >> (max_depth - depth - 1)) & 1u;
+                const auto z_bit = (static_cast<std::size_t>(coords.z) >> (max_depth - depth - 1)) & 1u;
+                const auto child_index = (x_bit << 2) | (y_bit << 1) | z_bit;
+                
+                const auto& child = curr->children.at(child_index);
+                if (!child) {
+                    return curr->data;
+                }
+                curr = child.get();
+            }
+
+            return curr->data;
+        }
+
+        void set_voxel(Coordinate coords, Voxel voxel) override {
+            if (coords.x >= size.x || coords.y >= size.y || coords.z >= size.z) {
+                std::cerr << "[!] Out of bounds: " << coords << "\n";
+                return;
+            }
+
+            auto* curr = root.get();
+
+            for (std::size_t depth = 0; depth < max_depth; depth++) {
+                const auto x_bit = (static_cast<std::size_t>(coords.x) >> (max_depth - depth - 1)) & 1u;
+                const auto y_bit = (static_cast<std::size_t>(coords.y) >> (max_depth - depth - 1)) & 1u;
+                const auto z_bit = (static_cast<std::size_t>(coords.z) >> (max_depth - depth - 1)) & 1u;
+                const auto child_index = (x_bit << 2) | (y_bit << 1) | z_bit;
+                
+                auto& child = curr->children.at(child_index);
+                if (!child) {
+                    child = std::make_unique<Node>();
+                }
+                curr = child.get();
+            }
+
+            curr->data = voxel;
+            curr->isLeaf = true;
+        }
+
+    private:
+        struct Node {
+            bool isLeaf = false;
+            std::array<std::unique_ptr<Node>, 8> children{};
+            Voxel data = Voxel::empty();
+        };
+
+        std::size_t max_depth;
+        // std::size_t tree_size = 0;
+        std::unique_ptr<Node> root = std::make_unique<Node>();
     };
 } // namespace geometry
 
