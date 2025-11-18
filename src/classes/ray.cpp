@@ -26,6 +26,8 @@ namespace geometry {
         Vec3 max;
         Interval interval = intersection(grid.bounding_box, min, max);
 
+        // ! DEBUG
+        std::cout << "[t] Interval: [" << interval.min << ", " << interval.max << "]\n";
         if (interval.is_valid()) {
             tcur = interval.min;
 
@@ -37,21 +39,23 @@ namespace geometry {
                      ? infinity
                      : std::max(
                          min.x,
-                         max.x - (floor((max.x - interval.min) * dir.x / grid.scale.x) * grid.scale.x * inv_dir.x)));
+                         max.x - (trunc((max.x - interval.min) * dir.x / grid.scale.x) * grid.scale.x * inv_dir.x)));
             num first_y =
                 (max.y == infinity
                      ? infinity
                      : std::max(
                          min.y,
-                         max.y - (floor((max.y - interval.min) * dir.y / grid.scale.y) * grid.scale.y * inv_dir.y)));
+                         max.y - (trunc((max.y - interval.min) * dir.y / grid.scale.y) * grid.scale.y * inv_dir.y)));
             num first_z =
                 (max.z == infinity
                      ? infinity
                      : std::max(
                          min.z,
-                         max.z - (floor((max.z - interval.min) * dir.z / grid.scale.z) * grid.scale.z * inv_dir.z)));
+                         max.z - (trunc((max.z - interval.min) * dir.z / grid.scale.z) * grid.scale.z * inv_dir.z)));
 
             tmax = Vec3(first_x, first_y, first_z);
+
+            std::cerr << "pos: " << at(tcur) << ", tcur: " << tcur << ", tmax: " << tmax << "\n";
 
             if (equals(tmax.x, tcur)) {
                 normal += orientation.x();
@@ -72,11 +76,20 @@ namespace geometry {
         }
 
         coords = grid.get_coords(at(tcur), orientation);
+        
+        // ! DEBUG
+        std::cerr << "Starting coords: " << coords << "\n";
 
         // Iteratively find the next voxel using floating-point comparisons.
         while (grid.contains(coords)) {
+            // ! DEBUG
+            std::cerr << "[c] " << coords << ": [" << tcur << "] " << at(tcur) << " " << normal << " => " << grid.get_coords(at(tcur), orientation) << "\n";
+            
             Voxel voxel = grid.get_voxel(coords);
             if (voxel.is_opaque()) {
+                // ! DEBUG
+                std::cerr << "[i] ray: " << dir << ", dist: " << tcur * dir.length() << ", pos: " << at(tcur) << ", coords: " << grid.get_coords(at(tcur), orientation) << ", normal: " << normal << "\n";
+               
                 objects.push_back(Intersection(voxel, tcur * dir.length(), normal));
 
                 // ! TEMP
@@ -85,6 +98,9 @@ namespace geometry {
 
             // Create a temporary variable so any traversal updates don't affect the current iteration.
             Vec3 tmax_temp = tmax;
+
+            // ! DEBUG
+            std::cerr << "tmax: " << tmax_temp << "\n";
 
             normal = Direction(NONE);
 
@@ -117,6 +133,10 @@ namespace geometry {
     IntersectionList geometry::Ray::traverse(const Scene& scene) {
         IntersectionList objects = IntersectionList(dir);
         for (auto grid = scene.grids.begin(); grid != scene.grids.end(); ++grid) {
+            // ! DEBUG
+            std::cout << "Ray: " << dir << ", Interval: ";
+            std::cout << intersection((**grid).bounding_box) << "\n";
+
             if (intersects((*grid)->bounding_box)) {
                 IntersectionList intersections = traverse(**grid);
                 objects.insert(objects.end(), intersections.begin(), intersections.end());
@@ -153,6 +173,9 @@ namespace geometry {
         num z_max = (orientation.z().is_none()
                          ? infinity
                          : ((orientation.is_zpos() ? bounding_box.max.z : bounding_box.min.z) - origin.z) * inv_dir.z);
+                
+        // ! DEBUG
+        std::cerr << "x: " << Interval(x_min, x_max) << ", y: " << Interval(y_min, y_max) << ", z: " << Interval(z_min, z_max) << "\n";
 
         t_min = std::max(x_min, t_min);
         t_min = std::max(y_min, t_min);
