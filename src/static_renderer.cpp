@@ -3,7 +3,7 @@
 #include "classes/colour.hpp"
 #include "classes/ray.hpp"
 #include "classes/scene.hpp"
-#include "classes/shaders/shader.hpp"
+#include "classes/shader.hpp"
 #include "classes/vec3.hpp"
 
 #include "stb_image_write.h"

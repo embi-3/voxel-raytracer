@@ -1,9 +1,9 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#include "../../common.hpp"
-#include "../colour.hpp"
-#include "../intersection_list.hpp"
+#include "../common.hpp"
+#include "colour.hpp"
+#include "intersection_list.hpp"
 
 #include <vector>
 

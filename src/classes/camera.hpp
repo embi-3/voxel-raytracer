@@ -6,7 +6,7 @@
 #include "interval.hpp"
 #include "ray.hpp"
 #include "scene.hpp"
-#include "shaders/shader.hpp"
+#include "shader.hpp"
 #include "vec3.hpp"
 
 #include <vector>
