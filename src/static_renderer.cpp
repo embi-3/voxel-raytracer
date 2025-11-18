@@ -13,6 +13,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <cstdlib>
 
 using Pixel = texture::Colour;
 using namespace texture;
@@ -48,15 +49,43 @@ void create_png(std::size_t width, std::size_t height, const std::vector<Pixel>&
                    static_cast<int>(channels * width));
 }
 
-int main() {
+Scene two_spheres() {
+    Scene scene = Scene();
+
     // ! INFO
-    // std::cerr << "Output is being written to a file!\n";
-    // freopen("output.txt", "a", stdout);
-    // freopen("output.txt", "a", stderr);
+    std::cout << "> Creating grid...\n";
+    auto grid = std::make_unique<ArrayVoxelGrid>(ArrayVoxelGrid(32, Vec3(0, 0, 20)));
 
-    // freopen("/dev/null", "a", stdout);
-    // freopen("/dev/null", "a", stderr);
+    // TODO: Test shapes that go outside the boundary of the grid and see what happens.
+    std::cout << "> Creating shapes...\n";
+    grid->create_sphere(Coordinate(25, 27, 20), 4);
+    grid->create_sphere(Coordinate(10, 5, 10), 10);
 
+    scene.push_back(std::move(grid));
+
+    return scene;
+}
+
+Scene random_spheres() {
+    Scene scene = Scene();
+    auto grid = std::make_unique<ArrayVoxelGrid>(ArrayVoxelGrid(200, Vec3(0, 0, 0)));
+    int x;
+    int y;
+    int z;
+    int r;
+    for (int i = 0; i < 200; i++) {
+        x = rand() % 200;
+        y = rand() % 200;
+        z = rand() % 200;
+        r = rand() % 20;
+        grid->create_sphere(Coordinate(x, y, z), r);
+    }
+    scene.push_back(std::move(grid));
+
+    return scene;
+}
+
+int main() {
     // ! INFO
     std::cout << "===========================================\n\n"
               << "> Starting...\n";
@@ -72,22 +101,8 @@ int main() {
     // Create the scene
     // ! INFO
     std::cout << "> Creating scene...\n";
-    Scene scene = Scene();
-
-    // ! INFO
-    std::cout << "> Creating grid...\n";
-    auto grid = std::make_unique<ArrayVoxelGrid>(ArrayVoxelGrid(32, Vec3(0, 0, 20)));
-
-    // TODO: Test shapes that go outside the boundary of the grid and see what happens.
-    std::cout << "> Creating shapes...\n";
-    grid->create_sphere(Coordinate(25, 27, 20), 4);
-    grid->create_sphere(Coordinate(10, 5, 10), 10);
-    // grid.create_cube(Coordinate(6, 6, 6), Coordinate(26, 26, 26));
-    // grid.create_cube(Coordinate(0, 0, 1));
-    // grid.create_cube(Coordinate(15, 15, 0));
-    // grid.create_cube(Coordinate(5, 5, 10));
-
-    scene.push_back(std::move(grid));
+    // Scene scene = two_spheres();
+    Scene scene = random_spheres();
 
     // Create shaders
     // ! INFO

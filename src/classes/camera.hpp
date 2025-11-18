@@ -73,6 +73,9 @@ namespace renderer {
                     pixels.push_back(pixel_colour);
                 }
             }
+            // ! INFO
+            std::cout << "- 100% done \n";
+            
             return pixels;
         }
 
