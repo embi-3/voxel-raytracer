@@ -50,14 +50,6 @@ void create_png(std::size_t width, std::size_t height, const std::vector<Pixel>&
 
 int main() {
     // ! INFO
-    // std::cerr << "Output is being written to a file!\n";
-    // freopen("output.txt", "a", stdout);
-    // freopen("output.txt", "a", stderr);
-
-    // freopen("/dev/null", "a", stdout);
-    // freopen("/dev/null", "a", stderr);
-
-    // ! INFO
     std::cout << "===========================================\n\n"
               << "> Starting...\n";
     const auto start = high_resolution_clock::now();
@@ -72,22 +64,7 @@ int main() {
     // Create the scene
     // ! INFO
     std::cout << "> Creating scene...\n";
-    Scene scene = Scene();
-
-    // ! INFO
-    std::cout << "> Creating grid...\n";
-    auto grid = ArrayVoxelGrid(32, Vec3(0, 0, 20));
-
-    // TODO: Test shapes that go outside the boundary of the grid and see what happens.
-    std::cout << "> Creating shapes...\n";
-    grid.create_sphere(Coordinate(25, 27, 20), 4);
-    grid.create_sphere(Coordinate(10, 5, 10), 10);
-    // grid.create_cube(Coordinate(6, 6, 6), Coordinate(26, 26, 26));
-    // grid.create_cube(Coordinate(0, 0, 1));
-    // grid.create_cube(Coordinate(15, 15, 0));
-    // grid.create_cube(Coordinate(5, 5, 10));
-
-    scene.push_back(grid);
+    Scene scene = scene_1();
 
     // Create shaders
     // ! INFO
@@ -109,4 +86,25 @@ int main() {
     const auto duration = duration_cast<milliseconds>(end - start).count();
 
     std::cout << "> Time taken: " << duration << " ms\n\n";
+}
+
+Scene scene_1() {
+    Scene scene = Scene();
+
+    // ! INFO
+    std::cout << "> Creating grid...\n";
+    auto grid = ArrayVoxelGrid(32, Vec3(0, 0, 20));
+
+    // TODO: Test shapes that go outside the boundary of the grid and see what happens.
+    std::cout << "> Creating shapes...\n";
+    grid.create_sphere(Coordinate(25, 27, 20), 4);
+    grid.create_sphere(Coordinate(10, 5, 10), 10);
+    // grid.create_cube(Coordinate(6, 6, 6), Coordinate(26, 26, 26));
+    // grid.create_cube(Coordinate(0, 0, 1));
+    // grid.create_cube(Coordinate(15, 15, 0));
+    // grid.create_cube(Coordinate(5, 5, 10));
+
+    scene.push_back(grid);
+
+    return scene;
 }
