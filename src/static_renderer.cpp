@@ -156,28 +156,9 @@ int main(int argc, char* argv[]) {
     // Create the scene
     // ! INFO
     std::cout << "> Creating scene...\n";
-<<<<<<< HEAD
-    Scene scene = Scene();
-
-    // ! INFO
-    std::cout << "> Creating grid...\n";
-    auto grid = SVOVoxelGrid(32, Vec3(0, 0, 20));
-
-    // TODO: Test shapes that go outside the boundary of the grid and see what happens.
-    std::cout << "> Creating shapes...\n";
-    grid.create_sphere(Coordinate(25, 27, 20), 4);
-    grid.create_sphere(Coordinate(10, 5, 10), 10);
-    // grid.create_cube(Coordinate(6, 6, 6), Coordinate(26, 26, 26));
-    // grid.create_cube(Coordinate(0, 0, 1));
-    // grid.create_cube(Coordinate(15, 15, 0));
-    // grid.create_cube(Coordinate(5, 5, 10));
-
-    scene.push_back(grid);
-=======
     // Scene scene = two_spheres();
     Scene scene = random_spheres();
     // Scene scene = random_cubes();
->>>>>>> abstract-voxel-grid
 
     // Create shaders
     // ! INFO
