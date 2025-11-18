@@ -19,7 +19,8 @@ namespace geometry {
         uint8_t dir = 0;
 
         constexpr Direction() {}
-        constexpr Direction(uint8_t dir) : dir(dir) {}
+        constexpr Direction(uint8_t dir)
+        : dir(dir) {}
         constexpr Direction(Vec3 direction) {
             uint8_t x_dir = Direction::from_x_orient(direction.x).dir;
             uint8_t y_dir = Direction::from_y_orient(direction.y).dir;
@@ -71,7 +72,8 @@ namespace geometry {
         constexpr static Direction from_x_orient(num orientation) {
             if (orientation > 0) {
                 return Direction(X_POS);
-            } else if (orientation < 0) {
+            }
+            else if (orientation < 0) {
                 return Direction(X_NEG);
             }
             else {
@@ -82,7 +84,8 @@ namespace geometry {
         constexpr static Direction from_y_orient(num orientation) {
             if (orientation > 0) {
                 return Direction(Y_POS);
-            } else if (orientation < 0) {
+            }
+            else if (orientation < 0) {
                 return Direction(Y_NEG);
             }
             else {
@@ -93,7 +96,8 @@ namespace geometry {
         constexpr static Direction from_z_orient(num orientation) {
             if (orientation > 0) {
                 return Direction(Z_POS);
-            } else if (orientation < 0) {
+            }
+            else if (orientation < 0) {
                 return Direction(Z_NEG);
             }
             else {
@@ -104,11 +108,11 @@ namespace geometry {
         Direction x() {
             return Direction(dir & (X_POS | X_NEG));
         }
-        
+
         Direction y() {
             return Direction(dir & (Y_POS | Y_NEG));
         }
-        
+
         Direction z() {
             return Direction(dir & (Z_POS | Z_NEG));
         }

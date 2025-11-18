@@ -23,9 +23,8 @@ namespace geometry {
 
         explicit constexpr Ray(Vec3 origin, Vec3 dir)
         : origin(origin)
-        , dir(dir) 
-        , orientation(Direction(dir))
-        {
+        , dir(dir)
+        , orientation(Direction(dir)) {
             inv_dir.x = equals_zero(dir.x) ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.x;
             inv_dir.y = equals_zero(dir.y) ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.y;
             inv_dir.z = equals_zero(dir.z) ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.z;
@@ -33,7 +32,7 @@ namespace geometry {
 
         IntersectionList traverse(const VoxelGrid& grid);
 
-        IntersectionList traverse(Scene scene);
+        IntersectionList traverse(const Scene& scene);
 
         Interval intersection(AABB bounding_box);
         Interval intersection(AABB bounding_box, Vec3& tmin, Vec3& tmax);

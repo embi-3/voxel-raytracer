@@ -10,6 +10,7 @@
 #include <vector>
 
 namespace geometry {
+    using IntersectionIterator = std::vector<Intersection>::iterator;
     class IntersectionList {
     public:
         Vec3 ray_dir;

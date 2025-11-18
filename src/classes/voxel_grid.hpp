@@ -20,8 +20,6 @@ namespace geometry {
 
         virtual Vec3 get_pos(Coordinate coords) const = 0;
 
-        virtual void set_voxel(int x, int y, int z, Voxel voxel) = 0;
-
         virtual void set_voxel(Coordinate coords, Voxel voxel) = 0;
 
         virtual bool contains(Vec3 pos) const = 0;
@@ -40,10 +38,10 @@ namespace geometry {
 
         virtual void create_cube(Coordinate min, Coordinate max) = 0;
 
-        Vec3 scale = Vec3(1);               // Size of a voxel in 3D space
-        Coordinate size = Coordinate(32);   // Default world dimensions
-        Vec3 origin = Vec3();               // (0, 0, 0)
-        AABB bounding_box;                  // Precompute the bounding box of the grid for performance.
+        Vec3 scale = Vec3(1); // Size of a voxel in 3D space
+        Coordinate size = Coordinate(32); // Default world dimensions
+        Vec3 origin = Vec3(); // (0, 0, 0)
+        AABB bounding_box; // Precompute the bounding box of the grid for performance.
     };
 
     class ArrayVoxelGrid : public VoxelGrid {
@@ -84,8 +82,8 @@ namespace geometry {
 
         // TODO: Check if this returns shallow or deep copy of the Voxel.
         Voxel get_voxel(Coordinate coords) const override {
-            unsigned int index = flatten(coords);
-            if (static_cast<int>(index) >= size.x * size.y * size.z) {
+            size_t index = flatten(coords);
+            if (index >= static_cast<size_t>(size.x * size.y * size.z)) {
                 std::cerr << "[!] Invalid coordinates for grid: " << coords << " -> " << index << "\n";
                 return Voxel::empty();
             }
@@ -118,24 +116,19 @@ namespace geometry {
             else {
                 // Return a coordinate that is clearly an error. We could handle this error more elegantly but
                 // this is good enough for debugging purposes.
-                std::cerr << "[!] " << pos << " is not in bounds: [" << bounding_box.min << ", " << bounding_box.max << "]\n";
+                std::cerr << "[!] " << pos << " is not in bounds: [" << bounding_box.min << ", " << bounding_box.max
+                          << "]\n";
                 return Coordinate(std::numeric_limits<int>().max());
             }
         }
 
         // ! May return a position outside of the bounding box.
         Vec3 get_pos(Coordinate coords) const override {
-            return origin + Vec3(coords.x * scale.x, coords.y * scale.y, coords.z* scale.z);
-        }
-
-        void set_voxel(int x, int y, int z, Voxel voxel) override {
-            // TODO: Throw an error if the coordinates are invalid.
-            world.at(flatten(static_cast<unsigned int>(x), static_cast<unsigned int>(y), static_cast<unsigned int>(z))) =
-                voxel;
+            return origin + Vec3(coords.x * scale.x, coords.y * scale.y, coords.z * scale.z);
         }
 
         void set_voxel(Coordinate coords, Voxel voxel) override {
-            set_voxel(coords.x, coords.y, coords.z, voxel);
+            world.at(flatten(coords)) = voxel;
         }
 
         bool contains(Vec3 pos) const override {
@@ -177,7 +170,7 @@ namespace geometry {
                          z++)
                     {
                         if (space_dist(centre, Coordinate(x, y, z)) <= radius) {
-                            set_voxel(x, y, z, Voxel());
+                            set_voxel(Coordinate(x, y, z), Voxel());
                         }
                     }
                 }
@@ -192,29 +185,22 @@ namespace geometry {
             for (int x = std::max(min.x, 0); x <= std::min(max.x, size.x - 1); x++) {
                 for (int y = std::max(min.y, 0); y <= std::min(max.y, size.y - 1); y++) {
                     for (int z = std::max(min.z, 0); z <= std::min(max.z, size.z - 1); z++) {
-                        set_voxel(x, y, z, Voxel());
+                        set_voxel(Coordinate(x, y, z), Voxel());
                     }
                 }
             }
         }
 
-    private:  
-        std::vector<Voxel> world = {};  // 1D array representation of the voxel world
+    private:
+        std::vector<Voxel> world = {}; // 1D array representation of the voxel world
 
         // ! If the coordinates are too large, this may return an index outside the VoxelGrid!
-        unsigned int flatten(Coordinate coords) const {
-            return flatten(static_cast<unsigned int>(coords.x),
-                           static_cast<unsigned int>(coords.y),
-                           static_cast<unsigned int>(coords.z));
-        }
-
-        unsigned int flatten(unsigned int x, unsigned int y, unsigned int z) const {
-            return x * static_cast<unsigned int>(size.y) * static_cast<unsigned int>(size.z)
-                   + y * static_cast<unsigned int>(size.z) + z;
+        size_t flatten(Coordinate coords) const {
+            return static_cast<size_t>(coords.x * size.y * size.z + coords.y * size.z + coords.z);
         }
 
         // ! If index is too large, this may return a coordinate outside the VoxelGrid!
-        Coordinate unflatten(unsigned int index) const {
+        Coordinate unflatten(size_t index) const {
             int x = static_cast<int>(index) / (size.y + size.z);
             int y = (static_cast<int>(index) - x * (size.y + size.z)) / size.z;
             int z = static_cast<int>(index) - x * (size.y + size.z) - y * size.z;
