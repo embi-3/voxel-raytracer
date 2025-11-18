@@ -24,7 +24,8 @@ namespace geometry {
         }
 
         // Wrapper functions for the internal vector.
-        void insert(auto iterator, auto first, auto last) {
+        template<typename InputIterator>
+        void insert(IntersectionIterator iterator, InputIterator first, InputIterator last) {
             items.insert(iterator, first, last);
         }
 

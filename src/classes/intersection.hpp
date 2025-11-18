@@ -12,11 +12,11 @@ namespace geometry {
     
     class Intersection {
     public:
-        const Voxel voxel; // for colour and material data
-        const num distance = 0; // for depth shader.
-        const Direction orientation = Direction(NONE);
+        Voxel voxel; // for colour and material data
+        num distance = 0; // for depth shader.
+        Direction orientation = Direction(NONE);
         // TODO: Implement this!
-        const Vec3 normal;
+        Vec3 normal;
 
         explicit constexpr Intersection(const Voxel voxel)
         : voxel(voxel) {}
