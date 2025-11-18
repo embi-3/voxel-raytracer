@@ -27,15 +27,23 @@ namespace renderer {
         Vec3 upper_left_pixel;
         Vec3 delta_x;
         Vec3 delta_y;
+        
+        num fov = 90;
 
         explicit Camera(int image_width = 1920, int image_height = 1080, num focal_length = 1.0, num viewport_height = 2.0)
         : image_width(image_width)
         , image_height(image_height)
         , focal_length(focal_length)
-        , viewport_height(viewport_height) {
+        , viewport_height(viewport_height * focal_length) {
             aspect_ratio = image_width / image_height;
 
-            viewport_width = viewport_height * (double(image_width) / image_height);
+            auto fov_theta = deg_to_rad(fov);
+            auto tan = std::tan(fov_theta / 2);
+
+            // ! DEBUG
+            std::cerr << "FOV: " << fov_theta << ", tan: " << tan << "\n";
+
+            viewport_width = viewport_height * (double(image_width) / image_height) * tan;
 
             // calculate horizontal and vertical viewport vectors
             auto viewport_x = Vec3(viewport_width, 0, 0);
