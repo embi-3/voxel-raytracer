@@ -10,6 +10,7 @@
 
 #include <chrono>
 #include <cstdint>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -19,6 +20,8 @@ using namespace texture;
 using namespace geometry;
 using namespace renderer;
 using namespace std::chrono;
+
+bool debug = false;
 
 // Outputs PPM ASCII and PNG
 void create_png(std::size_t width, std::size_t height, const std::vector<Pixel>& pixels) {
@@ -37,6 +40,7 @@ void create_png(std::size_t width, std::size_t height, const std::vector<Pixel>&
         image.push_back(pixel.r_int());
         image.push_back(pixel.g_int());
         image.push_back(pixel.b_int());
+        // TODO: Check if this is actually doing what it's supposed to.
         image.push_back(static_cast<uint8_t>(255.999 * pixel.a));
     }
 
@@ -48,22 +52,102 @@ void create_png(std::size_t width, std::size_t height, const std::vector<Pixel>&
                    static_cast<int>(channels * width));
 }
 
-int main() {
-    // ! INFO
-    // std::cerr << "Output is being written to a file!\n";
-    // freopen("output.txt", "a", stdout);
-    // freopen("output.txt", "a", stderr);
+Scene two_spheres() {
+    Scene scene = Scene();
 
-    // freopen("/dev/null", "a", stdout);
-    // freopen("/dev/null", "a", stderr);
+    // ! INFO
+    std::cout << "> Creating grid...\n";
+    auto grid = std::make_unique<ArrayVoxelGrid>(32, Vec3(0, 0, 20));
+
+    // TODO: Test shapes that go outside the boundary of the grid and see what happens.
+    std::cout << "> Creating shapes...\n";
+    grid->create_sphere(Coordinate(25, 27, 20), 4);
+    grid->create_sphere(Coordinate(10, 5, 10), 10);
+
+    scene.push_back(std::move(grid));
+
+    return scene;
+}
+
+Scene random_spheres() {
+    int world_size = 200;
+    int num_spheres = 300;
+    Scene scene = Scene();
+
+    auto grid = std::make_unique<ArrayVoxelGrid>(world_size, Vec3(0, 0, world_size/2));
+    int x;
+    int y;
+    int z;
+    int r;
+    for (int i = 0; i < num_spheres; i++) {
+        x = rand() % (9 * world_size / 10);
+        y = rand() % (9 * world_size / 10);
+        z = rand() % (9 * world_size / 10);
+        r = rand() % (world_size / 10);
+        grid->create_sphere(Coordinate(x, y, z), r);
+    }
+    scene.push_back(std::move(grid));
+
+    return scene;
+}
+
+Scene random_cubes() {
+    int world_size = 500;
+    int num_cubes = 100000;
+
+    Scene scene = Scene();
+    auto grid = std::make_unique<ArrayVoxelGrid>(world_size, Vec3(0, 0, 0));
+    int x;
+    int y;
+    int z;
+    for (int i = 0; i < num_cubes; i++) {
+        x = rand() % world_size;
+        y = rand() % world_size;
+        z = rand() % world_size;
+        grid->create_cube(Coordinate(x, y, z));
+    }
+    scene.push_back(std::move(grid));
+
+    return scene;
+}
+
+int main(int argc, char* argv[]) {
+    int image_width = 1920;
+    int image_height = 1080;
+    std::string debug_path = "output.txt";
+
+    // Parse command line arguments
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+
+        if (arg == "--width" && i + 1 < argc) {
+            image_width = std::atoi(argv[++i]);
+        }
+        else if (arg == "--height" && i + 1 < argc) {
+            image_height = std::atoi(argv[++i]);
+        }
+        else if (arg == "--path" && i + 1 < argc) {
+            debug = true;
+        }
+        else if (arg == "--debug") {
+            debug_path = argv[++i];
+        }
+        else {
+            std::cerr << "Unknown argument: " << arg << "\n";
+            return 1;
+        }
+    }
+
+    if (debug) {
+        std::cout << "Output is being written to a file!\n";
+        freopen(debug_path.c_str(), "a", stdout);
+        freopen(debug_path.c_str(), "a", stderr);
+    }
 
     // ! INFO
     std::cout << "===========================================\n\n"
               << "> Starting...\n";
     const auto start = high_resolution_clock::now();
-
-    int image_width = 1920;
-    int image_height = 1080;
 
     // ! INFO
     std::cout << "> Initialising camera...\n";
@@ -72,6 +156,7 @@ int main() {
     // Create the scene
     // ! INFO
     std::cout << "> Creating scene...\n";
+<<<<<<< HEAD
     Scene scene = Scene();
 
     // ! INFO
@@ -88,6 +173,11 @@ int main() {
     // grid.create_cube(Coordinate(5, 5, 10));
 
     scene.push_back(grid);
+=======
+    // Scene scene = two_spheres();
+    Scene scene = random_spheres();
+    // Scene scene = random_cubes();
+>>>>>>> abstract-voxel-grid
 
     // Create shaders
     // ! INFO

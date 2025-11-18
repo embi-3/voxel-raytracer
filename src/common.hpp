@@ -14,6 +14,7 @@ using num = float;
 using num = double;
 #endif
 
+extern bool debug;
 static const num epsilon = 1.E-10;
 
 #endif // COMMON_H

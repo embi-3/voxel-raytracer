@@ -45,7 +45,9 @@ namespace shader {
             if (!list.empty()) {
                 num distance = (list.items.at(0)).distance;
                 // ! DEBUG
-                std::cout << "Distance: " << distance << "\n";
+                if (debug) {
+                    std::cerr << "Distance: " << distance << "\n";
+                }
                 return Colour(distance - 10);
             }
             return Colour();
