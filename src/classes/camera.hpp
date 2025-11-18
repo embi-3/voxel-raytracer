@@ -68,6 +68,9 @@ namespace renderer {
                     auto ray_direction = pixel_center - camera_center;
                     auto r = Ray{camera_center, ray_direction};
 
+                    // ! DEBUG
+                    std::cerr << "Pixel: (" << i << ", " << j << ")\n";
+
                     auto intersections = r.traverse(scene);
                     auto pixel_colour = shader.fragment(intersections);
                     pixels.push_back(pixel_colour);

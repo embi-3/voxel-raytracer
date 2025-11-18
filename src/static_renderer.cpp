@@ -38,7 +38,8 @@ void create_png(std::size_t width, std::size_t height, const std::vector<Pixel>&
         image.push_back(pixel.r_int());
         image.push_back(pixel.g_int());
         image.push_back(pixel.b_int());
-        image.push_back(static_cast<uint8_t>(255.999 * pixel.a));
+        // TODO: Check if this is actually doing what it's supposed to.
+        image.push_back(static_cast<uint8_t>(255.999 * pixel.a)); 
     }
 
     stbi_write_png((filename + ".png").c_str(),
@@ -86,8 +87,8 @@ Scene random_spheres() {
 }
 
 Scene random_cubes() {
-    int world_size = 200;
-    int num_cubes = 10000;
+    int world_size = 30;
+    int num_cubes = 100;
 
     Scene scene = Scene();
     auto grid = std::make_unique<ArrayVoxelGrid>(ArrayVoxelGrid(world_size, Vec3(0, 0, world_size / 2)));
@@ -105,14 +106,44 @@ Scene random_cubes() {
     return scene;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+    static bool debug = false;
+    int image_width = 400;
+    int image_height = 200;
+    std::string debug_path = "output.txt";
+
+    // Parse command line arguments
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+
+        if (arg == "--width" && i + 1 < argc) {
+            image_width = std::atoi(argv[++i]);
+        } 
+        else if (arg == "--height" && i + 1 < argc) {
+            image_height = std::atoi(argv[++i]);
+        } 
+        else if (arg == "--path" && i + 1 < argc) {
+            debug = true;
+        }
+        else if (arg == "--debug") {
+            debug_path = argv[++i];
+        } 
+        else {
+            std::cerr << "Unknown argument: " << arg << "\n";
+            return 1;
+        }
+    }
+    
+    if (debug) {
+        std::cout << "Output is being written to a file!\n";
+        freopen(debug_path.c_str(), "a", stdout);
+        freopen(debug_path.c_str(), "a", stderr);
+    }
+
     // ! INFO
     std::cout << "===========================================\n\n"
               << "> Starting...\n";
     const auto start = high_resolution_clock::now();
-
-    int image_width = 1920;
-    int image_height = 1080;
 
     // ! INFO
     std::cout << "> Initialising camera...\n";
