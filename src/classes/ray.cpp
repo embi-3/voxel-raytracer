@@ -75,9 +75,9 @@ namespace geometry {
 
         // Iteratively find the next voxel using floating-point comparisons.
         while (grid.contains(coords)) {
-            Voxel intersect = grid.get_voxel(coords);
-            if (intersect.is_opaque()) {
-                objects.push_back(Intersection(intersect, tcur * dir.length(), normal));
+            Voxel voxel = grid.get_voxel(coords);
+            if (voxel.is_opaque()) {
+                objects.push_back(Intersection(voxel, tcur * dir.length(), normal));
 
                 // ! TEMP
                 break;

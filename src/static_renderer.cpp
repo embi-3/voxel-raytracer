@@ -85,6 +85,26 @@ Scene random_spheres() {
     return scene;
 }
 
+Scene random_cubes() {
+    int world_size = 200;
+    int num_cubes = 10000;
+
+    Scene scene = Scene();
+    auto grid = std::make_unique<ArrayVoxelGrid>(ArrayVoxelGrid(world_size, Vec3(0, 0, world_size / 2)));
+    int x;
+    int y;
+    int z;
+    for (int i = 0; i < num_cubes; i++) {
+        x = rand() % world_size;
+        y = rand() % world_size;
+        z = rand() % world_size;
+        grid->create_cube(Coordinate(x, y, z));
+    }
+    scene.push_back(std::move(grid));
+
+    return scene;
+}
+
 int main() {
     // ! INFO
     std::cout << "===========================================\n\n"
@@ -102,7 +122,8 @@ int main() {
     // ! INFO
     std::cout << "> Creating scene...\n";
     // Scene scene = two_spheres();
-    Scene scene = random_spheres();
+    // Scene scene = random_spheres();
+    Scene scene = random_cubes();
 
     // Create shaders
     // ! INFO

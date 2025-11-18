@@ -56,25 +56,25 @@ namespace geometry {
             initialise();
         }
 
-        explicit ArrayVoxelGrid(unsigned int world_size) {
-            size = Coordinate(static_cast<int>(world_size));
+        explicit ArrayVoxelGrid(int world_size) {
+            size = Coordinate(world_size);
             initialise();
         }
 
-        explicit ArrayVoxelGrid(unsigned int world_size, Vec3 centre) {
-            size = Coordinate(static_cast<int>(world_size));
+        explicit ArrayVoxelGrid(int world_size, Vec3 centre) {
+            size = Coordinate(world_size);
             origin =
                 centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
             initialise();
         }
 
-        explicit ArrayVoxelGrid(unsigned int x, unsigned int y, unsigned int z) {
-            size = Coordinate(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z));
+        explicit ArrayVoxelGrid(int x, int y, int z) {
+            size = Coordinate(x, y, z);
             initialise();
         }
 
-        explicit ArrayVoxelGrid(unsigned int x, unsigned int y, unsigned int z, Vec3 centre) {
-            size = Coordinate(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z));
+        explicit ArrayVoxelGrid(int x, int y, int z, Vec3 centre) {
+            size = Coordinate(x, y, z);
             origin =
                 centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
             initialise();
@@ -211,6 +211,11 @@ namespace geometry {
             // ! INFO
             std::cout << "   > Allocating space..."
                       << "\n";
+
+            std::cout << "   > " << sizeof(Voxel) << " bytes per voxel.\n";
+                    
+            std::cout << "   > " << static_cast<unsigned long>(size.x * size.y * size.z) * sizeof(Voxel) << " bytes required.\n";
+            
             world.resize(static_cast<size_t>(size.x * size.y * size.z));
 
             // ! INFO
@@ -218,8 +223,7 @@ namespace geometry {
                       << "\n";
             std::fill(world.begin(), world.end(), Voxel::empty());
             // ! INFO
-            std::cout << "   > " << world.size() << " of " << world.capacity() << " bytes used"
-                      << "\n";
+            // std::cout << "   > " << world.size() << " of " << world.capacity() << " bytes used" << "\n";
             std::cout << "   > Origin at " << origin << "\n";
 
             Vec3 min_bounds = origin - Vec3(0.5 * scale.x, 0.5 * scale.y, 0.5 * scale.z);
