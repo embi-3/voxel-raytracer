@@ -28,16 +28,6 @@ namespace renderer {
         Vec3 delta_x;
         Vec3 delta_y;
 
-        // TODO: Remove this if not necessary.
-        explicit constexpr Camera() {
-            Camera(1920, 1080, 1.0, 2.0);
-        }
-
-        explicit constexpr Camera(int image_width, num aspect_ratio) {
-            image_height = std::max(int(image_width / aspect_ratio), 1);
-            Camera(image_height, image_width, 1.0, 2.0);
-        }
-
         explicit Camera(int image_width = 1920, int image_height = 1080, num focal_length = 1.0, num viewport_height = 2.0)
         : image_width(image_width)
         , image_height(image_height)
