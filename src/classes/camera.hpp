@@ -28,7 +28,7 @@ namespace renderer {
         Vec3 delta_x;
         Vec3 delta_y;
         
-        num fov = 90;
+        num fov = 75;
 
         explicit Camera(int image_width = 1920, int image_height = 1080, num focal_length = 1.0, num viewport_height = 2.0)
         : image_width(image_width)
@@ -40,8 +40,8 @@ namespace renderer {
             auto fov_theta = deg_to_rad(fov);
             auto tan = std::tan(fov_theta / 2);
 
-            // ! DEBUG
-            std::cerr << "FOV: " << fov_theta << ", tan: " << tan << "\n";
+            // ! INFO
+            std::cout << "   > FOV: " << fov_theta << ", tan: " << tan << "\n";
 
             viewport_width = viewport_height * (double(image_width) / image_height) * tan;
 
