@@ -115,12 +115,10 @@ namespace geometry {
     }
 
     IntersectionList geometry::Ray::traverse(const Scene& scene) {
-        auto grids = scene.grids;
-
         IntersectionList objects = IntersectionList(dir);
-        for (auto grid = grids.begin(); grid != grids.end(); ++grid) {
-            if (intersects((*grid).get().bounding_box)) {
-                IntersectionList intersections = traverse(*grid);
+        for (auto grid = scene.grids.begin(); grid != scene.grids.end(); ++grid) {
+            if (intersects((*grid)->bounding_box)) {
+                IntersectionList intersections = traverse(**grid);
                 objects.insert(objects.end(), intersections.begin(), intersections.end());
             }
         }
