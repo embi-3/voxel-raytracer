@@ -64,14 +64,14 @@ namespace renderer {
             int progress = 0;
             int total_pixels = image_height * image_width;
             int current_pixels = 0;
-            int chunk = total_pixels / 100;
+            int chunk = total_pixels / 10;
             auto pixels = std::vector<Pixel>{}; // array of pixels
             for (int j = 0; j < image_height; j++) {
                 for (int i = 0; i < image_width; i++) {
                     current_pixels = j * image_width + i;
                     if (current_pixels / chunk >= progress) {
                         // ! INFO
-                        std::cout << "- " << (progress++) << "% done"
+                        std::cout << "- " << (progress++ * 10) << "% done"
                                   << " \n";
                     }
                     auto pixel_center = upper_left_pixel + (i * delta_x) + (j * delta_y);

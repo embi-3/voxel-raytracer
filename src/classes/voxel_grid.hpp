@@ -240,16 +240,6 @@ namespace geometry {
             Vec3 max_bounds = origin + Vec3((size.x - 0.5) * scale.x, (size.y - 0.5) * scale.y, (size.z - 0.5) * scale.z);
             bounding_box = AABB(min_bounds, max_bounds);
         }
-
-        // Rounds negative numbers up to 0, and positive numbers down to 0.
-        num round_to_zero(num input) const {
-            num integer;
-            num decimal = std::modf(input, &integer);
-            if (std::abs(decimal) <= 0.5) {
-                return integer;
-            }
-            return integer + std::copysign(1, input);
-        }
     };
 } // namespace geometry
 

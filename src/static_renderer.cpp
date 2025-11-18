@@ -62,8 +62,8 @@ int main() {
               << "> Starting...\n";
     const auto start = high_resolution_clock::now();
 
-    int image_width = 401;
-    int image_height = 201;
+    int image_width = 1920;
+    int image_height = 1080;
 
     // ! INFO
     std::cout << "> Initialising camera...\n";
@@ -80,9 +80,9 @@ int main() {
 
     // TODO: Test shapes that go outside the boundary of the grid and see what happens.
     std::cout << "> Creating shapes...\n";
-    // grid.create_sphere(Coordinate(16, 16, 16), 10);
-    // grid.create_sphere(Coordinate(10, 5, 5), 4);
-    grid.create_cube(Coordinate(6, 6, 6), Coordinate(26, 26, 26));
+    grid.create_sphere(Coordinate(25, 27, 20), 4);
+    grid.create_sphere(Coordinate(10, 5, 10), 10);
+    // grid.create_cube(Coordinate(6, 6, 6), Coordinate(26, 26, 26));
     // grid.create_cube(Coordinate(0, 0, 1));
     // grid.create_cube(Coordinate(15, 15, 0));
     // grid.create_cube(Coordinate(5, 5, 10));
@@ -102,7 +102,7 @@ int main() {
     // Render the scene
     // ! INFO
     std::cout << "> Rendering scene...\n";
-    auto pixels = camera.render(scene, ray_shader);
+    auto pixels = camera.render(scene, orientation_shader);
     create_png(static_cast<std::size_t>(image_width), static_cast<std::size_t>(image_height), pixels);
 
     const auto end = high_resolution_clock::now();
