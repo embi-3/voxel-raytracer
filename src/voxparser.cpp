@@ -6,45 +6,20 @@ Parser for the .vox file format.
 https://github.com/ephtracy/voxel-model/blob/master/MagicaVoxel-file-format-vox.txt
 */
 
+#include "voxparser.hpp"
+#include "classes/scene.hpp"
+#include "classes/colour.hpp"
+#include "classes/voxel.hpp"
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <cstdint>
 
-// TODO: REFACTOR THIS INTO OUR DEFINED CLASSES  ////////////////////////
-// TODO: REFACTOR THIS INTO OUR DEFINED CLASSES  ////////////////////////
-// TODO: REFACTOR THIS INTO OUR DEFINED CLASSES  ////////////////////////
-// TODO: REFACTOR THIS INTO OUR DEFINED CLASSES  ////////////////////////
+using namespace geometry;
 
-
-// 'RGBA' chunk: 4 bytes (R, G, B, A)
-struct Color {
-    uint8_t r, g, b, a;
-};
-
-// 'XYZI' chunk: 4 bytes (x, y, z, colorIndex)
-struct Voxel {
-    uint8_t x, y, z, colorIndex;
-};
-
-// A struct to hold a single model's data
-struct Model {
-    uint32_t size_x;
-    uint32_t size_y;
-    uint32_t size_z;
-    std::vector<Voxel> voxels; // A dynamic array of voxels
-};
-
-// A struct to hold the entire file's contents
-struct VoxData {
-    std::vector<Model> models;
-    Color palette[256];
-    bool palette_set = false;
-};
-/////////////////////////////////////////////////////////////////////////
-
-
+// Helpers to read int and string ////////////////////////////////////
 int readInt(std::ifstream &file) {
     int val;
     file.read(reinterpret_cast<char*>(&val), 4);
@@ -52,17 +27,20 @@ int readInt(std::ifstream &file) {
 }
 
 std::string readString(std::ifstream &file, int n) {
-    std::string str(n, '\0');
+    std::string str(static_cast<size_t>(n), '\0');
     file.read(&str[0], n);
     return str;
 }
+/////////////////////////////////////////////////////////////////////
 
-int main() {
 
-    VoxData data;   // stores whole file's contents 
-
-    // open the file in binary 
-    std::ifstream inputFile("/src/voxmodels/scan/teapot.vox", std::ios::binary);
+VoxData renderVoxels(const std::string &filePath) {
+    VoxData data;   
+    std::ifstream inputFile(filePath, std::ios::binary);
+    if (!inputFile.is_open()) {
+        std::cerr << "Error: Could not open file " << filePath << "\n";
+        return data; 
+    }
 
     // read magic 4 bytes and version number 4 bytes
     std::string magic = readString(inputFile, 4);
@@ -70,12 +48,14 @@ int main() {
         std::cerr << "Error: Not a .vox file (Wrong magic number)." << std::endl;
     }
     int version = readInt(inputFile);
+    (void)version;  // ignore unused variable
 
     // read MAIN chunk. 
     std::string mainId = readString(inputFile, 4);
     int mainContentSize = readInt(inputFile);   // should be 0
+    (void)mainContentSize;  // ignore unused variable
     int mainChildrenSize = readInt(inputFile);  // should be all the other chunks
-    int endOfFile = inputFile.tellg() + mainChildrenSize;
+    auto endOfFile = inputFile.tellg() + static_cast<std::streamoff>(mainChildrenSize);
     
     Model currentModel;
     while (inputFile.tellg() < endOfFile) {
@@ -87,23 +67,20 @@ int main() {
 
         if (chunkId == "SIZE") {
             // 5. Read 'SIZE' chunk content
-            currentModel.size_x = readInt(inputFile);
-            currentModel.size_y = readInt(inputFile);
-            currentModel.size_z = readInt(inputFile);
+            currentModel.size_x = static_cast<uint32_t>(readInt(inputFile));
+            currentModel.size_y = static_cast<uint32_t>(readInt(inputFile));
+            currentModel.size_z = static_cast<uint32_t>(readInt(inputFile));
         }
         else if (chunkId == "XYZI") {   // paired with SIZE chunk.
-            int numVoxels = readInt(inputFile);
-            currentModel.voxels.resize(numVoxels);
+            
+            int numVoxels = readInt(inputFile);   
+            currentModel.voxels.resize(static_cast<size_t>(numVoxels));
 
             // load all the voxel info into our model
             inputFile.read(reinterpret_cast<char*>(currentModel.voxels.data()), numVoxels * 4);
             
-            // model is complete, add it to model list
-            data.models.push_back(currentModel);
-            
-            // resets model (though i don't think there will be more than 1 model)
-            // useful for PACK if we ever decide to do animation 
-            currentModel = Model();     
+            // model is complete, save it to data 
+            data.model = currentModel;  
         }
         else if (chunkId == "RGBA") {
             inputFile.read(reinterpret_cast<char*>(data.palette), 256 * 4);
@@ -116,5 +93,42 @@ int main() {
         }
     }
     inputFile.close();
+    return data;
 }
 
+
+
+Scene voxelise(const std::string &filePath) {
+
+    VoxData data = renderVoxels(filePath);   
+
+    Scene scene = Scene();
+
+    auto grid = std::make_unique<ArrayVoxelGrid>(
+        data.model.size_x,
+        data.model.size_y,
+        data.model.size_z,
+        Vec3(0, 0, 75)
+    );
+
+    for (size_t i = 0; i < data.model.voxels.size(); i++) {
+        int currColourIndex = data.model.voxels[i].colourIndex;
+        Colour currVoxelColour = Colour(
+            data.palette[currColourIndex].r,
+            data.palette[currColourIndex].g,
+            data.palette[currColourIndex].b, 1
+        );
+
+        Voxel currVoxel = Voxel(currVoxelColour);
+        Coordinate currVoxelCoord = Coordinate(
+            data.model.voxels[i].x, 
+            data.model.voxels[i].z,
+            data.model.voxels[i].y      
+            // we use y = up instead of z = up
+        );
+
+        grid->set_voxel(currVoxelCoord, currVoxel);
+    }
+    scene.push_back(std::move(grid));
+    return scene;
+}
