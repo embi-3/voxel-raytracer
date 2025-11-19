@@ -8,6 +8,11 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <string>
+#include <sstream>
+
+using StringStream = std::ostringstream;
+
 #ifdef USE_SINGLE_PRECISION
 using num = float;
 #else

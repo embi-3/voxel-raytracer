@@ -42,11 +42,9 @@ namespace geometry {
                                   static_cast<int>(round(z_scaled)));
             }
             else {
-                // Return a coordinate that is clearly an error. We could handle this error more elegantly but
-                // this is good enough for debugging purposes.
-                std::cerr << "[!] " << pos << " is not in bounds: [" << bounding_box.min << ", " << bounding_box.max
-                          << "]\n";
-                return Coordinate(std::numeric_limits<int>().max());
+                StringStream stream;
+                stream << "[!] " << pos << "is not in bounds: [" << bounding_box.min << ", " << bounding_box.max << "]\n";
+                throw new std::invalid_argument(stream.str());
             }
         }
 
@@ -159,15 +157,21 @@ namespace geometry {
 
         // TODO: Check if this returns shallow or deep copy of the Voxel.
         const Voxel& get_voxel(Coordinate coords) const override {
-            size_t index = flatten(coords);
-            if (index >= static_cast<size_t>(size.x * size.y * size.z)) {
-                throw new std::invalid_argument("Coordinates out of bounds.");
+            if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0 || coords.z >= size.z) {
+                StringStream stream;
+                stream << "[!] Coordinates out of bounds: " << coords << "\n";
+                throw new std::invalid_argument(stream.str());
             }
 
-            return world.at(index);
+            return world.at(flatten(coords));
         }
 
         void set_voxel(Coordinate coords, Voxel voxel) override {
+            if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0 || coords.z >= size.z) {
+                StringStream stream;
+                stream << "[!] Coordinates out of bounds: " << coords << "\n";
+                throw new std::invalid_argument(stream.str());
+            }
             world.at(flatten(coords)) = voxel;
         }
 
@@ -224,8 +228,10 @@ namespace geometry {
         }
 
         const Voxel& get_voxel(Coordinate coords) const override {
-            if (coords.x >= size.x || coords.y >= size.y || coords.z >= size.z) {
-                throw new std::invalid_argument("Coordinates out of bounds.");
+            if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0 || coords.z >= size.z) {
+                StringStream stream;
+                stream << "[!] Coordinates out of bounds: " << coords << "\n";
+                throw new std::invalid_argument(stream.str());
             }
 
             const auto* curr = root.get();
@@ -247,9 +253,10 @@ namespace geometry {
         }
 
         void set_voxel(Coordinate coords, Voxel voxel) override {
-            if (coords.x >= size.x || coords.y >= size.y || coords.z >= size.z) {
-                std::cerr << "[!] Out of bounds: " << coords << "\n";
-                return;
+            if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0 || coords.z >= size.z) {
+                StringStream stream;
+                stream << "[!] Coordinates out of bounds: " << coords << "\n";
+                throw new std::invalid_argument(stream.str());
             }
 
             auto* curr = root.get();

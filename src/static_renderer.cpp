@@ -133,8 +133,9 @@ int main(int argc, char* argv[]) {
             debug_path = argv[++i];
         }
         else {
-            std::cerr << "Unknown argument: " << arg << "\n";
-            return 1;
+            StringStream stream;
+            stream << "[!] Unknown argument: " << arg << "\n";
+            throw new std::invalid_argument(stream.str());
         }
     }
 
