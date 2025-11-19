@@ -7,6 +7,7 @@
 #include "aabb.hpp"
 #include <cmath>
 #include <iostream>
+#include "direction.hpp"
 
 #include <vector>
 

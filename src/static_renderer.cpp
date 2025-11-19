@@ -5,6 +5,7 @@
 #include "classes/scene.hpp"
 #include "classes/shader.hpp"
 #include "classes/vec3.hpp"
+#include "voxparser.hpp"
 
 #include "stb_image_write.h"
 
@@ -158,7 +159,8 @@ int main(int argc, char* argv[]) {
     std::cout << "> Creating scene...\n";
     // Scene scene = two_spheres();
     // Scene scene = random_spheres();
-    Scene scene = random_cubes();
+    // Scene scene = random_cubes();
+    Scene scene = voxelise("../src/voxmodels/monument/monu1.vox");
 
     // Create shaders
     // ! INFO
