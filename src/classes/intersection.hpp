@@ -18,17 +18,17 @@ namespace geometry {
         // TODO: Implement this!
         Vec3 normal;
 
-        explicit constexpr Intersection(Voxel& voxel)
+        explicit Intersection(Voxel& voxel)
         : voxel(voxel) {}
-        explicit constexpr Intersection(Voxel& voxel, num distance)
+        explicit Intersection(Voxel& voxel, num distance)
         : voxel(voxel)
         , distance(distance) {}
-        explicit constexpr Intersection(Voxel& voxel, num distance, Direction orientation)
+        explicit Intersection(Voxel& voxel, num distance, Direction orientation)
         : voxel(voxel)
         , distance(distance)
         , orientation(orientation) {}
 
-        static constexpr Intersection invalid() {
+        static Intersection invalid() {
             return Intersection(INVALID_VOXEL, -1);
         }
     };
