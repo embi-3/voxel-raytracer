@@ -29,43 +29,43 @@ namespace geometry {
             dir = x_dir | y_dir | z_dir;
         }
 
-        bool is_none() const {
+        constexpr bool is_none() const {
             return dir == 0;
         }
 
-        bool is_xpos() const {
+        constexpr bool is_xpos() const {
             return dir & X_POS;
         }
 
-        bool is_xneg() const {
+        constexpr bool is_xneg() const {
             return dir & X_NEG;
         }
 
-        bool is_ypos() const {
+        constexpr bool is_ypos() const {
             return dir & Y_POS;
         }
 
-        bool is_yneg() const {
+        constexpr bool is_yneg() const {
             return dir & Y_NEG;
         }
 
-        bool is_zpos() const {
+        constexpr bool is_zpos() const {
             return dir & Z_POS;
         }
 
-        bool is_zneg() const {
+        constexpr bool is_zneg() const {
             return dir & Z_NEG;
         }
 
-        bool is_x() const {
+        constexpr bool is_x() const {
             return is_xpos() || is_xneg();
         }
 
-        bool is_y() const {
+        constexpr bool is_y() const {
             return is_ypos() || is_yneg();
         }
 
-        bool is_z() const {
+        constexpr bool is_z() const {
             return is_zpos() || is_zneg();
         }
 
@@ -105,19 +105,19 @@ namespace geometry {
             }
         }
 
-        Direction x() {
+        constexpr Direction x() const {
             return Direction(dir & (X_POS | X_NEG));
         }
 
-        Direction y() {
+        constexpr Direction y() const {
             return Direction(dir & (Y_POS | Y_NEG));
         }
 
-        Direction z() {
+        constexpr Direction z() const {
             return Direction(dir & (Z_POS | Z_NEG));
         }
 
-        Coordinate sign() {
+        constexpr Coordinate sign() const {
             int x = (is_xpos() ? 1 : (is_xneg() ? -1 : 0));
             int y = (is_ypos() ? 1 : (is_yneg() ? -1 : 0));
             int z = (is_zpos() ? 1 : (is_zneg() ? -1 : 0));

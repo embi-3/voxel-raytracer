@@ -4,11 +4,14 @@
 #include "../common.hpp"
 #include "aabb.hpp"
 #include "voxel.hpp"
+#include "ray.hpp"
 #include <cmath>
 #include <memory>
 #include <iostream>
 
 #include <vector>
+
+using namespace helper;
 
 namespace geometry {
     class VoxelGrid {
@@ -18,6 +21,8 @@ namespace geometry {
         virtual const Voxel& get_voxel(Coordinate coords) const = 0;
 
         virtual void set_voxel(Coordinate coords, Voxel voxel) = 0;
+
+        virtual IntersectionList traverse(const Ray& ray) = 0;
 
         // ! The orientation is used to distinguish ties for coordinates on the border of voxels.
         Coordinate get_coords(Vec3 pos, Direction orientation) const {
@@ -175,45 +180,184 @@ namespace geometry {
             world.at(flatten(coords)) = voxel;
         }
 
-    private:
-        std::vector<Voxel> world = {}; // 1D array representation of the voxel world
+        IntersectionList traverse(const Ray& ray) override {
+            IntersectionList objects = IntersectionList(ray.dir);
 
-        // ! If the coordinates are too large, this may return an index outside the VoxelGrid!
-        size_t flatten(Coordinate coords) const {
-            return static_cast<size_t>(coords.x * size.y * size.z + coords.y * size.z + coords.z);
+            Vec3 tmax;
+            Vec3 tdelta = Vec3(equals_zero(ray.dir.x) ? infinity : fabs(scale.x * ray.inv_dir.x),
+                            equals_zero(ray.dir.y) ? infinity : fabs(scale.y * ray.inv_dir.y),
+                            equals_zero(ray.dir.z) ? infinity : fabs(scale.z * ray.inv_dir.z));
+            num tcur = 0;
+            Direction normal = Direction();
+            Coordinate step = ray.orientation.sign();
+            Coordinate coords;
+
+            Vec3 min;
+            Vec3 max;
+            Interval interval = ray.intersection(bounding_box, min, max);
+            Voxel voxel;
+
+            // ! DEBUG
+            if (debug) {
+                std::cerr << "[t] Interval: [" << interval.min << ", " << interval.max << "]\n";
+                std::cerr << "[t] Delta: " << tdelta << "\n";
+            }
+
+            if (interval.is_valid()) {
+                tcur = interval.min;
+
+                // Calculate the first t which intersects with each coordinate plane.
+                // If it's infinity, don't bother.
+                // ! Double check the order of multiplications / divisions is correct!
+                num first_x =
+                    (max.x == infinity
+                        ? infinity
+                        : std::max(
+                            min.x,
+                            max.x - (trunc((max.x - interval.min) * ray.dir.x / scale.x) * scale.x * ray.inv_dir.x)));
+                num first_y =
+                    (max.y == infinity
+                        ? infinity
+                        : std::max(
+                            min.y,
+                            max.y - (trunc((max.y - interval.min) * ray.dir.y / scale.y) * scale.y * ray.inv_dir.y)));
+                num first_z =
+                    (max.z == infinity
+                        ? infinity
+                        : std::max(
+                            min.z,
+                            max.z - (trunc((max.z - interval.min) * ray.dir.z / scale.z) * scale.z * ray.inv_dir.z)));
+
+                tmax = Vec3(first_x, first_y, first_z);
+
+                // ! DEBUG
+                if (debug) {
+                    std::cerr << "pos: " << ray.at(tcur) << ", tcur: " << tcur << ", tmax: " << tmax << "\n";
+                }
+
+                if (equals(tmax.x, tcur)) {
+                    // normal += orientation.x();
+                    tmax.x += tdelta.x;
+                }
+                if (equals(tmax.y, tcur)) {
+                    // normal += orientation.y();
+                    tmax.y += tdelta.y;
+                }
+                if (equals(tmax.z, tcur)) {
+                    // normal += orientation.z();
+                    tmax.z += tdelta.z;
+                }
+            }
+            else {
+                // If the ray doesn't hit the bounding box, return an empty list.
+                return objects;
+            }
+
+            coords = get_coords(ray.at(tcur), ray.orientation);
+
+            // ! DEBUG
+            if (debug) {
+                std::cerr << "Starting coords: " << coords << "\n";
+            }
+
+            // Iteratively find the next voxel using floating-point comparisons.
+            while (contains(coords)) {
+                // ! DEBUG
+                if (debug) {
+                    std::cerr << "[c] " << coords << ": [" << tcur << "] " << ray.at(tcur) << " " << normal << " => "
+                            << get_coords(ray.at(tcur), ray.orientation) << "\n";
+                }
+
+                voxel = get_voxel(coords);
+                if (voxel.is_opaque()) {
+                    // ! DEBUG
+                    if (debug) {
+                        std::cerr << "[i] ray: " << ray.dir << ", dist: " << tcur * ray.dir.length() << ", pos: " << ray.at(tcur)
+                                << ", coords: " << get_coords(ray.at(tcur), ray.orientation) << ", normal: " << normal
+                                << "\n";
+                    }
+
+                    objects.push_back(Intersection(voxel, tcur * ray.dir.length(), normal));
+
+                    // ! TEMP
+                    break;
+                }
+
+                // Create a temporary variable so any traversal updates don't affect the current iteration.
+                Vec3 tmax_temp = tmax;
+
+                // ! DEBUG
+                if (debug) {
+                    std::cerr << "tmax: " << tmax_temp << "\n";
+                }
+
+                normal = Direction(NONE);
+
+                // Update the Amanatides-Woo algorithm to handle diagonals.
+                if (tmax_temp.x <= tmax_temp.y && tmax_temp.x <= tmax_temp.z) {
+                    tcur = tmax_temp.x;
+                    tmax.x += tdelta.x;
+                    coords.x += step.x;
+                    normal += ray.orientation.x();
+                }
+
+                if (tmax_temp.y <= tmax_temp.x && tmax_temp.y <= tmax_temp.z) {
+                    tcur = tmax_temp.y;
+                    tmax.y += tdelta.y;
+                    coords.y += step.y;
+                    normal += ray.orientation.y();
+                }
+
+                if (tmax_temp.z <= tmax_temp.x && tmax_temp.z <= tmax_temp.y) {
+                    tcur = tmax_temp.z;
+                    tmax.z += tdelta.z;
+                    coords.z += step.z;
+                    normal += ray.orientation.z();
+                }
+            }
+
+            return objects;
         }
 
-        // ! If index is too large, this may return a coordinate outside the VoxelGrid!
-        Coordinate unflatten(size_t index) const {
-            int x = static_cast<int>(index) / (size.y + size.z);
-            int y = (static_cast<int>(index) - x * (size.y + size.z)) / size.z;
-            int z = static_cast<int>(index) - x * (size.y + size.z) - y * size.z;
-            return Coordinate(x, y, z);
-        }
+        private:
+            std::vector<Voxel> world = {}; // 1D array representation of the voxel world
 
-        void initialise() {
-            // ! INFO
-            std::cout << "   > Allocating space..."
-                      << "\n";
+            // ! If the coordinates are too large, this may return an index outside the VoxelGrid!
+            size_t flatten(Coordinate coords) const {
+                return static_cast<size_t>(coords.x * size.y * size.z + coords.y * size.z + coords.z);
+            }
 
-            std::cout << "   > " << static_cast<unsigned long>(size.x * size.y * size.z) * sizeof(Voxel)
-                      << " bytes required (" << sizeof(Voxel) << " bytes per voxel).\n";
+            // ! If index is too large, this may return a coordinate outside the VoxelGrid!
+            Coordinate unflatten(size_t index) const {
+                int x = static_cast<int>(index) / (size.y + size.z);
+                int y = (static_cast<int>(index) - x * (size.y + size.z)) / size.z;
+                int z = static_cast<int>(index) - x * (size.y + size.z) - y * size.z;
+                return Coordinate(x, y, z);
+            }
 
-            world.resize(static_cast<size_t>(size.x * size.y * size.z));
+            void initialise() {
+                // ! INFO
+                std::cout << "   > Allocating space..."
+                        << "\n";
 
-            // ! INFO
-            std::cout << "   > Zeroing memory..."
-                      << "\n";
-            std::fill(world.begin(), world.end(), Voxel::empty());
-            // ! INFO
-            // std::cout << "   > " << world.size() << " of " << world.capacity() << " bytes used" << "\n";
-            std::cout << "   > Origin at " << origin << "\n";
+                std::cout << "   > " << static_cast<unsigned long>(size.x * size.y * size.z) * sizeof(Voxel)
+                        << " bytes required (" << sizeof(Voxel) << " bytes per voxel).\n";
 
-            Vec3 min_bounds = origin - Vec3(0.5 * scale.x, 0.5 * scale.y, 0.5 * scale.z);
-            Vec3 max_bounds = origin + Vec3((size.x - 0.5) * scale.x, (size.y - 0.5) * scale.y, (size.z - 0.5) * scale.z);
-            bounding_box = AABB(min_bounds, max_bounds);
-        }
-    };
+                world.resize(static_cast<size_t>(size.x * size.y * size.z));
+
+                // ! INFO
+                std::cout << "   > Zeroing memory..."
+                        << "\n";
+                std::fill(world.begin(), world.end(), Voxel::empty());
+                // ! INFO
+                // std::cout << "   > " << world.size() << " of " << world.capacity() << " bytes used" << "\n";
+                std::cout << "   > Origin at " << origin << "\n";
+
+                Vec3 min_bounds = origin - Vec3(0.5 * scale.x, 0.5 * scale.y, 0.5 * scale.z);
+                Vec3 max_bounds = origin + Vec3((size.x - 0.5) * scale.x, (size.y - 0.5) * scale.y, (size.z - 0.5) * scale.z);
+                bounding_box = AABB(min_bounds, max_bounds);
+            }
+        };
 
     class SVOVoxelGrid : public VoxelGrid {
     public:
@@ -276,6 +420,11 @@ namespace geometry {
 
             curr->data = voxel;
             curr->isLeaf = true;
+        }
+
+        IntersectionList traverse(const Ray& ray) override {
+            // TODO: Implement this!
+            return IntersectionList(ray.dir);
         }
 
     private:

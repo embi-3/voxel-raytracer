@@ -74,7 +74,7 @@ Scene random_spheres() {
     int num_spheres = 300;
     Scene scene = Scene();
 
-    auto grid = std::make_unique<SVOVoxelGrid>(world_size, Vec3(0, 0, 0));
+    auto grid = std::make_unique<ArrayVoxelGrid>(world_size, Vec3(0, 0, 0));
     int x;
     int y;
     int z;
@@ -100,7 +100,7 @@ Scene random_cubes() {
     int num_cubes = 100000;
 
     Scene scene = Scene();
-    auto grid = std::make_unique<SVOVoxelGrid>(world_size, Vec3(0, 0, 0));
+    auto grid = std::make_unique<ArrayVoxelGrid>(world_size, Vec3(0, 0, 0));
     int x;
     int y;
     int z;

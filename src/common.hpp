@@ -20,6 +20,7 @@ using num = double;
 #endif
 
 extern bool debug;
+static const num infinity = std::numeric_limits<num>::infinity();
 static const num epsilon = 1.E-10;
 
 #endif // COMMON_H
