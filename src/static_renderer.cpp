@@ -74,7 +74,7 @@ Scene random_spheres() {
     int num_spheres = 300;
     Scene scene = Scene();
 
-    auto grid = std::make_unique<SVOVoxelGrid>(world_size, Vec3(0, 0, world_size/2));
+    auto grid = std::make_unique<SVOVoxelGrid>(world_size, Vec3(0, 0, 0));
     int x;
     int y;
     int z;
@@ -84,7 +84,11 @@ Scene random_spheres() {
         y = rand() % (9 * world_size / 10);
         z = rand() % (9 * world_size / 10);
         r = rand() % (world_size / 10);
-        grid->create_sphere(Coordinate(x, y, z), r);
+        
+        // Make sure there's no spheres overlapping with the camera
+        if (grid->space_dist(Coordinate(x, y, z), grid->get_coords(Vec3(), Direction())) > r) {
+            grid->create_sphere(Coordinate(x, y, z), r);
+        }
     }
     scene.push_back(std::move(grid));
 

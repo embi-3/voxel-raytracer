@@ -16,7 +16,7 @@ namespace geometry {
 
     class Direction {
     public:
-        uint8_t dir = 0;
+        uint8_t dir = NONE;
 
         constexpr Direction() {}
         constexpr Direction(uint8_t dir)
