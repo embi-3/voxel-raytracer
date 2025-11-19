@@ -170,6 +170,19 @@ namespace geometry {
             root = std::make_unique<Node>(bounding_box);
         }
 
+        explicit SVOVoxelGrid(std::size_t x, std::size_t y, std::size_t z, Vec3 centre) {
+            size = Coordinate(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z));
+            origin =
+                centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
+            
+            Vec3 min_bounds = origin - Vec3(0.5 * scale.x, 0.5 * scale.y, 0.5 * scale.z);
+            Vec3 max_bounds = origin + Vec3((size.x - 0.5) * scale.x, (size.y - 0.5) * scale.y, (size.z - 0.5) * scale.z);
+            bounding_box = AABB(min_bounds, max_bounds);
+
+            max_depth = static_cast<std::size_t>(ceil(std::log2(std::max({x, y, z}))));
+            root = std::make_unique<Node>(bounding_box);
+        }
+
         const Voxel& get_voxel(Coordinate coords) const override;
 
         void set_voxel(Coordinate coords, Voxel voxel) override;
