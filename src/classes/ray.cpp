@@ -18,13 +18,14 @@ namespace geometry {
                            equals_zero(dir.y) ? infinity : fabs(grid.scale.y * inv_dir.y),
                            equals_zero(dir.z) ? infinity : fabs(grid.scale.z * inv_dir.z));
         num tcur = 0;
-        Direction normal = Direction(NONE);
+        Direction normal = Direction();
         Coordinate step = orientation.sign();
         Coordinate coords;
 
         Vec3 min;
         Vec3 max;
         Interval interval = intersection(grid.bounding_box, min, max);
+        Voxel voxel;
 
         // ! DEBUG
         if (debug) {
@@ -65,15 +66,15 @@ namespace geometry {
             }
 
             if (equals(tmax.x, tcur)) {
-                normal += orientation.x();
+                // normal += orientation.x();
                 tmax.x += tdelta.x;
             }
             if (equals(tmax.y, tcur)) {
-                normal += orientation.y();
+                // normal += orientation.y();
                 tmax.y += tdelta.y;
             }
             if (equals(tmax.z, tcur)) {
-                normal += orientation.z();
+                // normal += orientation.z();
                 tmax.z += tdelta.z;
             }
         }
@@ -97,7 +98,7 @@ namespace geometry {
                           << grid.get_coords(at(tcur), orientation) << "\n";
             }
 
-            Voxel voxel = grid.get_voxel(coords);
+            voxel = grid.get_voxel(coords);
             if (voxel.is_opaque()) {
                 // ! DEBUG
                 if (debug) {
