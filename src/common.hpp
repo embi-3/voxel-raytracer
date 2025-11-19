@@ -5,8 +5,16 @@
 // using num = int;
 // #elifdef USE_SINGLE_PRECISION
 
+#ifndef COMMON_H
+#define COMMON_H
+
 #ifdef USE_SINGLE_PRECISION
 using num = float;
 #else
 using num = double;
 #endif
+
+extern bool debug;
+static const num epsilon = 1.E-10;
+
+#endif // COMMON_H

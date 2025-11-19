@@ -2,6 +2,7 @@
 #define COLOUR_H
 
 #include "../common.hpp"
+#include "../helper.hpp"
 #include "vec3.hpp"
 
 #include <algorithm>
@@ -23,6 +24,11 @@ namespace texture {
         num a = 0; // range: [0, 1]
 
         explicit constexpr Colour() noexcept = default;
+        explicit constexpr Colour(const num v, const num a = 1) noexcept
+        : r(v)
+        , g(v)
+        , b(v)
+        , a(a) {}
         explicit constexpr Colour(const num r, const num g, const num b, const num a = 1) noexcept
         : r(r)
         , g(g)
@@ -120,6 +126,10 @@ namespace texture {
         inline uint8_t b_int() const {
             return static_cast<uint8_t>(b);
         }
+
+        inline bool is_transparent() const {
+            return helper::equals_zero(a);
+        }
     };
 
     // Operator Overloads
@@ -148,6 +158,10 @@ namespace texture {
 
     inline Colour operator*(const Colour& c, const num s) noexcept {
         return Colour(bounded_rgb(s * c.r), bounded_rgb(s * c.g), bounded_rgb(s * c.b), c.a);
+    }
+
+    inline std::ostream& operator<<(std::ostream& out, const Colour& c) {
+        return out << "(" << c.r << ", " << c.g << ", " << c.b << ", " << c.a << ")";
     }
 
     // Unbounded Operator Overloads

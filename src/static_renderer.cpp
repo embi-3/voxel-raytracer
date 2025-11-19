@@ -1,21 +1,30 @@
 #include "static_renderer.hpp"
+#include "classes/camera.hpp"
 #include "classes/colour.hpp"
 #include "classes/ray.hpp"
+#include "classes/scene.hpp"
+#include "classes/shader.hpp"
 #include "classes/vec3.hpp"
 
 #include "stb_image_write.h"
 
 #include <chrono>
 #include <cstdint>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <vector>
 
 using Pixel = texture::Colour;
+using namespace texture;
+using namespace geometry;
+using namespace renderer;
 using namespace std::chrono;
 
+bool debug = false;
+
 // Outputs PPM ASCII and PNG
-void create_image(std::size_t width, std::size_t height, const std::vector<Pixel>& pixels) {
+void create_png(std::size_t width, std::size_t height, const std::vector<Pixel>& pixels) {
     if (pixels.size() != width * height)
         throw std::invalid_argument("Error: Number of pixel entries does not match the expected size.");
 
@@ -31,6 +40,7 @@ void create_image(std::size_t width, std::size_t height, const std::vector<Pixel
         image.push_back(pixel.r_int());
         image.push_back(pixel.g_int());
         image.push_back(pixel.b_int());
+        // TODO: Check if this is actually doing what it's supposed to.
         image.push_back(static_cast<uint8_t>(255.999 * pixel.a));
     }
 
@@ -42,58 +52,132 @@ void create_image(std::size_t width, std::size_t height, const std::vector<Pixel
                    static_cast<int>(channels * width));
 }
 
-// simple gradient from 4.2 from "Ray Tracing In One Weekend" website
-Pixel gradient(const geometry::Ray& r) {
-    geometry::Vec3 unit_direction = r.dir.normalise();
-    auto a = 0.5 * (unit_direction.y + 1.0);
-    return texture::interpolate(Pixel(124, 179, 255), Pixel::white(), a);
+Scene two_spheres() {
+    Scene scene = Scene();
+
+    // ! INFO
+    std::cout << "> Creating grid...\n";
+    auto grid = std::make_unique<ArrayVoxelGrid>(32, Vec3(0, 0, 20));
+
+    // TODO: Test shapes that go outside the boundary of the grid and see what happens.
+    std::cout << "> Creating shapes...\n";
+    grid->create_sphere(Coordinate(25, 27, 20), 4);
+    grid->create_sphere(Coordinate(10, 5, 10), 10);
+
+    scene.push_back(std::move(grid));
+
+    return scene;
 }
 
-int main() {
-    const auto start = high_resolution_clock::now();
+Scene random_spheres() {
+    int world_size = 200;
+    int num_spheres = 300;
+    Scene scene = Scene();
 
-    // 16:9 aspect ratio, width of 400
-    auto aspect_ratio = 16.0 / 9.0;
-    int image_width = 400;
+    auto grid = std::make_unique<ArrayVoxelGrid>(world_size, Vec3(0, 0, world_size/2));
+    int x;
+    int y;
+    int z;
+    int r;
+    for (int i = 0; i < num_spheres; i++) {
+        x = rand() % (9 * world_size / 10);
+        y = rand() % (9 * world_size / 10);
+        z = rand() % (9 * world_size / 10);
+        r = rand() % (world_size / 10);
+        grid->create_sphere(Coordinate(x, y, z), r);
+    }
+    scene.push_back(std::move(grid));
 
-    // finds height from ratio and width (height at least 1)
-    int image_height = int(image_width / aspect_ratio);
-    image_height = (image_height < 1) ? 1 : image_height;
+    return scene;
+}
 
-    // camera
-    auto focal_length = 1.0;
-    auto viewport_height = 2.0;
-    auto viewport_width = viewport_height * (double(image_width) / image_height);
-    auto camera_center = geometry::Vec3(0, 0, 0);
+Scene random_cubes() {
+    int world_size = 500;
+    int num_cubes = 100000;
 
-    // calculate horizontal and vertical viewport vectors
-    auto viewport_u = geometry::Vec3(viewport_width, 0, 0);
-    auto viewport_v = geometry::Vec3(0, -viewport_height, 0);
+    Scene scene = Scene();
+    auto grid = std::make_unique<ArrayVoxelGrid>(world_size, Vec3(0, 0, 0));
+    int x;
+    int y;
+    int z;
+    for (int i = 0; i < num_cubes; i++) {
+        x = rand() % world_size;
+        y = rand() % world_size;
+        z = rand() % world_size;
+        grid->create_cube(Coordinate(x, y, z));
+    }
+    scene.push_back(std::move(grid));
 
-    // delta vectors from pixel to pixel
-    auto delta_u = viewport_u / image_width;
-    auto delta_v = viewport_v / image_height;
+    return scene;
+}
 
-    // vector for upper left pixel
-    auto viewport_upper_left = camera_center - geometry::Vec3(0, 0, focal_length) - viewport_u / 2 - viewport_v / 2;
-    auto upper_left_pixel = viewport_upper_left + 0.5 * (delta_u + delta_v);
+int main(int argc, char* argv[]) {
+    int image_width = 1920;
+    int image_height = 1080;
+    std::string debug_path = "output.txt";
 
-    // render
-    auto pixels = std::vector<Pixel>{}; // array of pixels
-    for (int j = 0; j < image_height; j++) {
-        for (int i = 0; i < image_width; i++) {
-            auto pixel_center = upper_left_pixel + (i * delta_u) + (j * delta_v);
-            auto ray_direction = pixel_center - camera_center;
-            auto r = geometry::Ray{camera_center, ray_direction};
+    // Parse command line arguments
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
 
-            auto pixel_colour = gradient(r);
-            pixels.push_back(pixel_colour);
+        if (arg == "--width" && i + 1 < argc) {
+            image_width = std::atoi(argv[++i]);
+        }
+        else if (arg == "--height" && i + 1 < argc) {
+            image_height = std::atoi(argv[++i]);
+        }
+        else if (arg == "--path" && i + 1 < argc) {
+            debug = true;
+        }
+        else if (arg == "--debug") {
+            debug_path = argv[++i];
+        }
+        else {
+            std::cerr << "Unknown argument: " << arg << "\n";
+            return 1;
         }
     }
-    create_image(static_cast<std::size_t>(image_width), static_cast<std::size_t>(image_height), pixels);
+
+    if (debug) {
+        std::cout << "Output is being written to a file!\n";
+        freopen(debug_path.c_str(), "a", stdout);
+        freopen(debug_path.c_str(), "a", stderr);
+    }
+
+    // ! INFO
+    std::cout << "===========================================\n\n"
+              << "> Starting...\n";
+    const auto start = high_resolution_clock::now();
+
+    // ! INFO
+    std::cout << "> Initialising camera...\n";
+    Camera camera = Camera(image_width, image_height);
+
+    // Create the scene
+    // ! INFO
+    std::cout << "> Creating scene...\n";
+    // Scene scene = two_spheres();
+    Scene scene = random_spheres();
+    // Scene scene = random_cubes();
+
+    // Create shaders
+    // ! INFO
+    std::cout << "> Creating shaders...\n";
+    GradientShader gradient_shader = GradientShader();
+    WhiteShader white_shader = WhiteShader();
+    RedShader red_shader = RedShader();
+    DistanceShader distance_shader = DistanceShader();
+    OrientationShader orientation_shader = OrientationShader();
+    RayShader ray_shader = RayShader();
+
+    // Render the scene
+    // ! INFO
+    std::cout << "> Rendering scene...\n";
+    auto pixels = camera.render(scene, orientation_shader);
+    create_png(static_cast<std::size_t>(image_width), static_cast<std::size_t>(image_height), pixels);
 
     const auto end = high_resolution_clock::now();
     const auto duration = duration_cast<milliseconds>(end - start).count();
 
-    std::cout << "Time taken: " << duration << " ms\n";
+    std::cout << "> Time taken: " << duration << " ms\n\n";
 }
