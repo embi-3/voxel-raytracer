@@ -23,7 +23,7 @@ namespace geometry {
                     std::cerr << "Ray: " << ray.dir << "\n";
                 }
                 if (ray.intersects(grid->bounding_box)) {
-                    IntersectionList intersections = traverse(ray);
+                    IntersectionList intersections = grid->traverse(ray);
                     objects.insert(objects.end(), intersections.begin(), intersections.end());
                 }
             }

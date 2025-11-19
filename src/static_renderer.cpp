@@ -13,6 +13,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <vector>
 
 using Pixel = texture::Colour;
@@ -84,7 +85,6 @@ Scene random_spheres() {
         y = rand() % (9 * world_size / 10);
         z = rand() % (9 * world_size / 10);
         r = rand() % (world_size / 10);
-
         // Make sure there's no spheres overlapping with the camera
         if (grid->space_dist(Coordinate(x, y, z), grid->get_coords(Vec3(), Direction())) > r) {
             grid->create_sphere(Coordinate(x, y, z), r);

@@ -1,8 +1,6 @@
 #include "ray.hpp"
 #include "voxel_grid.hpp"
 
-#include "intersection_list.hpp"
-
 namespace geometry {
 
 // ========================================================================

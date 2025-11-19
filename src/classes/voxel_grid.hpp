@@ -15,6 +15,8 @@
 
 #include <vector>
 
+using namespace helper;
+
 namespace geometry {
     class VoxelGrid {
     public:
