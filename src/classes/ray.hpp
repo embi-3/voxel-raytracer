@@ -3,12 +3,14 @@
 
 #include "../common.hpp"
 #include "../helper.hpp"
+
 #include "intersection.hpp"
 #include "intersection_list.hpp"
 #include "scene.hpp"
 #include "vec3.hpp"
 #include "voxel.hpp"
 #include "voxel_grid.hpp"
+
 #include <vector>
 
 using namespace helper;
@@ -30,16 +32,17 @@ namespace geometry {
             inv_dir.z = equals_zero(dir.z) ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.z;
         }
 
-        IntersectionList traverse(const VoxelGrid& grid);
+        IntersectionList traverse(const VoxelGrid& grid) const;
+        IntersectionList traverse(const Scene& scene) const;
 
-        IntersectionList traverse(const Scene& scene);
+        Interval intersection(AABB bounding_box) const;
+        Interval intersection(AABB bounding_box, Vec3& tmin, Vec3& tmax) const;
 
-        Interval intersection(AABB bounding_box);
-        Interval intersection(AABB bounding_box, Vec3& tmin, Vec3& tmax);
+        bool intersects(AABB bounding_box) const {
+            return intersection(bounding_box).is_valid();
+        }
 
-        bool intersects(AABB bounding_box);
-
-        inline Vec3 at(num t) {
+        Vec3 at(num t) const {
             return origin + t * dir;
         }
     };

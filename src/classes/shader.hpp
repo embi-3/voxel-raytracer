@@ -13,7 +13,7 @@ namespace shader {
 
     class Shader {
     public:
-        virtual Colour fragment(IntersectionList& list) = 0;
+        virtual Colour fragment(const IntersectionList& list) const = 0;
 
         virtual ~Shader() = default;
     };
@@ -21,7 +21,7 @@ namespace shader {
     // ? Is it bad practice to put these classes here instead of in their own files?
     class WhiteShader : public Shader {
     public:
-        Colour fragment(IntersectionList& list) override {
+        Colour fragment(const IntersectionList& list) const override {
             if (!list.empty()) {
                 return Colour::white();
             }
@@ -31,7 +31,7 @@ namespace shader {
 
     class RedShader : public Shader {
     public:
-        Colour fragment(IntersectionList& list) override {
+        Colour fragment(const IntersectionList& list) const override {
             if (!list.empty()) {
                 return Colour::red();
             }
@@ -41,9 +41,9 @@ namespace shader {
 
     class DistanceShader : public Shader {
     public:
-        Colour fragment(IntersectionList& list) override {
+        Colour fragment(const IntersectionList& list) const override {
             if (!list.empty()) {
-                num distance = (list.items.at(0)).distance;
+                num distance = (list.at(0)).distance;
                 // ! DEBUG
                 if (debug) {
                     std::cerr << "Distance: " << distance << "\n";
@@ -56,9 +56,9 @@ namespace shader {
 
     class OrientationShader : public Shader {
     public:
-        Colour fragment(IntersectionList& list) override {
+        Colour fragment(const IntersectionList& list) const override {
             if (!list.empty()) {
-                Direction orientation = (list.items.at(0)).orientation;
+                Direction orientation = (list.at(0)).orientation;
                 Colour colour = Colour::black();
                 if (orientation.is_xpos()) {
                     colour += Colour::red();
@@ -87,9 +87,9 @@ namespace shader {
 
     class RayShader : public Shader {
     public:
-        Colour fragment(IntersectionList& list) override {
+        Colour fragment(const IntersectionList& list) const override {
             if (!list.empty()) {
-                Vec3 dir = list.ray_dir.normalise();
+                Vec3 dir = list.ray_direction();
                 Colour colour = Colour(122.5) + Colour(122.5 * dir.x, 122.5 * dir.y, 122.5 * dir.z);
 
                 return colour;
@@ -100,8 +100,8 @@ namespace shader {
 
     class GradientShader : public Shader {
     public:
-        Colour fragment(IntersectionList& list) override {
-            Vec3 unit_direction = list.ray_dir.normalise();
+        Colour fragment(const IntersectionList& list) const override {
+            Vec3 unit_direction = list.ray_direction();
             auto a = 0.5 * (unit_direction.y + 1.0);
             return interpolate(Colour(124, 179, 255), Colour::white(), a);
         }

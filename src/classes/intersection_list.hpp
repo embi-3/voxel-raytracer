@@ -10,12 +10,10 @@
 #include <vector>
 
 namespace geometry {
-    using IntersectionIterator = std::vector<Intersection>::iterator;
+    using IntersectionIterator = std::vector<Intersection>::const_iterator;
+
     class IntersectionList {
     public:
-        Vec3 ray_dir;
-        std::vector<Intersection> items;
-
         explicit IntersectionList(Vec3 ray)
         : ray_dir(ray) {}
 
@@ -29,17 +27,33 @@ namespace geometry {
             items.insert(iterator, first, last);
         }
 
-        auto begin() {
+        auto at(size_t index) const {
+            return items.at(index);
+        }
+
+        auto begin() const noexcept {
             return items.begin();
         }
 
-        auto end() {
+        auto end() const noexcept {
             return items.end();
         }
 
-        auto empty() {
+        auto empty() const noexcept {
             return items.empty();
         }
+
+        auto size() const noexcept {
+            return items.size();
+        }
+
+        auto ray_direction() const {
+            return ray_dir.normalise();
+        }
+
+    private:
+        Vec3 ray_dir;
+        std::vector<Intersection> items;
     };
 
 } // namespace geometry

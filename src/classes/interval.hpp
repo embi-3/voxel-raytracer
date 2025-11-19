@@ -8,16 +8,18 @@
 namespace geometry {
     class Interval {
     public:
-        num min;
-        num max;
-
-        constexpr explicit Interval(num min, num max)
+        constexpr explicit Interval(num min, num max) noexcept
         : min(min)
         , max(max) {}
 
-        inline bool is_valid() {
+        bool is_valid() const noexcept {
             return min <= max;
         }
+
+        friend std::ostream& operator<<(std::ostream& out, const Interval& i);
+
+        num min;
+        num max;
     };
 
     inline std::ostream& operator<<(std::ostream& out, const Interval& i) {

@@ -2,6 +2,7 @@
 #include "../helper.hpp"
 #include "aabb.hpp"
 #include "intersection.hpp"
+
 #include <iostream>
 #include <limits>
 
@@ -10,7 +11,7 @@ using namespace helper;
 namespace geometry {
     static const num infinity = std::numeric_limits<num>::infinity();
 
-    IntersectionList Ray::traverse(const VoxelGrid& grid) {
+    IntersectionList Ray::traverse(const VoxelGrid& grid) const {
         IntersectionList objects = IntersectionList(dir);
 
         Vec3 tmax;
@@ -148,7 +149,7 @@ namespace geometry {
         return objects;
     }
 
-    IntersectionList geometry::Ray::traverse(const Scene& scene) {
+    IntersectionList geometry::Ray::traverse(const Scene& scene) const {
         IntersectionList objects = IntersectionList(dir);
         for (const auto &grid : scene.grids) {
             // ! DEBUG
@@ -163,18 +164,18 @@ namespace geometry {
 
         // ! DEBUG
         if (debug) {
-            std::cerr << "[i] " << objects.items.size() << " intersection(s) with " << dir << "\n";
+            std::cerr << "[i] " << objects.size() << " intersection(s) with " << dir << "\n";
         }
 
         return objects;
     }
 
-    Interval geometry::Ray::intersection(AABB bounding_box) {
+    Interval geometry::Ray::intersection(AABB bounding_box) const {
         Vec3 dummy;
         return intersection(bounding_box, dummy, dummy);
     }
 
-    Interval geometry::Ray::intersection(AABB bounding_box, Vec3& tmin, Vec3& tmax) {
+    Interval geometry::Ray::intersection(AABB bounding_box, Vec3& tmin, Vec3& tmax) const {
         num t_min = 0;
         num t_max = infinity;
 
@@ -215,9 +216,5 @@ namespace geometry {
         tmax = Vec3(x_max, y_max, z_max);
 
         return Interval(t_min, t_max);
-    }
-
-    bool geometry::Ray::intersects(AABB bounding_box) {
-        return intersection(bounding_box).is_valid();
     }
 } // namespace geometry

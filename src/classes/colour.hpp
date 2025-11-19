@@ -13,22 +13,19 @@
 
 // Biggest number less than 256
 static const num RGB_MAX = std::nexttoward(256, 0);
-static const num RGB_MIN = 0;
+static constexpr num RGB_MIN = 0;
 
 namespace texture {
     class Colour {
     public:
-        num r = 0; // range: [0, 256)
-        num g = 0; // range: [0, 256)
-        num b = 0; // range: [0, 256)
-        num a = 0; // range: [0, 1]
+        explicit constexpr Colour() = default;
 
-        explicit constexpr Colour() noexcept = default;
         explicit constexpr Colour(const num v, const num a = 1) noexcept
         : r(v)
         , g(v)
         , b(v)
         , a(a) {}
+
         explicit constexpr Colour(const num r, const num g, const num b, const num a = 1) noexcept
         : r(r)
         , g(g)
@@ -82,10 +79,11 @@ namespace texture {
             return Colour(255, 0, 255);
         }
 
-        inline Colour set_alpha(num alpha) {
-            a = alpha;
-            return *this;
-        }
+        // If alpha is public is this necessary?
+        // Colour set_alpha(num alpha) {
+        //     a = alpha;
+        //     return *this;
+        // }
 
         // ! std::format not supported by compiler.
         // inline std::string to_rgb_string() {
@@ -96,12 +94,12 @@ namespace texture {
         // 	return std::format("%d %d %d %.2f", rint(), gint(), bint(), a);
         // }
 
-        inline std::string to_rgb_string() const {
+        std::string to_rgb_string() const {
             return std::to_string(r_int()) + " " + std::to_string(g_int()) + " " + std::to_string(b_int());
         }
 
         // ! This does not restrict the precision of the float when printing.
-        inline std::string to_rgba_string() const {
+        std::string to_rgba_string() const {
             return std::to_string(r_int()) + " " + std::to_string(g_int()) + " " + std::to_string(b_int()) + " "
                    + std::to_string(a);
         }
@@ -115,21 +113,26 @@ namespace texture {
 
         // static_cast always truncates the floating part of the number, rounding down.
 
-        inline uint8_t r_int() const {
+        uint8_t r_int() const noexcept {
             return static_cast<uint8_t>(r);
         }
 
-        inline uint8_t g_int() const {
+        uint8_t g_int() const noexcept {
             return static_cast<uint8_t>(g);
         }
 
-        inline uint8_t b_int() const {
+        uint8_t b_int() const noexcept {
             return static_cast<uint8_t>(b);
         }
 
-        inline bool is_transparent() const {
+        bool is_transparent() const noexcept {
             return helper::equals_zero(a);
         }
+
+        num r = 0; // range: [0, 256)
+        num g = 0; // range: [0, 256)
+        num b = 0; // range: [0, 256)
+        num a = 0; // range: [0, 1]
     };
 
     // Operator Overloads
@@ -201,10 +204,15 @@ namespace texture {
     // }
 
     // Blend Modes
-    Colour normal_blend(const Colour& u, const Colour& v) noexcept;
+    inline Colour normal_blend(const Colour& u, const Colour& v) {
+        auto blended = (u.a * u) + ((1 - u.a) * (v * v.a));
+        blended.a = std::min(u.a + (u.a * v.a), 1.0);
+        return blended;
+    }
 
-    Colour interpolate(const Colour& u, const Colour& v, num ratio) noexcept;
-
+    inline Colour interpolate(const Colour& u, const Colour& v, num ratio) noexcept {
+        return (ratio * u) + ((1 - ratio) * v);
+    }
 } // namespace texture
 
 #endif // COLOUR_H

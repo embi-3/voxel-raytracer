@@ -12,25 +12,27 @@ namespace geometry {
 
     class Intersection {
     public:
+        explicit constexpr Intersection(Voxel& voxel) noexcept
+        : voxel(voxel) {}
+
+        explicit constexpr Intersection(Voxel& voxel, num distance) noexcept
+        : voxel(voxel)
+        , distance(distance) {}
+
+        explicit constexpr Intersection(Voxel& voxel, num distance, Direction orientation) noexcept
+        : voxel(voxel)
+        , distance(distance)
+        , orientation(orientation) {}
+
+        static constexpr Intersection invalid() noexcept {
+            return Intersection(INVALID_VOXEL, -1);
+        }
+
         std::reference_wrapper<Voxel> voxel; // for colour and material data
         num distance = 0; // for depth shader.
         Direction orientation = Direction(NONE);
         // TODO: Implement this!
         Vec3 normal;
-
-        explicit constexpr Intersection(Voxel& voxel)
-        : voxel(voxel) {}
-        explicit constexpr Intersection(Voxel& voxel, num distance)
-        : voxel(voxel)
-        , distance(distance) {}
-        explicit constexpr Intersection(Voxel& voxel, num distance, Direction orientation)
-        : voxel(voxel)
-        , distance(distance)
-        , orientation(orientation) {}
-
-        static constexpr Intersection invalid() {
-            return Intersection(INVALID_VOXEL, -1);
-        }
     };
 
 } // namespace geometry
