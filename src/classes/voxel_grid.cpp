@@ -1,6 +1,8 @@
 #include "ray.hpp"
 #include "voxel_grid.hpp"
 
+#include <stack>
+
 namespace geometry {
 
 // ========================================================================
@@ -71,7 +73,7 @@ namespace geometry {
 //  ArrayVoxelGrid
 // ========================================================================
 
-    IntersectionList ArrayVoxelGrid::traverse(const Ray& ray) const {
+    IntersectionList ArrayVoxelGrid::traverse(Ray ray) const {
         IntersectionList objects = IntersectionList(ray.dir);
 
         Vec3 tmax;
@@ -279,13 +281,110 @@ namespace geometry {
             
             auto& child = curr->children[child_index];
             if (!child) {
-                child = std::make_unique<Node>();
+                auto x_dist = curr->bounding_box.max.x - curr->bounding_box.min.x;
+                auto y_dist = curr->bounding_box.max.y - curr->bounding_box.min.y;
+                auto z_dist = curr->bounding_box.max.z - curr->bounding_box.min.z;
+
+                auto min = Vec3(
+                    curr->bounding_box.min.x + static_cast<double>(x_bit) * (x_dist / 2),
+                    curr->bounding_box.min.y + static_cast<double>(y_bit) * (y_dist / 2),
+                    curr->bounding_box.min.z + static_cast<double>(z_bit) * (z_dist / 2)
+                );
+
+                auto max = min + Vec3(x_dist / 2, y_dist / 2, z_dist / 2);
+
+                child = std::make_unique<Node>(AABB(min, max));
             }
             curr = child.get();
         }
 
         curr->data = voxel;
         curr->isLeaf = true;
+    }
+
+    IntersectionList SVOVoxelGrid::traverse(Ray ray) const {
+        auto objects = IntersectionList(ray.dir);
+
+        auto root_interval = ray.intersection(root->bounding_box);
+        // If ray doesn't hit root bounding_box, skip
+        if (!root_interval.is_valid())
+            return objects;
+
+        // Stores nodes with t-intervals
+        struct StackNode {
+            Node* ptr;
+            num tmin;
+            num tmax;
+        };
+
+        // Stack of nodes while traversing
+        auto stack = std::stack<StackNode>{};
+        stack.push({root.get(), root_interval.min, root_interval.max});
+
+        // Iterate until stack is empty or opaque node is hit
+        while (!stack.empty()) {
+            /// Pop stack
+            auto stack_node = stack.top();
+            auto node = stack_node.ptr;
+            stack.pop();
+
+            if (node->isLeaf) {
+                auto hit = ray.at(stack_node.tmin);
+                auto node_bb = node->bounding_box;
+                auto normal = Vec3();
+
+                if (std::fabs(hit.x - node_bb.min.x) < epsilon) 
+                    normal = Vec3(1, 0, 0);
+                else if (std::fabs(hit.x - node_bb.max.x) < epsilon) 
+                    normal = Vec3(-1, 0, 0);
+                else if (std::fabs(hit.y - node_bb.min.y) < epsilon) 
+                    normal = Vec3(0, 1, 0);
+                else if (std::fabs(hit.y - node_bb.max.y) < epsilon)
+                    normal = Vec3(0, -1, 0);
+                else if (std::fabs(hit.z - node_bb.min.z) < epsilon)
+                    normal = Vec3(0, 0, 1);
+                else if (std::fabs(hit.z - node_bb.max.z) < epsilon)
+                    normal = Vec3(0, 0, -1);
+
+                objects.push_back(Intersection(node->data, stack_node.tmin * ray.dir.length(), normal));
+                break;
+            }
+
+            auto sorted_children = std::array<StackNode, 8>{};
+            std::size_t child_count = 0;
+            for (std::size_t i = 0; i < 8; i++) {
+                // If child is nullptr, skip
+                if (!node->children[i]) continue;
+                auto child = node->children[i].get();
+                
+                // If ray doesn't intersect, skip
+                auto child_interval = ray.intersection(child->bounding_box);
+                if (!child_interval.is_valid()) continue;
+
+                // If ray doesnt originate from the parent, skip  
+                num tmin = std::max(child_interval.min, stack_node.tmin); 
+                num tmax = std::min(child_interval.max, stack_node.tmax); 
+                if (tmin > tmax) continue;
+                
+                sorted_children[child_count++] = {child, tmin, tmax};
+            }
+
+            // Sort children in descending tmin order
+            std::sort(
+                sorted_children.begin(), 
+                sorted_children.end(),
+                [](const StackNode& a, const StackNode& b) { return a.tmin > b.tmin; }
+            );
+
+            for (const auto& child : sorted_children) {
+                if (!child.ptr) 
+                    break;
+
+                stack.push(child);
+            }
+        }
+
+        return objects;
     }
 
 };

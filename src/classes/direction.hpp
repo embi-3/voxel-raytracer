@@ -16,7 +16,7 @@ namespace geometry {
 
     class Direction {
     public:
-        constexpr Direction() = default;
+        constexpr Direction() noexcept = default;
 
         constexpr Direction(uint8_t dir) noexcept
         : dir(dir) {}
@@ -118,9 +118,9 @@ namespace geometry {
         }
 
         constexpr Coordinate sign() const noexcept {
-            int x = (is_xpos() ? 1 : (is_xneg() ? -1 : 0));
-            int y = (is_ypos() ? 1 : (is_yneg() ? -1 : 0));
-            int z = (is_zpos() ? 1 : (is_zneg() ? -1 : 0));
+            auto x = (is_xpos() ? 1 : (is_xneg() ? -1 : 0));
+            auto y = (is_ypos() ? 1 : (is_yneg() ? -1 : 0));
+            auto z = (is_zpos() ? 1 : (is_zneg() ? -1 : 0));
             return Coordinate(x, y, z);
         }
 

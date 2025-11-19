@@ -14,25 +14,25 @@ namespace geometry {
     }
 
     Interval Ray::intersection(AABB bounding_box, Vec3& tmin, Vec3& tmax) const {
-        num t_min = 0;
-        num t_max = infinity;
+        auto t_min = 0.0;
+        auto t_max = infinity;
 
-        num x_min = (orientation.x().is_none()
+        auto x_min = (orientation.x().is_none()
                          ? -infinity
                          : ((orientation.is_xpos() ? bounding_box.min.x : bounding_box.max.x) - origin.x) * inv_dir.x);
-        num x_max = (orientation.x().is_none()
+        auto x_max = (orientation.x().is_none()
                          ? infinity
                          : ((orientation.is_xpos() ? bounding_box.max.x : bounding_box.min.x) - origin.x) * inv_dir.x);
-        num y_min = (orientation.y().is_none()
+        auto y_min = (orientation.y().is_none()
                          ? -infinity
                          : ((orientation.is_ypos() ? bounding_box.min.y : bounding_box.max.y) - origin.y) * inv_dir.y);
-        num y_max = (orientation.y().is_none()
+        auto y_max = (orientation.y().is_none()
                          ? infinity
                          : ((orientation.is_ypos() ? bounding_box.max.y : bounding_box.min.y) - origin.y) * inv_dir.y);
-        num z_min = (orientation.z().is_none()
+        auto z_min = (orientation.z().is_none()
                          ? -infinity
                          : ((orientation.is_zpos() ? bounding_box.min.z : bounding_box.max.z) - origin.z) * inv_dir.z);
-        num z_max = (orientation.z().is_none()
+        auto z_max = (orientation.z().is_none()
                          ? infinity
                          : ((orientation.is_zpos() ? bounding_box.max.z : bounding_box.min.z) - origin.z) * inv_dir.z);
 

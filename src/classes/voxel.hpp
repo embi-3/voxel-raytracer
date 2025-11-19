@@ -31,7 +31,7 @@ namespace geometry {
             return opaque;
         }
 
-        Colour get_colour() const noexcept {
+        const Colour& get_colour() const noexcept {
             return colour;
         }
 

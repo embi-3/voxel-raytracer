@@ -18,21 +18,21 @@ static constexpr num RGB_MIN = 0;
 namespace texture {
     class Colour {
     public:
-        explicit constexpr Colour() = default;
+        explicit constexpr Colour() noexcept = default;
 
-        explicit constexpr Colour(const num v, const num a = 1) noexcept
+        explicit constexpr Colour(num v, num a = 1) noexcept
         : r(v)
         , g(v)
         , b(v)
         , a(a) {}
 
-        explicit constexpr Colour(const num r, const num g, const num b, const num a = 1) noexcept
+        explicit constexpr Colour(num r, num g, num b, num a = 1) noexcept
         : r(r)
         , g(g)
         , b(b)
         , a(a) {}
 
-        Colour& operator+=(const Colour& rhs) {
+        Colour& operator+=(const Colour& rhs) noexcept {
             r += rhs.r;
             g += rhs.g;
             b += rhs.b;
@@ -94,7 +94,7 @@ namespace texture {
         // 	return std::format("%d %d %d %.2f", rint(), gint(), bint(), a);
         // }
 
-        std::string to_rgb_string() const {
+        std::string to_rgb_string() const noexcept {
             return std::to_string(r_int()) + " " + std::to_string(g_int()) + " " + std::to_string(b_int());
         }
 

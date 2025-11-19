@@ -25,21 +25,21 @@ namespace renderer {
         , viewport_height(viewport_height)
         , viewport_width(viewport_height * (static_cast<double>(image_width) / image_height)) {
             // calculate horizontal and vertical viewport vectors
-            const auto viewport_x = Vec3(viewport_width, 0, 0);
-            const auto viewport_y = Vec3(0, -viewport_height, 0);
+            auto viewport_x = Vec3(viewport_width, 0, 0);
+            auto viewport_y = Vec3(0, -viewport_height, 0);
 
             // delta vectors from pixel to pixel
             delta_x = viewport_x / image_width;
             delta_y = viewport_y / image_height;
 
             // vector for upper left pixel
-            const auto viewport_upper_left = camera_center + Vec3(0, 0, focal_length) - viewport_x / 2 - viewport_y / 2;
+            auto viewport_upper_left = camera_center + Vec3(0, 0, focal_length) - viewport_x / 2 - viewport_y / 2;
             upper_left_pixel = viewport_upper_left + 0.5 * (delta_x + delta_y);
         }
 
-        std::vector<Pixel> render(Scene& scene, Shader& shader) const;
+        std::vector<Pixel> render(const Scene& scene, const Shader& shader) const;
 
-        std::vector<Pixel> render(VoxelGrid& grid, Shader& shader);
+        std::vector<Pixel> render(const VoxelGrid& grid, const Shader& shader) const;
 
     private:
         int image_width;
