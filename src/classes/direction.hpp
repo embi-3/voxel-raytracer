@@ -4,6 +4,7 @@
 #include "../common.hpp"
 #include "vec3.hpp"
 #include <string>
+#include <cstdint>
 
 namespace geometry {
     static const uint8_t NONE = 0;

@@ -9,7 +9,7 @@ namespace helper {
         return std::fabs(lhs - rhs) < epsilon;
     }
 
-    inline bool equals_zero(num lhs) {
+    constexpr inline bool equals_zero(num lhs) {
         return std::fabs(lhs) < epsilon;
     }
 } // namespace helper

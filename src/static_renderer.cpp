@@ -157,8 +157,8 @@ int main(int argc, char* argv[]) {
     // ! INFO
     std::cout << "> Creating scene...\n";
     // Scene scene = two_spheres();
-    Scene scene = random_spheres();
-    // Scene scene = random_cubes();
+    // Scene scene = random_spheres();
+    Scene scene = random_cubes();
 
     // Create shaders
     // ! INFO

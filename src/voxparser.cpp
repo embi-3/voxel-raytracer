@@ -6,6 +6,9 @@ Parser for the .vox file format.
 https://github.com/ephtracy/voxel-model/blob/master/MagicaVoxel-file-format-vox.txt
 */
 
+/*
+
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -117,4 +120,6 @@ int main() {
     }
     inputFile.close();
 }
+
+*/
 
