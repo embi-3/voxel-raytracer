@@ -27,7 +27,7 @@ namespace renderer {
                     std::cerr << "Pixel: (" << i << ", " << j << ")\n";
                 }
 
-                const auto intersections = r.traverse(scene);
+                const auto intersections = scene.traverse(r);
                 const auto pixel_colour = shader.fragment(intersections);
                 pixels.push_back(pixel_colour);
             }
@@ -46,7 +46,7 @@ namespace renderer {
                 auto ray_direction = pixel_center - camera_center;
                 auto r = Ray{camera_center, ray_direction};
 
-                auto intersections = r.traverse(grid);
+                auto intersections = grid.traverse(r);
                 auto pixel_colour = shader.fragment(intersections);
                 pixels.push_back(pixel_colour);
             }

@@ -4,12 +4,11 @@
 #include "../common.hpp"
 #include "../helper.hpp"
 
-#include "intersection.hpp"
+#include "aabb.hpp"
 #include "intersection_list.hpp"
-#include "scene.hpp"
+#include "interval.hpp"
 #include "vec3.hpp"
 #include "voxel.hpp"
-#include "voxel_grid.hpp"
 
 #include <vector>
 
@@ -31,9 +30,6 @@ namespace geometry {
             inv_dir.y = equals_zero(dir.y) ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.y;
             inv_dir.z = equals_zero(dir.z) ? std::numeric_limits<num>::infinity() : static_cast<num>(1) / dir.z;
         }
-
-        IntersectionList traverse(const VoxelGrid& grid) const;
-        IntersectionList traverse(const Scene& scene) const;
 
         Interval intersection(AABB bounding_box) const;
         Interval intersection(AABB bounding_box, Vec3& tmin, Vec3& tmax) const;

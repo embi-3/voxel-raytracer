@@ -4,10 +4,14 @@
 #include "../common.hpp"
 #include "aabb.hpp"
 #include "direction.hpp"
+#include "intersection_list.hpp"
+#include "ray.hpp"
 #include "voxel.hpp"
+
 #include <cmath>
 #include <memory>
 #include <iostream>
+#include <sstream>
 
 #include <vector>
 
@@ -19,6 +23,8 @@ namespace geometry {
         virtual const Voxel& get_voxel(Coordinate coords) const = 0;
 
         virtual void set_voxel(Coordinate coords, Voxel voxel) = 0;
+
+        virtual IntersectionList traverse(const Ray& ray) const = 0;
 
         // ! The orientation is used to distinguish ties for coordinates on the border of voxels.
         Coordinate get_coords(Vec3 pos, Direction orientation) const;
@@ -105,21 +111,31 @@ namespace geometry {
 
         // TODO: Check if this returns shallow or deep copy of the Voxel.
         const Voxel& get_voxel(Coordinate coords) const override {
-            size_t index = flatten(coords);
-            // I think at has bounds checking
-            if (index >= static_cast<size_t>(size.x * size.y * size.z)) {
-                throw std::invalid_argument("Coordinates out of bounds.");
+            if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0 || coords.z >= size.z) {
+                auto stream = StringStream{};
+                stream << "[!] Coordinates out of bounds: " << coords << "\n";
+                throw std::invalid_argument(stream.str());
             }
 
-            return world.at(index);
+            return world[flatten(coords)];
         }
 
         void set_voxel(Coordinate coords, Voxel voxel) override {
-            world.at(flatten(coords)) = voxel;
+            if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0 || coords.z >= size.z) {
+                auto stream = StringStream{};
+                stream << "[!] Coordinates out of bounds: " << coords << "\n";
+                throw std::invalid_argument(stream.str());
+            }
+
+            world[flatten(coords)] = voxel;
         }
+
+        IntersectionList traverse(const Ray& ray) const override;
 
     private:
         std::vector<Voxel> world = {}; // 1D array representation of the voxel world
+
+        void initialise();
 
         // ! If the coordinates are too large, this may return an index outside the VoxelGrid!
         size_t flatten(Coordinate coords) const {
@@ -133,8 +149,6 @@ namespace geometry {
             int z = static_cast<int>(index) - x * (size.y + size.z) - y * size.z;
             return Coordinate(x, y, z);
         }
-
-        void initialise();
     };
 
     class SVOVoxelGrid : public VoxelGrid {
@@ -152,6 +166,11 @@ namespace geometry {
         const Voxel& get_voxel(Coordinate coords) const override;
 
         void set_voxel(Coordinate coords, Voxel voxel) override;
+
+        IntersectionList traverse(const Ray& ray) const override {
+            // TODO: Implement this!
+            return IntersectionList(ray.dir);
+        }
 
     private:
         struct Node {

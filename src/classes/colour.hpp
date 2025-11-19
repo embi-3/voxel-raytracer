@@ -167,42 +167,6 @@ namespace texture {
         return out << "(" << c.r << ", " << c.g << ", " << c.b << ", " << c.a << ")";
     }
 
-    // Unbounded Operator Overloads
-    // ! These have been left here for future testing purposes.
-
-    // // ! These operations may produce invalid RGBA values! Be careful of overflows!
-    // inline Colour operator+(const Colour& u, const Colour& v) noexcept {
-    //     Colour res = Colour(u.r + v.r, u.g + v.g, u.b + v.b, max((u.a) + (u.a * v.a));
-    // 	if (!res.is_valid()) {
-    // 		std::cerr << "Invalid RGBA value! Received " << res.to_rgb_string();
-    // 		return Colour::black();
-    // 	}
-
-    // 	return res;
-    // }
-
-    // // ! These operations may produce invalid RGBA values! Be careful of overflows!
-    // inline Colour operator*(const num s, const Colour& c) noexcept {
-    //     Colour res = Colour(s*c.r, s*c.g, s*c.b, c.a);
-    // 	if (!res.is_valid()) {
-    // 		std::cerr << "Invalid RGBA value! Received " << res.to_rgba_string();
-    // 		return Colour::black();
-    // 	}
-
-    // 	return res;
-    // }
-
-    // // ! These operations may produce invalid RGBA values! Be careful of overflows!
-    // inline Colour operator*(const Colour& c, const num s) noexcept {
-    //     Colour res = Colour(s*c.r, s*c.g, s*c.b, c.a);
-    // 	if (!res.is_valid()) {
-    // 		std::cerr << "Invalid RGBA value! Received " << res.to_rgba_string();
-    // 		return Colour::black();
-    // 	}
-
-    // 	return res;
-    // }
-
     // Blend Modes
     inline Colour normal_blend(const Colour& u, const Colour& v) {
         auto blended = (u.a * u) + ((1 - u.a) * (v * v.a));

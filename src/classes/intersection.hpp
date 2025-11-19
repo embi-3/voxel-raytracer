@@ -12,19 +12,19 @@ namespace geometry {
 
     class Intersection {
     public:
-        explicit constexpr Intersection(Voxel& voxel) noexcept
+        explicit Intersection(Voxel& voxel) noexcept
         : voxel(voxel) {}
 
-        explicit constexpr Intersection(Voxel& voxel, num distance) noexcept
+        explicit Intersection(Voxel& voxel, num distance) noexcept
         : voxel(voxel)
         , distance(distance) {}
 
-        explicit constexpr Intersection(Voxel& voxel, num distance, Direction orientation) noexcept
+        explicit Intersection(Voxel& voxel, num distance, Direction orientation) noexcept
         : voxel(voxel)
         , distance(distance)
         , orientation(orientation) {}
 
-        static constexpr Intersection invalid() noexcept {
+        static Intersection invalid() noexcept {
             return Intersection(INVALID_VOXEL, -1);
         }
 

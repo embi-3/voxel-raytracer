@@ -20,10 +20,13 @@ namespace geometry {
                    && pos.y - max.y <= epsilon && epsilon >= min.z - pos.z && pos.z - max.z <= epsilon;
         }
 
-        // Maybe make these private?
         Vec3 min;
         Vec3 max;
     };
+
+    inline std::ostream& operator<<(std::ostream& out, const AABB& aabb) {
+        return out << "[" << aabb.min << ", " << aabb.max << "]";
+    }
 } // namespace geometry
 
 #endif // AABB_H

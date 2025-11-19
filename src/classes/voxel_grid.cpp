@@ -1,4 +1,7 @@
+#include "ray.hpp"
 #include "voxel_grid.hpp"
+
+#include "intersection_list.hpp"
 
 namespace geometry {
 
@@ -29,11 +32,9 @@ namespace geometry {
                                 static_cast<int>(round(y_scaled)),
                                 static_cast<int>(round(z_scaled)));
         } else {
-            // Return a coordinate that is clearly an error. We could handle this error more elegantly but
-            // this is good enough for debugging purposes.
-            std::cerr << "[!] " << pos << " is not in bounds: [" << bounding_box.min << ", " << bounding_box.max
-                        << "]\n";
-            return Coordinate(std::numeric_limits<int>().max());
+            auto stream = StringStream{};
+            stream << "[!] " << pos << "is not in bounds: " << bounding_box << "\n";
+            throw std::invalid_argument(stream.str());
         }
     }
 
@@ -72,6 +73,145 @@ namespace geometry {
 //  ArrayVoxelGrid
 // ========================================================================
 
+    IntersectionList ArrayVoxelGrid::traverse(const Ray& ray) const {
+        IntersectionList objects = IntersectionList(ray.dir);
+
+        Vec3 tmax;
+        Vec3 tdelta = Vec3(equals_zero(ray.dir.x) ? infinity : fabs(scale.x * ray.inv_dir.x),
+                        equals_zero(ray.dir.y) ? infinity : fabs(scale.y * ray.inv_dir.y),
+                        equals_zero(ray.dir.z) ? infinity : fabs(scale.z * ray.inv_dir.z));
+        num tcur = 0;
+        Direction normal = Direction();
+        Coordinate step = ray.orientation.sign();
+        Coordinate coords;
+
+        Vec3 min;
+        Vec3 max;
+        Interval interval = ray.intersection(bounding_box, min, max);
+        Voxel voxel;
+
+        // ! DEBUG
+        if (debug) {
+            std::cerr << "[t] Interval: [" << interval.min << ", " << interval.max << "]\n";
+            std::cerr << "[t] Delta: " << tdelta << "\n";
+        }
+
+        if (interval.is_valid()) {
+            tcur = interval.min;
+
+            // Calculate the first t which intersects with each coordinate plane.
+            // If it's infinity, don't bother.
+            // ! Double check the order of multiplications / divisions is correct!
+            num first_x =
+                (max.x == infinity
+                    ? infinity
+                    : std::max(
+                        min.x,
+                        max.x - (trunc((max.x - interval.min) * ray.dir.x / scale.x) * scale.x * ray.inv_dir.x)));
+            num first_y =
+                (max.y == infinity
+                    ? infinity
+                    : std::max(
+                        min.y,
+                        max.y - (trunc((max.y - interval.min) * ray.dir.y / scale.y) * scale.y * ray.inv_dir.y)));
+            num first_z =
+                (max.z == infinity
+                    ? infinity
+                    : std::max(
+                        min.z,
+                        max.z - (trunc((max.z - interval.min) * ray.dir.z / scale.z) * scale.z * ray.inv_dir.z)));
+
+            tmax = Vec3(first_x, first_y, first_z);
+
+            // ! DEBUG
+            if (debug) {
+                std::cerr << "pos: " << ray.at(tcur) << ", tcur: " << tcur << ", tmax: " << tmax << "\n";
+            }
+
+            if (equals(tmax.x, tcur)) {
+                // normal += orientation.x();
+                tmax.x += tdelta.x;
+            }
+            if (equals(tmax.y, tcur)) {
+                // normal += orientation.y();
+                tmax.y += tdelta.y;
+            }
+            if (equals(tmax.z, tcur)) {
+                // normal += orientation.z();
+                tmax.z += tdelta.z;
+            }
+        }
+        else {
+            // If the ray doesn't hit the bounding box, return an empty list.
+            return objects;
+        }
+
+        coords = get_coords(ray.at(tcur), ray.orientation);
+
+        // ! DEBUG
+        if (debug) {
+            std::cerr << "Starting coords: " << coords << "\n";
+        }
+
+        // Iteratively find the next voxel using floating-point comparisons.
+        while (contains(coords)) {
+            // ! DEBUG
+            if (debug) {
+                std::cerr << "[c] " << coords << ": [" << tcur << "] " << ray.at(tcur) << " " << normal << " => "
+                        << get_coords(ray.at(tcur), ray.orientation) << "\n";
+            }
+
+            voxel = get_voxel(coords);
+            if (voxel.is_opaque()) {
+                // ! DEBUG
+                if (debug) {
+                    std::cerr << "[i] ray: " << ray.dir << ", dist: " << tcur * ray.dir.length() << ", pos: " << ray.at(tcur)
+                            << ", coords: " << get_coords(ray.at(tcur), ray.orientation) << ", normal: " << normal
+                            << "\n";
+                }
+
+                objects.push_back(Intersection(voxel, tcur * ray.dir.length(), normal));
+
+                // ! TEMP
+                break;
+            }
+
+            // Create a temporary variable so any traversal updates don't affect the current iteration.
+            Vec3 tmax_temp = tmax;
+
+            // ! DEBUG
+            if (debug) {
+                std::cerr << "tmax: " << tmax_temp << "\n";
+            }
+
+            normal = Direction(NONE);
+
+            // Update the Amanatides-Woo algorithm to handle diagonals.
+            if (tmax_temp.x <= tmax_temp.y && tmax_temp.x <= tmax_temp.z) {
+                tcur = tmax_temp.x;
+                tmax.x += tdelta.x;
+                coords.x += step.x;
+                normal += ray.orientation.x();
+            }
+
+            if (tmax_temp.y <= tmax_temp.x && tmax_temp.y <= tmax_temp.z) {
+                tcur = tmax_temp.y;
+                tmax.y += tdelta.y;
+                coords.y += step.y;
+                normal += ray.orientation.y();
+            }
+
+            if (tmax_temp.z <= tmax_temp.x && tmax_temp.z <= tmax_temp.y) {
+                tcur = tmax_temp.z;
+                tmax.z += tdelta.z;
+                coords.z += step.z;
+                normal += ray.orientation.z();
+            }
+        }
+
+        return objects;
+    }
+
     void ArrayVoxelGrid::initialise() {
         // ! INFO
         std::cout << "   > Allocating space..."
@@ -100,8 +240,10 @@ namespace geometry {
 // ========================================================================
 
     const Voxel& SVOVoxelGrid::get_voxel(Coordinate coords) const {
-        if (coords.x >= size.x || coords.y >= size.y || coords.z >= size.z) {
-            throw std::invalid_argument("Coordinates out of bounds.");
+        if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0 || coords.z >= size.z) {
+            auto stream = StringStream{};
+            stream << "[!] Coordinates out of bounds: " << coords << "\n";
+            throw std::invalid_argument(stream.str());
         }
 
         const auto* curr = root.get();
@@ -123,9 +265,10 @@ namespace geometry {
     }
 
     void SVOVoxelGrid::set_voxel(Coordinate coords, Voxel voxel) {
-        if (coords.x >= size.x || coords.y >= size.y || coords.z >= size.z) {
-            std::cerr << "[!] Out of bounds: " << coords << "\n";
-            return;
+        if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0 || coords.z >= size.z) {
+            auto stream = StringStream{};
+            stream << "[!] Coordinates out of bounds: " << coords << "\n";
+            throw std::invalid_argument(stream.str());
         }
 
         auto* curr = root.get();

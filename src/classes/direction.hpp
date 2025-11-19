@@ -29,43 +29,43 @@ namespace geometry {
             dir = x_dir | y_dir | z_dir;
         }
 
-        bool is_none() const noexcept {
+        constexpr bool is_none() const noexcept {
             return dir == 0;
         }
 
-        bool is_xpos() const noexcept {
+        constexpr bool is_xpos() const noexcept {
             return dir & X_POS;
         }
 
-        bool is_xneg() const noexcept {
+        constexpr bool is_xneg() const noexcept {
             return dir & X_NEG;
         }
 
-        bool is_ypos() const noexcept {
+        constexpr bool is_ypos() const noexcept {
             return dir & Y_POS;
         }
 
-        bool is_yneg() const noexcept {
+        constexpr bool is_yneg() const noexcept {
             return dir & Y_NEG;
         }
 
-        bool is_zpos() const noexcept {
+        constexpr bool is_zpos() const noexcept {
             return dir & Z_POS;
         }
 
-        bool is_zneg() const noexcept {
+        constexpr bool is_zneg() const noexcept {
             return dir & Z_NEG;
         }
 
-        bool is_x() const noexcept {
+        constexpr bool is_x() const noexcept {
             return is_xpos() || is_xneg();
         }
 
-        bool is_y() const noexcept {
+        constexpr bool is_y() const noexcept {
             return is_ypos() || is_yneg();
         }
 
-        bool is_z() const noexcept {
+        constexpr bool is_z() const noexcept {
             return is_zpos() || is_zneg();
         }
 
@@ -105,19 +105,19 @@ namespace geometry {
             }
         }
 
-        Direction x() const noexcept {
+        constexpr Direction x() const noexcept {
             return Direction(dir & (X_POS | X_NEG));
         }
 
-        Direction y() const noexcept {
+        constexpr Direction y() const noexcept {
             return Direction(dir & (Y_POS | Y_NEG));
         }
 
-        Direction z() const noexcept {
+        constexpr Direction z() const noexcept {
             return Direction(dir & (Z_POS | Z_NEG));
         }
 
-        Coordinate sign() const noexcept {
+        constexpr Coordinate sign() const noexcept {
             int x = (is_xpos() ? 1 : (is_xneg() ? -1 : 0));
             int y = (is_ypos() ? 1 : (is_yneg() ? -1 : 0));
             int z = (is_zpos() ? 1 : (is_zneg() ? -1 : 0));
@@ -133,7 +133,7 @@ namespace geometry {
         friend std::ostream& operator<<(std::ostream& out, const Direction& dir);
 
     private:
-        uint8_t dir = 0;
+        uint8_t dir = NONE;
     };
 
     inline Direction operator+(const Direction& u, const Direction& v) noexcept {
