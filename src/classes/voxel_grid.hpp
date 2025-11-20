@@ -165,7 +165,7 @@ namespace geometry {
             
             auto root = Node();
             root.start_index = 1;
-            root.bounding_box = AABB{Coordinate{}, size};
+            root.bounding_box = bounding_box;
 
             nodes.reserve((static_cast<size_t>(std::pow(8, max_depth)) - 1) / 7);
             nodes.push_back(root);
@@ -185,7 +185,7 @@ namespace geometry {
             
             auto root = Node();
             root.start_index = 1;
-            root.bounding_box = AABB{Coordinate{}, size};
+            root.bounding_box = bounding_box;
 
             nodes.reserve((static_cast<size_t>(std::pow(8, max_depth)) - 1) / 7);
             nodes.push_back(root);
