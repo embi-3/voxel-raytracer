@@ -105,10 +105,12 @@ Scene voxelise(const std::string &filePath) {
     Scene scene = Scene();
 
     auto grid = std::make_unique<SVOVoxelGrid>(
-        data.model.size_x,
-        data.model.size_y,
-        data.model.size_z,
-        Vec3(0, 0, 75)
+        data.model.size_x + 2,
+        data.model.size_z + 2,
+        data.model.size_y + 2,
+        // TODO: Decide how far to place the camera away from the model.
+        // This won't matter after camera movement is implemented.
+        Vec3(0, 0, data.model.size_y + 1) 
     );
 
     for (size_t i = 0; i < data.model.voxels.size(); i++) {
@@ -121,9 +123,9 @@ Scene voxelise(const std::string &filePath) {
 
         Voxel currVoxel = Voxel(currVoxelColour);
         Coordinate currVoxelCoord = Coordinate(
-            data.model.voxels[i].x, 
-            data.model.voxels[i].y,
-            data.model.voxels[i].z      
+            data.model.voxels[i].x + 1, 
+            data.model.voxels[i].z + 1,
+            data.model.voxels[i].y + 1      
             // we use y = up instead of z = up
         );
 

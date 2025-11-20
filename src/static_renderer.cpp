@@ -121,6 +121,7 @@ int main(int argc, char* argv[]) {
     int image_width = 1920;
     int image_height = 1080;
     std::string debug_path = "output.txt";
+    std::string model_path = "../src/voxmodels/monument/monu1.vox";
 
     // Parse command line arguments
     for (int i = 1; i < argc; ++i) {
@@ -132,11 +133,14 @@ int main(int argc, char* argv[]) {
         else if (arg == "--height" && i + 1 < argc) {
             image_height = std::atoi(argv[++i]);
         }
-        else if (arg == "--path" && i + 1 < argc) {
+        else if (arg == "--debug-path" && i + 1 < argc) {
             debug = true;
         }
         else if (arg == "--debug") {
             debug_path = argv[++i];
+        }
+        else if (arg == "--model-path" && i + 1 < argc) {
+            model_path = argv[++i];
         }
         else {
             auto stream = StringStream{};
@@ -166,7 +170,7 @@ int main(int argc, char* argv[]) {
     // Scene scene = two_spheres();
     // Scene scene = random_spheres();
     // Scene scene = random_cubes();
-    Scene scene = voxelise("../src/voxmodels/scan/teapot.vox");
+    Scene scene = voxelise(model_path);
 
     // Create shaders
     // ! INFO
