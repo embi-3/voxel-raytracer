@@ -239,36 +239,10 @@ namespace geometry {
 //  SVOVoxelGrid
 // ========================================================================
 
-    // const Voxel& SVOVoxelGrid::get_voxel(Coordinate coords) const {
-    //     if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0 || coords.z >= size.z) {
-    //         auto stream = StringStream{};
-    //         stream << "[!] Coordinates out of bounds: " << coords << "\n";
-    //         throw std::invalid_argument(stream.str());
-    //     }
-
-    //     auto curr = nodes[0];
-
-    //     for (std::size_t depth = 0; depth < max_depth && curr.start_index != sentinel; depth++) {
-    //         auto x_bit = (static_cast<std::size_t>(coords.x) >> (max_depth - depth - 1)) & 1u;
-    //         auto y_bit = (static_cast<std::size_t>(coords.y) >> (max_depth - depth - 1)) & 1u;
-    //         auto z_bit = (static_cast<std::size_t>(coords.z) >> (max_depth - depth - 1)) & 1u;
-    //         auto child_index = (x_bit << 2) | (y_bit << 1) | z_bit;
-    //         auto child_exists = (curr.children >> child_index) & 1u;
-
-    //         if (!child_exists) {
-    //             return curr.data;
-    //         }
-
-    //         curr = nodes[curr.start_index + child_index];
-    //     }
-
-    //     return curr.data;
-    // }
-
     void SVOVoxelGrid::set_voxel(Coordinate coords, Voxel voxel) {
         if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0 || coords.z >= size.z) {
             auto stream = StringStream{};
-            stream << "[!] Coordinates out of bounds: " << coords << "\n";
+            stream << "[!] Coordinates out of bounds: " << coords << " vs " << size << "\n";
             throw std::invalid_argument(stream.str());
         }
 
@@ -398,4 +372,52 @@ namespace geometry {
         return objects;
     }
 
+    void SVOVoxelGrid::compress_node(size_t index) {
+        auto& node = nodes[index];
+
+        // If no children, can't compress
+        if (node.start_index == sentinel || node.children == 0) {
+            return;
+        }
+
+        // Compress children first
+        for (size_t i = 0; i < 8; i++) {
+            auto child_exists = (node.children >> i) & 1u;
+            if (!child_exists) 
+                continue;
+
+            std::size_t child_index = node.start_index + i;
+            compress_node(child_index);
+        }
+        
+        // If some children don't exist, can't compress
+        if (node.children != 0xFF) {
+            return;
+        }
+
+        // Check if children are equal
+        auto first = true;
+        auto common_voxel = Voxel{};
+        for (size_t i = 1; i < 8; i++) {
+            auto child_index = node.start_index + i;
+            auto child = nodes[child_index];
+
+            // If child has children, can't compress
+            if (child.start_index != sentinel || child.children != 0) {
+                return;
+            }
+
+            if (first) {
+                common_voxel = child.data;
+            } else {
+                // If not homogeneous
+                if (child.data != common_voxel)
+                    return;
+            }
+        }
+
+        node.data = common_voxel;
+        node.children = 0;
+        node.start_index = sentinel;
+    }
 };

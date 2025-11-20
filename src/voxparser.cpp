@@ -122,13 +122,14 @@ Scene voxelise(const std::string &filePath) {
         Voxel currVoxel = Voxel(currVoxelColour);
         Coordinate currVoxelCoord = Coordinate(
             data.model.voxels[i].x, 
-            data.model.voxels[i].z,
-            data.model.voxels[i].y      
+            data.model.voxels[i].y,
+            data.model.voxels[i].z      
             // we use y = up instead of z = up
         );
 
         grid->set_voxel(currVoxelCoord, currVoxel);
     }
+    grid->compress();
     scene.push_back(std::move(grid));
     return scene;
 }

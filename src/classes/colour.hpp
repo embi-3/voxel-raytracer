@@ -47,6 +47,11 @@ namespace texture {
             return *this;
         }
 
+        // TODO: check alpha as well
+        bool operator==(const Colour& other) const noexcept {
+            return r_int() == other.r_int() && g_int() == other.g_int() && b_int() == other.b_int();
+        }
+
         static constexpr Colour black() noexcept {
             return Colour(0, 0, 0);
         }

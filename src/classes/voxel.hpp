@@ -35,6 +35,14 @@ namespace geometry {
             return colour;
         }
 
+        bool operator==(const Voxel& other) const noexcept {
+            return (colour == other.colour && opaque == other.opaque);
+        }
+
+        // bool operator!=(const Voxel& other) const noexcept {
+        //     return !(*this == other);
+        // }
+
     private:
         bool opaque = true;
         Colour colour = Colour::white();

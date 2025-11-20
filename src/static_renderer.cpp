@@ -98,7 +98,7 @@ Scene random_spheres() {
 
 Scene random_cubes() {
     int world_size = 500;
-    //int num_cubes = 100000;
+    // int num_cubes = 100000;
 
     Scene scene = Scene();
     auto grid = std::make_unique<SVOVoxelGrid>(world_size, Vec3(0, 0, 0));
@@ -111,6 +111,7 @@ Scene random_cubes() {
         z = rand() % world_size;
         grid->create_cube(Coordinate(x, y, z));
     }
+    grid->compress();
     scene.push_back(std::move(grid));
 
     return scene;
@@ -165,7 +166,7 @@ int main(int argc, char* argv[]) {
     // Scene scene = two_spheres();
     // Scene scene = random_spheres();
     // Scene scene = random_cubes();
-    Scene scene = voxelise("../src/voxmodels/monument/monu1.vox");
+    Scene scene = voxelise("../src/voxmodels/scan/teapot.vox");
 
     // Create shaders
     // ! INFO

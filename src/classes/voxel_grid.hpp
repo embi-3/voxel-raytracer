@@ -20,8 +20,6 @@ using namespace helper;
 namespace geometry {
     class VoxelGrid {
     public:
-        // virtual const Voxel& get_voxel(Coordinate coords) const = 0;
-
         virtual void set_voxel(Coordinate coords, Voxel voxel) = 0;
 
         virtual IntersectionList traverse(Ray ray) const = 0;
@@ -156,7 +154,6 @@ namespace geometry {
     class SVOVoxelGrid : public VoxelGrid {
     public:
         explicit SVOVoxelGrid(std::size_t world_size, Vec3 centre) {
-
             size = Coordinate(static_cast<int>(world_size));
             origin = centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
 
@@ -168,7 +165,7 @@ namespace geometry {
             
             auto root = Node();
             root.start_index = 1;
-            root.bounding_box = bounding_box;
+            root.bounding_box = AABB{Coordinate{}, size};
 
             nodes.reserve((static_cast<size_t>(std::pow(8, max_depth)) - 1) / 7);
             nodes.push_back(root);
@@ -188,7 +185,7 @@ namespace geometry {
             
             auto root = Node();
             root.start_index = 1;
-            root.bounding_box = bounding_box;
+            root.bounding_box = AABB{Coordinate{}, size};
 
             nodes.reserve((static_cast<size_t>(std::pow(8, max_depth)) - 1) / 7);
             nodes.push_back(root);
@@ -201,6 +198,10 @@ namespace geometry {
 
         IntersectionList traverse(Ray ray) const override;
 
+        void compress() {
+            compress_node(0);
+        }
+
     private:
         struct Node {
             size_t start_index = sentinel;             // Index of first child
@@ -211,6 +212,8 @@ namespace geometry {
 
         std::size_t max_depth;
         std::vector<Node> nodes;
+
+        void compress_node(size_t index);
     };
 } // namespace geometry
 
