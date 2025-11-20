@@ -389,7 +389,7 @@ namespace geometry {
             std::size_t child_index = node.start_index + i;
             compress_node(child_index);
         }
-        
+
         // If some children don't exist, can't compress
         if (node.children != 0xFF) {
             return;
@@ -398,9 +398,9 @@ namespace geometry {
         // Check if children are equal
         auto first = true;
         auto common_voxel = Voxel{};
-        for (size_t i = 1; i < 8; i++) {
+        for (size_t i = 0; i < 8; i++) {
             auto child_index = node.start_index + i;
-            auto child = nodes[child_index];
+            auto& child = nodes[child_index];
 
             // If child has children, can't compress
             if (child.start_index != sentinel || child.children != 0) {
@@ -409,6 +409,7 @@ namespace geometry {
 
             if (first) {
                 common_voxel = child.data;
+                first = false;
             } else {
                 // If not homogeneous
                 if (child.data != common_voxel)
