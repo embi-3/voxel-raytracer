@@ -1,5 +1,5 @@
 ## Overview
-This project is a voxel-based ray tracer which takes ideas from several papers.
+This project is a voxel-based ray tracer with various inspirations.
 
 Ray traversal was based on the Fast Voxel Traversal Algorithm by Amanatides and Woo: http://www.cse.yorku.ca/~amana/research/grid.pdf
 
