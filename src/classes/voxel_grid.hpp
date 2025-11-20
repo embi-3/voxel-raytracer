@@ -156,9 +156,6 @@ namespace geometry {
     class SVOVoxelGrid : public VoxelGrid {
     public:
         explicit SVOVoxelGrid(std::size_t world_size, Vec3 centre) {
-
-            size = Coordinate(static_cast<int>(world_size));
-            origin = centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
             size = Coordinate(static_cast<int>(world_size));
             origin = centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
 
