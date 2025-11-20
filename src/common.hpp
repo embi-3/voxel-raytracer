@@ -22,6 +22,7 @@ using StringStream = std::ostringstream;
 
 extern bool debug;
 static constexpr num infinity = std::numeric_limits<num>::infinity();
+static constexpr std::size_t sentinel = std::numeric_limits<std::size_t>::max();
 static constexpr num epsilon = 1.E-10;
 
 #endif // COMMON_H

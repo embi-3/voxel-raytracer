@@ -20,7 +20,7 @@ using namespace helper;
 namespace geometry {
     class VoxelGrid {
     public:
-        virtual const Voxel& get_voxel(Coordinate coords) const = 0;
+        // virtual const Voxel& get_voxel(Coordinate coords) const = 0;
 
         virtual void set_voxel(Coordinate coords, Voxel voxel) = 0;
 
@@ -112,7 +112,7 @@ namespace geometry {
         }
 
         // TODO: Check if this returns shallow or deep copy of the Voxel.
-        const Voxel& get_voxel(Coordinate coords) const override {
+        const Voxel& get_voxel(Coordinate coords) const {
             if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0 || coords.z >= size.z) {
                 auto stream = StringStream{};
                 stream << "[!] Coordinates out of bounds: " << coords << "\n";
@@ -167,7 +167,13 @@ namespace geometry {
             bounding_box = AABB(min_bounds, max_bounds);
 
             max_depth = static_cast<std::size_t>(ceil(std::log2(world_size)));
-            root = std::make_unique<Node>(bounding_box);
+            
+            auto root = Node();
+            root.start_index = 1;
+            root.bounding_box = bounding_box;
+
+            nodes.push_back(root);
+            nodes.resize(8);
         }
 
         explicit SVOVoxelGrid(std::size_t x, std::size_t y, std::size_t z, Vec3 centre) {
@@ -180,10 +186,16 @@ namespace geometry {
             bounding_box = AABB(min_bounds, max_bounds);
 
             max_depth = static_cast<std::size_t>(ceil(std::log2(std::max({x, y, z}))));
-            root = std::make_unique<Node>(bounding_box);
+            
+            auto root = Node();
+            root.start_index = 1;
+            root.bounding_box = bounding_box;
+
+            nodes.push_back(root);
+            nodes.resize(8);
         }
 
-        const Voxel& get_voxel(Coordinate coords) const override;
+        const Voxel& get_voxel(Coordinate coords) const;
 
         void set_voxel(Coordinate coords, Voxel voxel) override;
 
@@ -191,18 +203,14 @@ namespace geometry {
 
     private:
         struct Node {
-            bool isLeaf = false;
-            std::array<std::unique_ptr<Node>, 8> children{};
+            size_t start_index;             // Index of first child
+            uint8_t children = 0;           // Bit map of children that exist
             Voxel data = Voxel::empty();
             AABB bounding_box;
-
-            explicit Node(AABB aabb) noexcept
-            : bounding_box(aabb) {}
         };
 
         std::size_t max_depth;
-        // std::size_t tree_size = 0;
-        std::unique_ptr<Node> root;
+        std::vector<Node> nodes;
     };
 } // namespace geometry
 
