@@ -22,7 +22,7 @@ namespace geometry {
     public:
         virtual void set_voxel(Coordinate coords, Voxel voxel) = 0;
 
-        virtual IntersectionList traverse(Ray ray) const = 0;
+        virtual IntersectionList traverse(const Ray& ray) const = 0;
 
         // ! The orientation is used to distinguish ties for coordinates on the border of voxels.
         Coordinate get_coords(Vec3 pos, Direction orientation) const;
@@ -130,7 +130,7 @@ namespace geometry {
             world[flatten(coords)] = voxel;
         }
 
-        IntersectionList traverse(Ray ray) const override;
+        IntersectionList traverse(const Ray& ray) const override;
 
     private:
         std::vector<Voxel> world = {}; // 1D array representation of the voxel world
@@ -151,7 +151,7 @@ namespace geometry {
         }
     };
 
-    class SVOVoxelGrid : public VoxelGrid {
+class SVOVoxelGrid : public VoxelGrid {
     public:
         explicit SVOVoxelGrid(std::size_t world_size, Vec3 centre) {
             size = Coordinate(static_cast<int>(world_size));
@@ -162,14 +162,7 @@ namespace geometry {
             bounding_box = AABB(min_bounds, max_bounds);
 
             max_depth = static_cast<std::size_t>(ceil(std::log2(world_size)));
-            
-            auto root = Node();
-            root.start_index = 1;
-            root.bounding_box = bounding_box;
-
-            nodes.reserve((static_cast<size_t>(std::pow(8, max_depth)) - 1) / 7);
-            nodes.push_back(root);
-            nodes.resize(9);
+            root = std::make_unique<Node>(bounding_box);
         }
 
         explicit SVOVoxelGrid(std::size_t x, std::size_t y, std::size_t z, Vec3 centre) {
@@ -182,38 +175,27 @@ namespace geometry {
             bounding_box = AABB(min_bounds, max_bounds);
 
             max_depth = static_cast<std::size_t>(ceil(std::log2(std::max({x, y, z}))));
-            
-            auto root = Node();
-            root.start_index = 1;
-            root.bounding_box = bounding_box;
-
-            nodes.reserve((static_cast<size_t>(std::pow(8, max_depth)) - 1) / 7);
-            nodes.push_back(root);
-            nodes.resize(9);
+            root = std::make_unique<Node>(bounding_box);
         }
-
-        const Voxel& get_voxel(Coordinate coords) const;
 
         void set_voxel(Coordinate coords, Voxel voxel) override;
 
-        IntersectionList traverse(Ray ray) const override;
-
-        void compress() {
-            compress_node(0);
-        }
+        IntersectionList traverse(const Ray& ray) const override;
 
     private:
         struct Node {
-            size_t start_index = sentinel;             // Index of first child
-            uint8_t children = 0;           // Bit map of children that exist
+            bool isLeaf = false;
+            std::array<std::unique_ptr<Node>, 8> children{};
             Voxel data = Voxel::empty();
-            AABB bounding_box{};
+            AABB bounding_box;
+
+            explicit Node(AABB aabb) noexcept
+            : bounding_box(aabb) {}
         };
 
         std::size_t max_depth;
-        std::vector<Node> nodes;
-
-        void compress_node(size_t index);
+        // std::size_t tree_size = 0;
+        std::unique_ptr<Node> root; 
     };
 } // namespace geometry
 

@@ -73,7 +73,7 @@ namespace geometry {
 //  ArrayVoxelGrid
 // ========================================================================
 
-    IntersectionList ArrayVoxelGrid::traverse(Ray ray) const {
+    IntersectionList ArrayVoxelGrid::traverse(const Ray& ray) const {
         IntersectionList objects = IntersectionList(ray.dir);
 
         Vec3 tmax;
@@ -238,73 +238,63 @@ namespace geometry {
 // ========================================================================
 //  SVOVoxelGrid
 // ========================================================================
-
     void SVOVoxelGrid::set_voxel(Coordinate coords, Voxel voxel) {
         if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0 || coords.z >= size.z) {
             auto stream = StringStream{};
-            stream << "[!] Coordinates out of bounds: " << coords << " vs " << size << "\n";
+            stream << "[!] Coordinates out of bounds: " << coords << "\n";
             throw std::invalid_argument(stream.str());
         }
 
-        std::size_t index = 0;
+        auto* curr = root.get();
 
         for (std::size_t depth = 0; depth < max_depth; depth++) {
-            auto x_bit = (static_cast<std::size_t>(coords.x) >> (max_depth - depth - 1)) & 1u;
-            auto y_bit = (static_cast<std::size_t>(coords.y) >> (max_depth - depth - 1)) & 1u;
-            auto z_bit = (static_cast<std::size_t>(coords.z) >> (max_depth - depth - 1)) & 1u;
-            auto child_index = (x_bit << 2) | (y_bit << 1) | z_bit;
-            auto child_exists = (nodes[index].children >> child_index) & 1u;
-
-            if (!child_exists) {
-                auto x_dist = nodes[index].bounding_box.max.x - nodes[index].bounding_box.min.x;
-                auto y_dist = nodes[index].bounding_box.max.y - nodes[index].bounding_box.min.y;
-                auto z_dist = nodes[index].bounding_box.max.z - nodes[index].bounding_box.min.z;
+            const auto x_bit = (static_cast<std::size_t>(coords.x) >> (max_depth - depth - 1)) & 1u;
+            const auto y_bit = (static_cast<std::size_t>(coords.y) >> (max_depth - depth - 1)) & 1u;
+            const auto z_bit = (static_cast<std::size_t>(coords.z) >> (max_depth - depth - 1)) & 1u;
+            const auto child_index = (x_bit << 2) | (y_bit << 1) | z_bit;
+            
+            auto& child = curr->children[child_index];
+            if (!child) {
+                auto x_dist = curr->bounding_box.max.x - curr->bounding_box.min.x;
+                auto y_dist = curr->bounding_box.max.y - curr->bounding_box.min.y;
+                auto z_dist = curr->bounding_box.max.z - curr->bounding_box.min.z;
 
                 auto min = Vec3(
-                    nodes[index].bounding_box.min.x + static_cast<double>(x_bit) * (x_dist / 2),
-                    nodes[index].bounding_box.min.y + static_cast<double>(y_bit) * (y_dist / 2),
-                    nodes[index].bounding_box.min.z + static_cast<double>(z_bit) * (z_dist / 2)
+                    curr->bounding_box.min.x + static_cast<double>(x_bit) * (x_dist / 2),
+                    curr->bounding_box.min.y + static_cast<double>(y_bit) * (y_dist / 2),
+                    curr->bounding_box.min.z + static_cast<double>(z_bit) * (z_dist / 2)
                 );
 
                 auto max = min + Vec3(x_dist / 2, y_dist / 2, z_dist / 2);
 
-                auto child = Node();
-                child.bounding_box = AABB(min, max);
-
-                if (depth + 1 < max_depth) {
-                    child.start_index = nodes.size();
-                    nodes.resize(nodes.size() + 8);
-                }
- 
-                nodes[index].children |= (1u << child_index);
-                nodes[nodes[index].start_index + child_index] = child;
+                child = std::make_unique<Node>(AABB(min, max));
             }
-
-            index = nodes[index].start_index + child_index;
+            curr = child.get();
         }
 
-        nodes[index].data = voxel;
+        curr->data = voxel;
+        curr->isLeaf = true;
     }
 
-    IntersectionList SVOVoxelGrid::traverse(Ray ray) const {
+    IntersectionList SVOVoxelGrid::traverse(const Ray& ray) const {
         auto objects = IntersectionList(ray.dir);
-        auto ray_len = ray.dir.length();
 
-        auto root_interval = ray.intersection(nodes[0].bounding_box);
+        auto root_interval = ray.intersection(root->bounding_box);
         // If ray doesn't hit root bounding_box, skip
         if (!root_interval.is_valid())
             return objects;
 
         // Stores nodes with t-intervals
         struct StackNode {
-            std::size_t index;
+            const Node* ptr;
             num tmin;
             num tmax;
         };
 
         // Stack of nodes while traversing
-        auto stack = std::stack<StackNode>{};
-        stack.push({0, root_interval.min, root_interval.max});
+        auto stack = std::vector<StackNode>{};
+        stack.reserve(64);
+        stack.push_back({root.get(), root_interval.min, root_interval.max});
 
         auto sorted_children = std::vector<StackNode>{};
         sorted_children.reserve(8);
@@ -312,14 +302,14 @@ namespace geometry {
         // Iterate until stack is empty or opaque node is hit
         while (!stack.empty()) {
             /// Pop stack
-            auto stack_node = stack.top();
-            const auto& node = nodes[stack_node.index];
-            stack.pop();
+            auto stack_node = stack.back();
+            auto node = stack_node.ptr;
+            stack.pop_back();
 
-            if (node.start_index == sentinel && node.data.is_opaque()) {
+            if (node->isLeaf) {
                 auto hit = ray.at(stack_node.tmin);
-                const auto& node_bb = node.bounding_box;
-                auto normal = Vec3{};
+                const auto& node_bb = node->bounding_box;
+                auto normal = Vec3();
 
                 if (std::fabs(hit.x - node_bb.min.x) < epsilon) 
                     normal = Vec3(1, 0, 0);
@@ -334,19 +324,18 @@ namespace geometry {
                 else if (std::fabs(hit.z - node_bb.max.z) < epsilon)
                     normal = Vec3(0, 0, -1);
 
-                objects.push_back(Intersection(node.data, stack_node.tmin * ray_len, normal));
+                objects.push_back(Intersection(node->data, stack_node.tmin * ray.dir.length(), normal));
                 break;
             }
 
             sorted_children.clear();
             for (std::size_t i = 0; i < 8; i++) {
-                // If no child, skip
-                auto child_exists = (node.children >> i) & 1u;
-                if (!child_exists) continue;
-                const auto& child = nodes[node.start_index + i];
+                // If child is nullptr, skip
+                if (!node->children[i]) continue;
+                auto child = node->children[i].get();
                 
                 // If ray doesn't intersect, skip
-                auto child_interval = ray.intersection(child.bounding_box);
+                auto child_interval = ray.intersection(child->bounding_box);
                 if (!child_interval.is_valid()) continue;
 
                 // If ray doesnt originate from the parent, skip  
@@ -354,7 +343,7 @@ namespace geometry {
                 num tmax = std::min(child_interval.max, stack_node.tmax); 
                 if (tmin > tmax) continue;
                 
-                sorted_children.push_back({node.start_index + i, tmin, tmax});
+                sorted_children.push_back({child, tmin, tmax});
             }
 
             // Sort children in descending tmin order
@@ -365,60 +354,10 @@ namespace geometry {
             );
 
             for (const auto& child : sorted_children) {
-                stack.push(child);
+                stack.push_back(child);
             }
         }
 
         return objects;
-    }
-
-    void SVOVoxelGrid::compress_node(size_t index) {
-        auto& node = nodes[index];
-
-        // If no children, can't compress
-        if (node.start_index == sentinel || node.children == 0) {
-            return;
-        }
-
-        // Compress children first
-        for (size_t i = 0; i < 8; i++) {
-            auto child_exists = (node.children >> i) & 1u;
-            if (!child_exists) 
-                continue;
-
-            std::size_t child_index = node.start_index + i;
-            compress_node(child_index);
-        }
-
-        // If some children don't exist, can't compress
-        if (node.children != 0xFF) {
-            return;
-        }
-
-        // Check if children are equal
-        auto first = true;
-        auto common_voxel = Voxel{};
-        for (size_t i = 0; i < 8; i++) {
-            auto child_index = node.start_index + i;
-            auto& child = nodes[child_index];
-
-            // If child has children, can't compress
-            if (child.start_index != sentinel || child.children != 0) {
-                return;
-            }
-
-            if (first) {
-                common_voxel = child.data;
-                first = false;
-            } else {
-                // If not homogeneous
-                if (child.data != common_voxel)
-                    return;
-            }
-        }
-
-        node.data = common_voxel;
-        node.children = 0;
-        node.start_index = sentinel;
     }
 };

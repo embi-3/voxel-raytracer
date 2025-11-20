@@ -111,7 +111,6 @@ Scene random_cubes() {
         z = rand() % world_size;
         grid->create_cube(Coordinate(x, y, z));
     }
-    grid->compress();
     scene.push_back(std::move(grid));
 
     return scene;

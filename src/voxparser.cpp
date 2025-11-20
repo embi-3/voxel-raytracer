@@ -131,7 +131,6 @@ Scene voxelise(const std::string &filePath) {
 
         grid->set_voxel(currVoxelCoord, currVoxel);
     }
-    grid->compress();
     scene.push_back(std::move(grid));
     return scene;
 }
