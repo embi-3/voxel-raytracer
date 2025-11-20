@@ -2,34 +2,38 @@
 #define INTERSECTION_H
 
 #include "../common.hpp"
+#include "direction.hpp"
 #include "material.hpp"
 #include "vec3.hpp"
 #include "voxel.hpp"
 
 namespace geometry {
+    static Voxel INVALID_VOXEL = Voxel();
+
     class Intersection {
     public:
-        enum FaceOrientation {
-            X_POS = 1,
-            X_NEG = 2,
-            Y_POS = 4,
-            Y_NEG = 8,
-            Z_POS = 16,
-            Z_NEG = 32,
-        };
-
-        Voxel voxel; // for colour and material data
-        num distance = 0; // for depth shader.
-
-        explicit constexpr Intersection(Voxel voxel)
+        explicit Intersection(const Voxel& voxel) noexcept
         : voxel(voxel) {}
-        explicit constexpr Intersection(Voxel voxel, num distance)
+
+        explicit Intersection(const Voxel& voxel, num distance) noexcept
         : voxel(voxel)
         , distance(distance) {}
 
-        static constexpr Intersection invalid() {
-            return Intersection(Voxel(), -1);
+        explicit Intersection(const Voxel& voxel, num distance, Direction orientation) noexcept
+        : voxel(voxel)
+        , distance(distance)
+        , orientation(orientation) {}
+
+        static Intersection invalid() noexcept {
+            return Intersection(INVALID_VOXEL, -1);
         }
+
+        // std::reference_wrapper<const Voxel> voxel; // for colour and material data
+        Voxel voxel;
+        num distance = 0; // for depth shader.
+        Direction orientation = Direction(NONE);
+        // TODO: Implement this!
+        Vec3 normal;
     };
 
 } // namespace geometry

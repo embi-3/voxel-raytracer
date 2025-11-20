@@ -5,8 +5,24 @@
 // using num = int;
 // #elifdef USE_SINGLE_PRECISION
 
+#ifndef COMMON_H
+#define COMMON_H
+
+#include <limits>
+#include <string>
+#include <sstream>
+
 #ifdef USE_SINGLE_PRECISION
 using num = float;
 #else
 using num = double;
 #endif
+
+using StringStream = std::ostringstream;
+
+extern bool debug;
+static constexpr num infinity = std::numeric_limits<num>::infinity();
+static constexpr std::size_t sentinel = std::numeric_limits<std::size_t>::max();
+static constexpr num epsilon = 1.E-10;
+
+#endif // COMMON_H

@@ -2,6 +2,7 @@
 #define COLOUR_H
 
 #include "../common.hpp"
+#include "../helper.hpp"
 #include "vec3.hpp"
 
 #include <algorithm>
@@ -12,24 +13,26 @@
 
 // Biggest number less than 256
 static const num RGB_MAX = std::nexttoward(256, 0);
-static const num RGB_MIN = 0;
+static constexpr num RGB_MIN = 0;
 
 namespace texture {
     class Colour {
     public:
-        num r = 0; // range: [0, 256)
-        num g = 0; // range: [0, 256)
-        num b = 0; // range: [0, 256)
-        num a = 0; // range: [0, 1]
-
         explicit constexpr Colour() noexcept = default;
-        explicit constexpr Colour(const num r, const num g, const num b, const num a = 1) noexcept
+
+        explicit constexpr Colour(num v, num a = 1) noexcept
+        : r(v)
+        , g(v)
+        , b(v)
+        , a(a) {}
+
+        explicit constexpr Colour(num r, num g, num b, num a = 1) noexcept
         : r(r)
         , g(g)
         , b(b)
         , a(a) {}
 
-        Colour& operator+=(const Colour& rhs) {
+        Colour& operator+=(const Colour& rhs) noexcept {
             r += rhs.r;
             g += rhs.g;
             b += rhs.b;
@@ -42,6 +45,11 @@ namespace texture {
             g *= s;
             b *= s;
             return *this;
+        }
+
+        // TODO: check alpha as well
+        bool operator==(const Colour& other) const noexcept {
+            return r_int() == other.r_int() && g_int() == other.g_int() && b_int() == other.b_int();
         }
 
         static constexpr Colour black() noexcept {
@@ -76,10 +84,11 @@ namespace texture {
             return Colour(255, 0, 255);
         }
 
-        inline Colour set_alpha(num alpha) {
-            a = alpha;
-            return *this;
-        }
+        // If alpha is public is this necessary?
+        // Colour set_alpha(num alpha) {
+        //     a = alpha;
+        //     return *this;
+        // }
 
         // ! std::format not supported by compiler.
         // inline std::string to_rgb_string() {
@@ -90,12 +99,12 @@ namespace texture {
         // 	return std::format("%d %d %d %.2f", rint(), gint(), bint(), a);
         // }
 
-        inline std::string to_rgb_string() const {
+        std::string to_rgb_string() const noexcept {
             return std::to_string(r_int()) + " " + std::to_string(g_int()) + " " + std::to_string(b_int());
         }
 
         // ! This does not restrict the precision of the float when printing.
-        inline std::string to_rgba_string() const {
+        std::string to_rgba_string() const {
             return std::to_string(r_int()) + " " + std::to_string(g_int()) + " " + std::to_string(b_int()) + " "
                    + std::to_string(a);
         }
@@ -109,17 +118,26 @@ namespace texture {
 
         // static_cast always truncates the floating part of the number, rounding down.
 
-        inline uint8_t r_int() const {
+        uint8_t r_int() const noexcept {
             return static_cast<uint8_t>(r);
         }
 
-        inline uint8_t g_int() const {
+        uint8_t g_int() const noexcept {
             return static_cast<uint8_t>(g);
         }
 
-        inline uint8_t b_int() const {
+        uint8_t b_int() const noexcept {
             return static_cast<uint8_t>(b);
         }
+
+        bool is_transparent() const noexcept {
+            return helper::equals_zero(a);
+        }
+
+        num r = 0; // range: [0, 256)
+        num g = 0; // range: [0, 256)
+        num b = 0; // range: [0, 256)
+        num a = 0; // range: [0, 1]
     };
 
     // Operator Overloads
@@ -150,47 +168,20 @@ namespace texture {
         return Colour(bounded_rgb(s * c.r), bounded_rgb(s * c.g), bounded_rgb(s * c.b), c.a);
     }
 
-    // Unbounded Operator Overloads
-    // ! These have been left here for future testing purposes.
-
-    // // ! These operations may produce invalid RGBA values! Be careful of overflows!
-    // inline Colour operator+(const Colour& u, const Colour& v) noexcept {
-    //     Colour res = Colour(u.r + v.r, u.g + v.g, u.b + v.b, max((u.a) + (u.a * v.a));
-    // 	if (!res.is_valid()) {
-    // 		std::cerr << "Invalid RGBA value! Received " << res.to_rgb_string();
-    // 		return Colour::black();
-    // 	}
-
-    // 	return res;
-    // }
-
-    // // ! These operations may produce invalid RGBA values! Be careful of overflows!
-    // inline Colour operator*(const num s, const Colour& c) noexcept {
-    //     Colour res = Colour(s*c.r, s*c.g, s*c.b, c.a);
-    // 	if (!res.is_valid()) {
-    // 		std::cerr << "Invalid RGBA value! Received " << res.to_rgba_string();
-    // 		return Colour::black();
-    // 	}
-
-    // 	return res;
-    // }
-
-    // // ! These operations may produce invalid RGBA values! Be careful of overflows!
-    // inline Colour operator*(const Colour& c, const num s) noexcept {
-    //     Colour res = Colour(s*c.r, s*c.g, s*c.b, c.a);
-    // 	if (!res.is_valid()) {
-    // 		std::cerr << "Invalid RGBA value! Received " << res.to_rgba_string();
-    // 		return Colour::black();
-    // 	}
-
-    // 	return res;
-    // }
+    inline std::ostream& operator<<(std::ostream& out, const Colour& c) {
+        return out << "(" << c.r << ", " << c.g << ", " << c.b << ", " << c.a << ")";
+    }
 
     // Blend Modes
-    Colour normal_blend(const Colour& u, const Colour& v) noexcept;
+    inline Colour normal_blend(const Colour& u, const Colour& v) {
+        auto blended = (u.a * u) + ((1 - u.a) * (v * v.a));
+        blended.a = std::min(u.a + (u.a * v.a), 1.0);
+        return blended;
+    }
 
-    Colour interpolate(const Colour& u, const Colour& v, num ratio) noexcept;
-
+    inline Colour interpolate(const Colour& u, const Colour& v, num ratio) noexcept {
+        return (ratio * u) + ((1 - ratio) * v);
+    }
 } // namespace texture
 
 #endif // COLOUR_H

@@ -8,35 +8,44 @@
 
 #include <array>
 
-constexpr int NUM_FACES = 6;
+static constexpr int NUM_FACES = 6;
 
 namespace geometry {
+    using namespace texture;
+
     class Voxel {
-        using Faces = std::array<texture::Colour, NUM_FACES>;
-        using Colour = texture::Colour;
-        using Material = texture::Material;
     public:
-        bool opaque = true;
-        Faces colours;
-        Material material = Material();
+        explicit constexpr Voxel() = default;
 
-        explicit constexpr Voxel() {
-            colours.fill(Colour::white());
-        };
+        explicit constexpr Voxel(Colour colour) noexcept
+        : colour(colour) {}
 
-        explicit constexpr Voxel(Colour colour) {
-            colours.fill(colour);
-        }
+        explicit constexpr Voxel(bool opaque) noexcept
+        : opaque(opaque) {}
 
-        explicit constexpr Voxel(bool opaque) : opaque(opaque) {}
-
-        explicit constexpr Voxel(Colour face1, Colour face2, Colour face3, Colour face4, Colour face5, Colour face6) {
-            colours = {face1, face2, face3, face4, face5, face6};
-        }
-
-        static constexpr Voxel empty() {
+        static constexpr Voxel empty() noexcept {
             return Voxel(false);
         }
+
+        constexpr bool is_opaque() const noexcept {
+            return opaque;
+        }
+
+        const Colour& get_colour() const noexcept {
+            return colour;
+        }
+
+        bool operator==(const Voxel& other) const noexcept {
+            return (colour == other.colour && opaque == other.opaque);
+        }
+
+        // bool operator!=(const Voxel& other) const noexcept {
+        //     return !(*this == other);
+        // }
+
+    private:
+        bool opaque = true;
+        Colour colour = Colour::white();
     };
 } // namespace geometry
 #endif // VOXEL_H
