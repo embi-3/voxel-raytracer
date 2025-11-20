@@ -214,7 +214,7 @@ namespace geometry {
 
     void ArrayVoxelGrid::initialise() {
         // ! INFO
-        std::cout << "   > Allocating space..."
+        std::cout << "   > Allocating space, " << size.x << "x" << size.y << "x" << size.z
                     << "\n";
 
         std::cout << "   > " << static_cast<unsigned long>(size.x * size.y * size.z) * sizeof(Voxel)

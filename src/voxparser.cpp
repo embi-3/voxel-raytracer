@@ -106,9 +106,11 @@ Scene voxelise(const std::string &filePath) {
 
     auto grid = std::make_unique<ArrayVoxelGrid>(
         data.model.size_x,
-        data.model.size_y,
         data.model.size_z,
-        Vec3(0, 0, 75)
+        data.model.size_y,
+        // TODO: Decide how far to place the camera away from the model.
+        // This won't matter after camera movement is implemented.
+        Vec3(0, 0, 2 * data.model.size_y) 
     );
 
     for (size_t i = 0; i < data.model.voxels.size(); i++) {
