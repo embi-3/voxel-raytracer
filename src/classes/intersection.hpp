@@ -28,7 +28,8 @@ namespace geometry {
             return Intersection(INVALID_VOXEL, -1);
         }
 
-        std::reference_wrapper<const Voxel> voxel; // for colour and material data
+        // std::reference_wrapper<const Voxel> voxel; // for colour and material data
+        Voxel voxel;
         num distance = 0; // for depth shader.
         Direction orientation = Direction(NONE);
         // TODO: Implement this!

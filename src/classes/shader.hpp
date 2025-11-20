@@ -106,6 +106,17 @@ namespace shader {
             return interpolate(Colour(124, 179, 255), Colour::white(), a);
         }
     };
+
+    class FlatShader : public Shader {
+    public:
+        Colour fragment(const IntersectionList& list) const override {
+            if (!list.empty()) {
+                const auto &hitVoxel = list.items.at(0);
+                return hitVoxel.voxel.get_colour();
+            }
+            return Colour();
+        }
+    };
 } // namespace shader
 
 #endif // SHADER_H

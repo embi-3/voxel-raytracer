@@ -181,11 +181,12 @@ int main(int argc, char* argv[]) {
     DistanceShader distance_shader = DistanceShader();
     OrientationShader orientation_shader = OrientationShader();
     RayShader ray_shader = RayShader();
+    FlatShader flat_shader = FlatShader();
 
     // Render the scene
     // ! INFO
     std::cout << "> Rendering scene...\n";
-    auto pixels = camera.render(scene, orientation_shader);
+    auto pixels = camera.render(scene, flat_shader);
     create_png(static_cast<std::size_t>(image_width), static_cast<std::size_t>(image_height), pixels);
 
     const auto end = high_resolution_clock::now();
