@@ -300,21 +300,21 @@ namespace geometry {
                 if (depth + 1 < max_depth) {
                     child.start_index = nodes.size();
                     nodes.resize(nodes.size() + 8);
-                } else {
-                    child.start_index = sentinel;
-                    child.data = voxel;
                 }
-                
+ 
                 nodes[index].children |= (1u << child_index);
                 nodes[nodes[index].start_index + child_index] = child;
             }
 
             index = nodes[index].start_index + child_index;
         }
+
+        nodes[index].data = voxel;
     }
 
     IntersectionList SVOVoxelGrid::traverse(Ray ray) const {
         auto objects = IntersectionList(ray.dir);
+        auto ray_len = ray.dir.length();
 
         auto root_interval = ray.intersection(nodes[0].bounding_box);
         // If ray doesn't hit root bounding_box, skip
@@ -323,26 +323,29 @@ namespace geometry {
 
         // Stores nodes with t-intervals
         struct StackNode {
-            Node node;
+            std::size_t index;
             num tmin;
             num tmax;
         };
 
         // Stack of nodes while traversing
         auto stack = std::stack<StackNode>{};
-        stack.push({nodes[0], root_interval.min, root_interval.max});
+        stack.push({0, root_interval.min, root_interval.max});
+
+        auto sorted_children = std::vector<StackNode>{};
+        sorted_children.reserve(8);
 
         // Iterate until stack is empty or opaque node is hit
         while (!stack.empty()) {
             /// Pop stack
             auto stack_node = stack.top();
-            auto node = stack_node.node;
+            const auto& node = nodes[stack_node.index];
             stack.pop();
 
-            if (node.start_index == sentinel) {
+            if (node.start_index == sentinel && node.data.is_opaque()) {
                 auto hit = ray.at(stack_node.tmin);
-                auto node_bb = node.bounding_box;
-                auto normal = Vec3();
+                const auto& node_bb = node.bounding_box;
+                auto normal = Vec3{};
 
                 if (std::fabs(hit.x - node_bb.min.x) < epsilon) 
                     normal = Vec3(1, 0, 0);
@@ -357,16 +360,16 @@ namespace geometry {
                 else if (std::fabs(hit.z - node_bb.max.z) < epsilon)
                     normal = Vec3(0, 0, -1);
 
-                objects.push_back(Intersection(node.data, stack_node.tmin * ray.dir.length(), normal));
+                objects.push_back(Intersection(node.data, stack_node.tmin * ray_len, normal));
                 break;
             }
 
-            auto sorted_children = std::vector<StackNode>{};
+            sorted_children.clear();
             for (std::size_t i = 0; i < 8; i++) {
                 // If no child, skip
                 auto child_exists = (node.children >> i) & 1u;
                 if (!child_exists) continue;
-                auto child = nodes[node.start_index + i];
+                const auto& child = nodes[node.start_index + i];
                 
                 // If ray doesn't intersect, skip
                 auto child_interval = ray.intersection(child.bounding_box);
@@ -377,7 +380,7 @@ namespace geometry {
                 num tmax = std::min(child_interval.max, stack_node.tmax); 
                 if (tmin > tmax) continue;
                 
-                sorted_children.push_back({child, tmin, tmax});
+                sorted_children.push_back({node.start_index + i, tmin, tmax});
             }
 
             // Sort children in descending tmin order

@@ -159,8 +159,6 @@ namespace geometry {
 
             size = Coordinate(static_cast<int>(world_size));
             origin = centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
-            size = Coordinate(static_cast<int>(world_size));
-            origin = centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
 
             Vec3 min_bounds = origin - Vec3(0.5 * scale.x, 0.5 * scale.y, 0.5 * scale.z);
             Vec3 max_bounds = origin + Vec3((size.x - 0.5) * scale.x, (size.y - 0.5) * scale.y, (size.z - 0.5) * scale.z);
@@ -172,8 +170,9 @@ namespace geometry {
             root.start_index = 1;
             root.bounding_box = bounding_box;
 
+            nodes.reserve((static_cast<size_t>(std::pow(8, max_depth)) - 1) / 7);
             nodes.push_back(root);
-            nodes.resize(8);
+            nodes.resize(9);
         }
 
         explicit SVOVoxelGrid(std::size_t x, std::size_t y, std::size_t z, Vec3 centre) {
@@ -191,8 +190,9 @@ namespace geometry {
             root.start_index = 1;
             root.bounding_box = bounding_box;
 
+            nodes.reserve((static_cast<size_t>(std::pow(8, max_depth)) - 1) / 7);
             nodes.push_back(root);
-            nodes.resize(8);
+            nodes.resize(9);
         }
 
         const Voxel& get_voxel(Coordinate coords) const;
@@ -203,10 +203,10 @@ namespace geometry {
 
     private:
         struct Node {
-            size_t start_index;             // Index of first child
+            size_t start_index = sentinel;             // Index of first child
             uint8_t children = 0;           // Bit map of children that exist
             Voxel data = Voxel::empty();
-            AABB bounding_box;
+            AABB bounding_box{};
         };
 
         std::size_t max_depth;

@@ -12,14 +12,14 @@ namespace geometry {
 
     class Intersection {
     public:
-        explicit Intersection(Voxel& voxel) noexcept
+        explicit Intersection(const Voxel& voxel) noexcept
         : voxel(voxel) {}
 
-        explicit Intersection(Voxel& voxel, num distance) noexcept
+        explicit Intersection(const Voxel& voxel, num distance) noexcept
         : voxel(voxel)
         , distance(distance) {}
 
-        explicit Intersection(Voxel& voxel, num distance, Direction orientation) noexcept
+        explicit Intersection(const Voxel& voxel, num distance, Direction orientation) noexcept
         : voxel(voxel)
         , distance(distance)
         , orientation(orientation) {}
@@ -28,7 +28,7 @@ namespace geometry {
             return Intersection(INVALID_VOXEL, -1);
         }
 
-        std::reference_wrapper<Voxel> voxel; // for colour and material data
+        std::reference_wrapper<const Voxel> voxel; // for colour and material data
         num distance = 0; // for depth shader.
         Direction orientation = Direction(NONE);
         // TODO: Implement this!
