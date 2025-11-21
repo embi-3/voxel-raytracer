@@ -59,12 +59,12 @@ Scene two_spheres() {
 
     // ! INFO
     std::cout << "> Creating grid...\n";
-    auto grid = std::make_unique<SVOVoxelGrid>(32, Vec3(0, 0, 20));
+    auto grid = std::make_unique<SVOVoxelGrid>(320, Vec3(0, 0, 200));
 
     // TODO: Test shapes that go outside the boundary of the grid and see what happens.
     std::cout << "> Creating shapes...\n";
-    grid->create_sphere(Coordinate(25, 27, 20), 4);
-    grid->create_sphere(Coordinate(10, 5, 10), 10);
+    grid->create_sphere(Coordinate(250, 270, 200), 40);
+    grid->create_sphere(Coordinate(100, 50, 100), 100);
 
     scene.push_back(std::move(grid));
 
@@ -76,7 +76,7 @@ Scene random_spheres() {
     int num_spheres = 300;
     Scene scene = Scene();
 
-    auto grid = std::make_unique<ArrayVoxelGrid>(world_size, Vec3(0, 0, world_size / 2));
+    auto grid = std::make_unique<SVOVoxelGrid>(world_size, Vec3(0, 0, world_size / 2));
     int x;
     int y;
     int z;
@@ -97,7 +97,7 @@ Scene random_spheres() {
 }
 
 Scene random_cubes() {
-    int world_size = 500;
+    int world_size = 400;
     // int num_cubes = 100000;
 
     Scene scene = Scene();
@@ -109,7 +109,7 @@ Scene random_cubes() {
         x = rand() % world_size;
         y = rand() % world_size;
         z = rand() % world_size;
-        grid->create_cube(Coordinate(x, y, z));
+        grid->create_cube(Coordinate(x, y, z), Coordinate(x + 3, y + 3, z + 3));
     }
     scene.push_back(std::move(grid));
 
@@ -120,7 +120,7 @@ int main(int argc, char* argv[]) {
     int image_width = 1920;
     int image_height = 1080;
     std::string debug_path = "output.txt";
-    std::string model_path = "../src/voxmodels/monument/monu1.vox";
+    std::string model_path = "../src/voxmodels/procedure/menger.vox";
 
     // Parse command line arguments
     for (int i = 1; i < argc; ++i) {
@@ -168,8 +168,8 @@ int main(int argc, char* argv[]) {
     std::cout << "> Creating scene...\n";
     // Scene scene = two_spheres();
     // Scene scene = random_spheres();
-    // Scene scene = random_cubes();
-    Scene scene = voxelise(model_path);
+    Scene scene = random_cubes();
+    // Scene scene = voxelise(model_path);
 
     // ! INFO
     std::cout << " > " << scene.mem_usage() << " bytes required to store the scene.\n";
@@ -188,7 +188,7 @@ int main(int argc, char* argv[]) {
     // Render the scene
     // ! INFO
     std::cout << "> Rendering scene...\n";
-    auto pixels = camera.render(scene, flat_shader);
+    auto pixels = camera.render(scene, orientation_shader);
     create_png(static_cast<std::size_t>(image_width), static_cast<std::size_t>(image_height), pixels);
 
     const auto end = high_resolution_clock::now();
