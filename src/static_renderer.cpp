@@ -60,14 +60,8 @@ Scene two_spheres() {
 
     // ! INFO
     std::cout << "> Creating grid...\n";
-
-
-    std::unique_ptr<VoxelGrid> grid;
-    if (svo) {
-        grid = std::make_unique<SVOVoxelGrid>(32, Vec3(0, 0, 20));
-    } else {
-        grid = std::make_unique<ArrayVoxelGrid>(32, Vec3(0, 0, 20));
-    }
+    //auto grid = std::make_unique<SVOVoxelGrid>(32, Vec3(0, 0, 20));
+    auto grid = std::make_unique<ArrayVoxelGrid>(32, Vec3(0, 0, 20));
 
     // TODO: Test shapes that go outside the boundary of the grid and see what happens.
     std::cout << "> Creating shapes...\n";
@@ -84,13 +78,7 @@ Scene random_spheres() {
     int num_spheres = 300;
     Scene scene = Scene();
 
-    std::unique_ptr<VoxelGrid> grid;
-    if (svo) {
-        grid = std::make_unique<SVOVoxelGrid>(world_size, Vec3(0, 0, world_size / 2));
-    } else {
-        grid = std::make_unique<ArrayVoxelGrid>(world_size, Vec3(0, 0, world_size / 2));
-    }
-
+    auto grid = std::make_unique<ArrayVoxelGrid>(world_size, Vec3(0, 0, world_size / 2));
     int x;
     int y;
     int z;
@@ -261,6 +249,9 @@ int main(int argc, char* argv[]) {
     } else {
         throw new std::invalid_argument("Invalid preset option! Please choose from: [two_spheres, hi_res_spheres, rand_cubes, many_cubes, rand_spheres]\n");
     }
+
+    // ! INFO
+    std::cout << " > " << scene.mem_usage() << " bytes required to store the scene.\n";
 
     // ! INFO
     std::cout << " > " << scene.mem_usage() << " bytes required to store the scene.\n";
