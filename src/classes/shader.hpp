@@ -111,7 +111,7 @@ namespace shader {
     public:
         Colour fragment(const IntersectionList& list) const override {
             if (!list.empty()) {
-                const auto &hitVoxel = list.items.at(0);
+                const auto& hitVoxel = list.items.at(0);
                 return hitVoxel.voxel.get_colour();
             }
             return Colour();
