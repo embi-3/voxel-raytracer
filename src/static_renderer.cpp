@@ -59,7 +59,8 @@ Scene two_spheres() {
 
     // ! INFO
     std::cout << "> Creating grid...\n";
-    auto grid = std::make_unique<SVOVoxelGrid>(32, Vec3(0, 0, 20));
+    //auto grid = std::make_unique<SVOVoxelGrid>(32, Vec3(0, 0, 20));
+    auto grid = std::make_unique<ArrayVoxelGrid>(32, Vec3(0, 0, 20));
 
     // TODO: Test shapes that go outside the boundary of the grid and see what happens.
     std::cout << "> Creating shapes...\n";
