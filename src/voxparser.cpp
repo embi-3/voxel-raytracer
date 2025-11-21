@@ -99,13 +99,19 @@ Scene voxelise(const std::string& filePath) {
 
     Scene scene = Scene();
 
-    auto grid = std::make_unique<SVOVoxelGrid>(data.model.size_x + 2,
-                                               data.model.size_z + 2,
-                                               data.model.size_y + 2,
-                                               // TODO: Decide how far to place the camera away from the model.
-                                               // This won't matter after camera movement is implemented.
-                                               Vec3(0, 0, data.model.size_y + 1));
 
+
+    std::unique_ptr<VoxelGrid> grid;
+    if (svo) {
+        grid = std::make_unique<SVOVoxelGrid>(data.model.size_x + 2,
+                                               data.model.size_z + 2,
+                                               data.model.size_y + 2, Vec3(0, 0, data.model.size_y + 1));
+    } else {
+        grid = std::make_unique<ArrayVoxelGrid>(data.model.size_x + 2,
+                                               data.model.size_z + 2,
+                                               data.model.size_y + 2, Vec3(0, 0, data.model.size_y + 1));
+    }
+    
     for (size_t i = 0; i < data.model.voxels.size(); i++) {
         int currColourIndex = data.model.voxels[i].colourIndex;
         Colour currVoxelColour =
