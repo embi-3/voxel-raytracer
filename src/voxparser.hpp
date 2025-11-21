@@ -2,14 +2,13 @@
 #ifndef VOXPARSER_H
 #define VOXPARSER_H
 
-#include "classes/scene.hpp"
 #include "classes/colour.hpp"
+#include "classes/scene.hpp"
 #include "classes/voxel.hpp"
 
-#include <vector>
-#include <string>
 #include <cstdint>
-
+#include <string>
+#include <vector>
 
 struct VoxelColour {
     uint8_t r, g, b, a;
@@ -49,6 +48,6 @@ constexpr unsigned int default_palette[256] = {
 	0xff880000, 0xff770000, 0xff550000, 0xff440000, 0xff220000, 0xff110000, 0xffeeeeee, 0xffdddddd, 0xffbbbbbb, 0xffaaaaaa, 0xff888888, 0xff777777, 0xff555555, 0xff444444, 0xff222222, 0xff111111
 };
 
-geometry::Scene voxelise(const std::string &filePath);
+geometry::Scene voxelise(const std::string& filePath);
 
 #endif

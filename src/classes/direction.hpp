@@ -3,8 +3,8 @@
 
 #include "../common.hpp"
 #include "vec3.hpp"
-#include <string>
 #include <cstdint>
+#include <string>
 
 namespace geometry {
     static constexpr uint8_t NONE = 0;

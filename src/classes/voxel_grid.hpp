@@ -9,8 +9,8 @@
 #include "voxel.hpp"
 
 #include <cmath>
-#include <memory>
 #include <iostream>
+#include <memory>
 #include <sstream>
 
 #include <vector>
@@ -22,7 +22,9 @@ namespace geometry {
     public:
         virtual void set_voxel(Coordinate coords, Voxel voxel) = 0;
 
-        virtual IntersectionList traverse(Ray ray) const = 0;
+        virtual IntersectionList traverse(const Ray& ray) const = 0;
+
+        virtual size_t mem_usage() const = 0;
 
         // ! The orientation is used to distinguish ties for coordinates on the border of voxels.
         Coordinate get_coords(Vec3 pos, Direction orientation) const;
@@ -111,7 +113,8 @@ namespace geometry {
 
         // TODO: Check if this returns shallow or deep copy of the Voxel.
         const Voxel& get_voxel(Coordinate coords) const {
-            if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0 || coords.z >= size.z) {
+            if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0
+                || coords.z >= size.z) {
                 auto stream = StringStream{};
                 stream << "[!] Coordinates out of bounds: " << coords << "\n";
                 throw std::invalid_argument(stream.str());
@@ -121,7 +124,8 @@ namespace geometry {
         }
 
         void set_voxel(Coordinate coords, Voxel voxel) override {
-            if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0 || coords.z >= size.z) {
+            if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0
+                || coords.z >= size.z) {
                 auto stream = StringStream{};
                 stream << "[!] Coordinates out of bounds: " << coords << "\n";
                 throw std::invalid_argument(stream.str());
@@ -130,7 +134,11 @@ namespace geometry {
             world[flatten(coords)] = voxel;
         }
 
-        IntersectionList traverse(Ray ray) const override;
+        IntersectionList traverse(const Ray& ray) const override;
+
+        size_t mem_usage() const override {
+            return static_cast<size_t>(size.x * size.y * size.z) * sizeof(Voxel);
+        }
 
     private:
         std::vector<Voxel> world = {}; // 1D array representation of the voxel world
@@ -155,65 +163,65 @@ namespace geometry {
     public:
         explicit SVOVoxelGrid(std::size_t world_size, Vec3 centre) {
             size = Coordinate(static_cast<int>(world_size));
-            origin = centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
+            origin =
+                centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
 
             Vec3 min_bounds = origin - Vec3(0.5 * scale.x, 0.5 * scale.y, 0.5 * scale.z);
             Vec3 max_bounds = origin + Vec3((size.x - 0.5) * scale.x, (size.y - 0.5) * scale.y, (size.z - 0.5) * scale.z);
             bounding_box = AABB(min_bounds, max_bounds);
 
             max_depth = static_cast<std::size_t>(ceil(std::log2(world_size)));
-            
-            auto root = Node();
-            root.start_index = 1;
-            root.bounding_box = bounding_box;
-
-            nodes.reserve((static_cast<size_t>(std::pow(8, max_depth)) - 1) / 7);
-            nodes.push_back(root);
-            nodes.resize(9);
+            root = std::make_unique<Node>(bounding_box);
         }
 
         explicit SVOVoxelGrid(std::size_t x, std::size_t y, std::size_t z, Vec3 centre) {
             size = Coordinate(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z));
             origin =
                 centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
-            
+
             Vec3 min_bounds = origin - Vec3(0.5 * scale.x, 0.5 * scale.y, 0.5 * scale.z);
             Vec3 max_bounds = origin + Vec3((size.x - 0.5) * scale.x, (size.y - 0.5) * scale.y, (size.z - 0.5) * scale.z);
             bounding_box = AABB(min_bounds, max_bounds);
 
             max_depth = static_cast<std::size_t>(ceil(std::log2(std::max({x, y, z}))));
-            
-            auto root = Node();
-            root.start_index = 1;
-            root.bounding_box = bounding_box;
-
-            nodes.reserve((static_cast<size_t>(std::pow(8, max_depth)) - 1) / 7);
-            nodes.push_back(root);
-            nodes.resize(9);
+            root = std::make_unique<Node>(bounding_box);
         }
 
-        const Voxel& get_voxel(Coordinate coords) const;
+        size_t mem_usage() const override {
+            return get_size(*root);
+        }
 
         void set_voxel(Coordinate coords, Voxel voxel) override;
 
-        IntersectionList traverse(Ray ray) const override;
-
-        void compress() {
-            compress_node(0);
-        }
+        IntersectionList traverse(const Ray& ray) const override;
 
     private:
         struct Node {
-            size_t start_index = sentinel;             // Index of first child
-            uint8_t children = 0;           // Bit map of children that exist
+            bool isLeaf = false;
+            std::array<std::unique_ptr<Node>, 8> children{};
             Voxel data = Voxel::empty();
-            AABB bounding_box{};
+            AABB bounding_box;
+
+            explicit Node(AABB aabb) noexcept
+            : bounding_box(aabb) {}
         };
+        
+        size_t get_size(struct Node& node) const {
+            size_t size = sizeof(Node);
+            if (!node.isLeaf) {
+                for (size_t i = 0; i < 8; i++) {
+                    if (node.children.at(i) != nullptr) {
+                        size += get_size(*(node.children[i]));
+                    }
+                }
+            }
+
+            return size;
+        }
 
         std::size_t max_depth;
-        std::vector<Node> nodes;
-
-        void compress_node(size_t index);
+        // std::size_t tree_size = 0;
+        std::unique_ptr<Node> root;
     };
 } // namespace geometry
 

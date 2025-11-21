@@ -18,23 +18,23 @@ namespace geometry {
         auto t_max = infinity;
 
         auto x_min = (orientation.x().is_none()
-                         ? -infinity
-                         : ((orientation.is_xpos() ? bounding_box.min.x : bounding_box.max.x) - origin.x) * inv_dir.x);
+                          ? -infinity
+                          : ((orientation.is_xpos() ? bounding_box.min.x : bounding_box.max.x) - origin.x) * inv_dir.x);
         auto x_max = (orientation.x().is_none()
-                         ? infinity
-                         : ((orientation.is_xpos() ? bounding_box.max.x : bounding_box.min.x) - origin.x) * inv_dir.x);
+                          ? infinity
+                          : ((orientation.is_xpos() ? bounding_box.max.x : bounding_box.min.x) - origin.x) * inv_dir.x);
         auto y_min = (orientation.y().is_none()
-                         ? -infinity
-                         : ((orientation.is_ypos() ? bounding_box.min.y : bounding_box.max.y) - origin.y) * inv_dir.y);
+                          ? -infinity
+                          : ((orientation.is_ypos() ? bounding_box.min.y : bounding_box.max.y) - origin.y) * inv_dir.y);
         auto y_max = (orientation.y().is_none()
-                         ? infinity
-                         : ((orientation.is_ypos() ? bounding_box.max.y : bounding_box.min.y) - origin.y) * inv_dir.y);
+                          ? infinity
+                          : ((orientation.is_ypos() ? bounding_box.max.y : bounding_box.min.y) - origin.y) * inv_dir.y);
         auto z_min = (orientation.z().is_none()
-                         ? -infinity
-                         : ((orientation.is_zpos() ? bounding_box.min.z : bounding_box.max.z) - origin.z) * inv_dir.z);
+                          ? -infinity
+                          : ((orientation.is_zpos() ? bounding_box.min.z : bounding_box.max.z) - origin.z) * inv_dir.z);
         auto z_max = (orientation.z().is_none()
-                         ? infinity
-                         : ((orientation.is_zpos() ? bounding_box.max.z : bounding_box.min.z) - origin.z) * inv_dir.z);
+                          ? infinity
+                          : ((orientation.is_zpos() ? bounding_box.max.z : bounding_box.min.z) - origin.z) * inv_dir.z);
 
         // ! DEBUG
         if (debug) {
