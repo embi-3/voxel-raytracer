@@ -98,17 +98,17 @@ Scene random_spheres() {
 
 Scene random_cubes() {
     int world_size = 500;
-    // int num_cubes = 100000;
+    int num_cubes = 50000;
 
     Scene scene = Scene();
-    auto grid = std::make_unique<SVOVoxelGrid>(world_size, Vec3(0, 0, 0));
+    auto grid = std::make_unique<ArrayVoxelGrid>(world_size, world_size, world_size / 4, Vec3(0, 0, world_size / 8));
     int x;
     int y;
     int z;
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < num_cubes; i++) {
         x = rand() % world_size;
         y = rand() % world_size;
-        z = rand() % world_size;
+        z = rand() % world_size / 4;
         grid->create_cube(Coordinate(x, y, z));
     }
     scene.push_back(std::move(grid));
@@ -168,8 +168,8 @@ int main(int argc, char* argv[]) {
     std::cout << "> Creating scene...\n";
     // Scene scene = two_spheres();
     // Scene scene = random_spheres();
-    // Scene scene = random_cubes();
-    Scene scene = voxelise(model_path);
+    Scene scene = random_cubes();
+    // Scene scene = voxelise(model_path);
 
     // ! INFO
     std::cout << " > " << scene.mem_usage() << " bytes required to store the scene.\n";
@@ -188,7 +188,7 @@ int main(int argc, char* argv[]) {
     // Render the scene
     // ! INFO
     std::cout << "> Rendering scene...\n";
-    auto pixels = camera.render(scene, flat_shader);
+    auto pixels = camera.render(scene, orientation_shader);
     create_png(static_cast<std::size_t>(image_width), static_cast<std::size_t>(image_height), pixels);
 
     const auto end = high_resolution_clock::now();
