@@ -50,8 +50,9 @@ namespace geometry {
         auto ray_direction() const {
             return ray_dir.normalise();
         }
-        // Moved items to public so FlatShader can access it 
+        // Moved items to public so FlatShader can access it
         std::vector<Intersection> items;
+
     private:
         Vec3 ray_dir;
     };

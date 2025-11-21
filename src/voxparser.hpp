@@ -2,14 +2,13 @@
 #ifndef VOXPARSER_H
 #define VOXPARSER_H
 
-#include "classes/scene.hpp"
 #include "classes/colour.hpp"
+#include "classes/scene.hpp"
 #include "classes/voxel.hpp"
 
-#include <vector>
-#include <string>
 #include <cstdint>
-
+#include <string>
+#include <vector>
 
 struct VoxelColour {
     uint8_t r, g, b, a;
@@ -30,6 +29,6 @@ struct VoxData {
     bool palette_set = false;
 };
 
-geometry::Scene voxelise(const std::string &filePath);
+geometry::Scene voxelise(const std::string& filePath);
 
 #endif

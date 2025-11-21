@@ -76,7 +76,7 @@ Scene random_spheres() {
     int num_spheres = 300;
     Scene scene = Scene();
 
-    auto grid = std::make_unique<ArrayVoxelGrid>(world_size, Vec3(0, 0, world_size/2));
+    auto grid = std::make_unique<ArrayVoxelGrid>(world_size, Vec3(0, 0, world_size / 2));
     int x;
     int y;
     int z;
@@ -170,6 +170,9 @@ int main(int argc, char* argv[]) {
     // Scene scene = random_spheres();
     // Scene scene = random_cubes();
     Scene scene = voxelise(model_path);
+
+    // ! INFO
+    std::cout << " > " << scene.mem_usage() << " bytes required to store the scene.\n";
 
     // Create shaders
     // ! INFO

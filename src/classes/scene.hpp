@@ -17,7 +17,7 @@ namespace geometry {
 
         IntersectionList traverse(const Ray& ray) const {
             auto objects = IntersectionList(ray.dir);
-            for (const auto &grid : grids) {
+            for (const auto& grid : grids) {
                 // ! DEBUG
                 if (debug) {
                     std::cerr << "Ray: " << ray.dir << "\n";
@@ -34,6 +34,15 @@ namespace geometry {
             }
 
             return objects;
+        }
+
+        size_t mem_usage() const {
+            size_t size = sizeof(*this);
+            for (const auto& grid : grids) {
+                size += grid->mem_usage();
+            }
+
+            return size;
         }
 
     private:

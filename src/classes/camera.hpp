@@ -44,10 +44,10 @@ namespace renderer {
     private:
         int image_width;
         int image_height;
-        [[maybe_unused]] num aspect_ratio;
-        [[maybe_unused]] num focal_length;
+        num aspect_ratio;
+        num focal_length;
         Vec3 camera_center = Vec3();
-        [[maybe_unused]] num viewport_height;
+        num viewport_height;
         num viewport_width;
         Vec3 upper_left_pixel;
         Vec3 delta_x;

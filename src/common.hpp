@@ -9,8 +9,8 @@
 #define COMMON_H
 
 #include <limits>
-#include <string>
 #include <sstream>
+#include <string>
 
 #ifdef USE_SINGLE_PRECISION
 using num = float;
