@@ -48,7 +48,7 @@ namespace shader {
                 if (debug) {
                     std::cerr << "Distance: " << distance << "\n";
                 }
-                return Colour(distance - 10);
+                return Colour((1 / distance) * 255);
             }
             return Colour();
         }
@@ -108,6 +108,17 @@ namespace shader {
     };
 
     class FlatShader : public Shader {
+    public:
+        Colour fragment(const IntersectionList& list) const override {
+            if (!list.empty()) {
+                const auto& hitVoxel = list.items.at(0);
+                return hitVoxel.voxel.get_colour();
+            }
+            return Colour();
+        }
+    };
+
+    class IterationShader : public Shader {
     public:
         Colour fragment(const IntersectionList& list) const override {
             if (!list.empty()) {
