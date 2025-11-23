@@ -20,8 +20,6 @@ using namespace helper;
 namespace geometry {
     class VoxelGrid {
     public:
-        virtual const Voxel& get_voxel(Coordinate coords) const = 0;
-
         virtual void set_voxel(Coordinate coords, Voxel voxel) = 0;
 
         virtual IntersectionList traverse(Ray ray) const = 0;
@@ -112,7 +110,7 @@ namespace geometry {
         }
 
         // TODO: Check if this returns shallow or deep copy of the Voxel.
-        const Voxel& get_voxel(Coordinate coords) const override {
+        const Voxel& get_voxel(Coordinate coords) const {
             if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0 || coords.z >= size.z) {
                 auto stream = StringStream{};
                 stream << "[!] Coordinates out of bounds: " << coords << "\n";
@@ -159,46 +157,35 @@ namespace geometry {
             size = Coordinate(static_cast<int>(world_size));
             origin = centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
 
-            Vec3 min_bounds = origin - Vec3(0.5 * scale.x, 0.5 * scale.y, 0.5 * scale.z);
-            Vec3 max_bounds = origin + Vec3((size.x - 0.5) * scale.x, (size.y - 0.5) * scale.y, (size.z - 0.5) * scale.z);
-            bounding_box = AABB(min_bounds, max_bounds);
-
-            max_depth = static_cast<std::size_t>(ceil(std::log2(world_size)));
-            root = std::make_unique<Node>(bounding_box);
+            max_depth = static_cast<std::size_t>(ceil(std::log2(world_size))) + 1;
+            root = std::make_unique<Node>(0);
         }
 
         explicit SVOVoxelGrid(std::size_t x, std::size_t y, std::size_t z, Vec3 centre) {
             size = Coordinate(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z));
             origin =
                 centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
-            
-            Vec3 min_bounds = origin - Vec3(0.5 * scale.x, 0.5 * scale.y, 0.5 * scale.z);
-            Vec3 max_bounds = origin + Vec3((size.x - 0.5) * scale.x, (size.y - 0.5) * scale.y, (size.z - 0.5) * scale.z);
-            bounding_box = AABB(min_bounds, max_bounds);
 
-            max_depth = static_cast<std::size_t>(ceil(std::log2(std::max({x, y, z}))));
-            root = std::make_unique<Node>(bounding_box);
+            max_depth = static_cast<std::size_t>(ceil(std::log2(std::max({x, y, z})))) + 1;
+            root = std::make_unique<Node>(0);
         }
 
-        const Voxel& get_voxel(Coordinate coords) const override;
+        const Voxel& get_voxel(Coordinate coords, size_t& depth) const;
 
         void set_voxel(Coordinate coords, Voxel voxel) override;
 
         IntersectionList traverse(Ray ray) const override;
 
-    private:
         struct Node {
-            bool isLeaf = false;
+            size_t depth;
             std::array<std::unique_ptr<Node>, 8> children{};
             Voxel data = Voxel::empty();
-            AABB bounding_box;
 
-            explicit Node(AABB aabb) noexcept
-            : bounding_box(aabb) {}
+            explicit Node(size_t depth) noexcept
+            : depth(depth) {}
         };
 
         std::size_t max_depth;
-        // std::size_t tree_size = 0;
         std::unique_ptr<Node> root;
     };
 } // namespace geometry

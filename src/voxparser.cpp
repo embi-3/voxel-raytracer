@@ -104,7 +104,7 @@ Scene voxelise(const std::string &filePath) {
 
     Scene scene = Scene();
 
-    auto grid = std::make_unique<ArrayVoxelGrid>(
+    auto grid = std::make_unique<SVOVoxelGrid>(
         data.model.size_x + 2,
         data.model.size_z + 2,
         data.model.size_y + 2,

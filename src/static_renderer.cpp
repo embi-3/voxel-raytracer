@@ -166,10 +166,10 @@ int main(int argc, char* argv[]) {
     // Create the scene
     // ! INFO
     std::cout << "> Creating scene...\n";
-    // Scene scene = two_spheres();
+    Scene scene = two_spheres();
     // Scene scene = random_spheres();
     // Scene scene = random_cubes();
-    Scene scene = voxelise(model_path);
+    // Scene scene = voxelise(model_path);
 
     // Create shaders
     // ! INFO

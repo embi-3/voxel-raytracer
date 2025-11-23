@@ -239,7 +239,7 @@ namespace geometry {
 //  SVOVoxelGrid
 // ========================================================================
 
-    const Voxel& SVOVoxelGrid::get_voxel(Coordinate coords) const {
+    const Voxel& SVOVoxelGrid::get_voxel(Coordinate coords, size_t& depth) const {
         if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0 || coords.z >= size.z) {
             auto stream = StringStream{};
             stream << "[!] Coordinates out of bounds: " << coords << "\n";
@@ -248,7 +248,7 @@ namespace geometry {
 
         const auto* curr = root.get();
 
-        for (std::size_t depth = 0; depth < max_depth && !curr->isLeaf; depth++) {
+        for (std::size_t depth = 0; depth < max_depth && !(curr->depth < max_depth); depth++) {
             const auto x_bit = (static_cast<std::size_t>(coords.x) >> (max_depth - depth - 1)) & 1u;
             const auto y_bit = (static_cast<std::size_t>(coords.y) >> (max_depth - depth - 1)) & 1u;
             const auto z_bit = (static_cast<std::size_t>(coords.z) >> (max_depth - depth - 1)) & 1u;
@@ -260,6 +260,8 @@ namespace geometry {
             }
             curr = child.get();
         }
+
+        depth = curr->depth;
 
         return curr->data;
     }
@@ -281,110 +283,220 @@ namespace geometry {
             
             auto& child = curr->children[child_index];
             if (!child) {
-                auto x_dist = curr->bounding_box.max.x - curr->bounding_box.min.x;
-                auto y_dist = curr->bounding_box.max.y - curr->bounding_box.min.y;
-                auto z_dist = curr->bounding_box.max.z - curr->bounding_box.min.z;
-
-                auto min = Vec3(
-                    curr->bounding_box.min.x + static_cast<double>(x_bit) * (x_dist / 2),
-                    curr->bounding_box.min.y + static_cast<double>(y_bit) * (y_dist / 2),
-                    curr->bounding_box.min.z + static_cast<double>(z_bit) * (z_dist / 2)
-                );
-
-                auto max = min + Vec3(x_dist / 2, y_dist / 2, z_dist / 2);
-
-                child = std::make_unique<Node>(AABB(min, max));
+                child = std::make_unique<Node>(depth);
             }
             curr = child.get();
         }
 
         curr->data = voxel;
-        curr->isLeaf = true;
     }
 
     IntersectionList SVOVoxelGrid::traverse(Ray ray) const {
         auto objects = IntersectionList(ray.dir);
 
-        auto root_interval = ray.intersection(root->bounding_box);
-        // If ray doesn't hit root bounding_box, skip
-        if (!root_interval.is_valid())
+        Vec3 tmax;
+        Vec3 tdelta = Vec3(equals_zero(ray.dir.x) ? infinity : fabs(scale.x * ray.inv_dir.x),
+                        equals_zero(ray.dir.y) ? infinity : fabs(scale.y * ray.inv_dir.y),
+                        equals_zero(ray.dir.z) ? infinity : fabs(scale.z * ray.inv_dir.z));
+        num tcur = 0;
+        Direction normal = Direction();
+        Coordinate step = ray.orientation.sign();
+        Coordinate coords;
+
+        Vec3 min;
+        Vec3 max;
+        Interval interval = ray.intersection(bounding_box, min, max);
+        Voxel voxel;
+
+        // ! DEBUG
+        if (debug) {
+            std::cerr << "[t] Interval: [" << interval.min << ", " << interval.max << "]\n";
+            std::cerr << "[t] Delta: " << tdelta << "\n";
+        }
+
+        if (interval.is_valid()) {
+            tcur = interval.min;
+
+            // Calculate the first t which intersects with each coordinate plane.
+            // If it's infinity, don't bother.
+            // ! Double check the order of multiplications / divisions is correct!
+            num first_x =
+                (max.x == infinity
+                    ? infinity
+                    : std::max(
+                        min.x,
+                        max.x - (trunc((max.x - interval.min) * ray.dir.x / scale.x) * scale.x * ray.inv_dir.x)));
+            num first_y =
+                (max.y == infinity
+                    ? infinity
+                    : std::max(
+                        min.y,
+                        max.y - (trunc((max.y - interval.min) * ray.dir.y / scale.y) * scale.y * ray.inv_dir.y)));
+            num first_z =
+                (max.z == infinity
+                    ? infinity
+                    : std::max(
+                        min.z,
+                        max.z - (trunc((max.z - interval.min) * ray.dir.z / scale.z) * scale.z * ray.inv_dir.z)));
+
+            tmax = Vec3(first_x, first_y, first_z);
+
+            // ! DEBUG
+            if (debug) {
+                std::cerr << "pos: " << ray.at(tcur) << ", tcur: " << tcur << ", tmax: " << tmax << "\n";
+            }
+        }
+        else {
+            // If the ray doesn't hit the bounding box, return an empty list.
             return objects;
+        }
 
-        // Stores nodes with t-intervals
-        struct StackNode {
-            Node* ptr;
-            num tmin;
-            num tmax;
-        };
+        coords = get_coords(ray.at(tcur), ray.orientation);
 
-        // Stack of nodes while traversing
-        auto stack = std::stack<StackNode>{};
-        stack.push({root.get(), root_interval.min, root_interval.max});
+        // ! DEBUG
+        if (debug) {
+            std::cerr << "Starting coords: " << coords << "\n";
+        }
 
-        // Iterate until stack is empty or opaque node is hit
-        while (!stack.empty()) {
-            /// Pop stack
-            auto stack_node = stack.top();
-            auto node = stack_node.ptr;
-            stack.pop();
+        size_t depth;
 
-            if (node->isLeaf) {
-                auto hit = ray.at(stack_node.tmin);
-                auto node_bb = node->bounding_box;
-                auto normal = Vec3();
+        // Iteratively find the next voxel using floating-point comparisons.
+        while (contains(coords)) {
+            // ! DEBUG
+            if (debug) {
+                std::cerr << "[c] " << coords << ": [" << tcur << "] " << ray.at(tcur) << " " << normal << " => "
+                        << get_coords(ray.at(tcur), ray.orientation) << "\n";
+            }
 
-                if (std::fabs(hit.x - node_bb.min.x) < epsilon) 
-                    normal = Vec3(1, 0, 0);
-                else if (std::fabs(hit.x - node_bb.max.x) < epsilon) 
-                    normal = Vec3(-1, 0, 0);
-                else if (std::fabs(hit.y - node_bb.min.y) < epsilon) 
-                    normal = Vec3(0, 1, 0);
-                else if (std::fabs(hit.y - node_bb.max.y) < epsilon)
-                    normal = Vec3(0, -1, 0);
-                else if (std::fabs(hit.z - node_bb.min.z) < epsilon)
-                    normal = Vec3(0, 0, 1);
-                else if (std::fabs(hit.z - node_bb.max.z) < epsilon)
-                    normal = Vec3(0, 0, -1);
+            voxel = get_voxel(coords, depth);
+            if (voxel.is_opaque()) {
+                // ! DEBUG
+                if (debug) {
+                    std::cerr << "[i] ray: " << ray.dir << ", dist: " << tcur * ray.dir.length() << ", pos: " << ray.at(tcur)
+                            << ", coords: " << get_coords(ray.at(tcur), ray.orientation) << ", normal: " << normal
+                            << "\n";
+                }
 
-                objects.push_back(Intersection(node->data, stack_node.tmin * ray.dir.length(), normal));
+                objects.push_back(Intersection(voxel, tcur * ray.dir.length(), normal));
+
+                // ! TEMP
                 break;
             }
 
-            auto sorted_children = std::array<StackNode, 8>{};
-            std::size_t child_count = 0;
-            for (std::size_t i = 0; i < 8; i++) {
-                // If child is nullptr, skip
-                if (!node->children[i]) continue;
-                auto child = node->children[i].get();
-                
-                // If ray doesn't intersect, skip
-                auto child_interval = ray.intersection(child->bounding_box);
-                if (!child_interval.is_valid()) continue;
+            // Create a temporary variable so any traversal updates don't affect the current iteration.
+            Vec3 tmax_temp = tmax;
 
-                // If ray doesnt originate from the parent, skip  
-                num tmin = std::max(child_interval.min, stack_node.tmin); 
-                num tmax = std::min(child_interval.max, stack_node.tmax); 
-                if (tmin > tmax) continue;
-                
-                sorted_children[child_count++] = {child, tmin, tmax};
+            // ! DEBUG
+            if (debug) {
+                std::cerr << "tmax: " << tmax_temp << "\n";
             }
 
-            // Sort children in descending tmin order
-            std::sort(
-                sorted_children.begin(), 
-                sorted_children.end(),
-                [](const StackNode& a, const StackNode& b) { return a.tmin > b.tmin; }
-            );
+            normal = Direction(NONE);
 
-            for (const auto& child : sorted_children) {
-                if (!child.ptr) 
-                    break;
+            // Update the Amanatides-Woo algorithm to handle diagonals.
+            if (tmax_temp.x <= tmax_temp.y && tmax_temp.x <= tmax_temp.z) {
+                tcur = tmax_temp.x;
+                tmax.x += tdelta.x * pow(2, static_cast<double>(max_depth - depth));
+                coords.x += step.x * static_cast<int>(pow(2, static_cast<double>(max_depth - depth)));
+                normal += ray.orientation.x();
+            }
 
-                stack.push(child);
+            if (tmax_temp.y <= tmax_temp.x && tmax_temp.y <= tmax_temp.z) {
+                tcur = tmax_temp.y;
+                tmax.y += tdelta.y * pow(2, static_cast<double>(max_depth - depth));
+                coords.y += step.y * static_cast<int>(pow(2, static_cast<double>(max_depth - depth)));
+                normal += ray.orientation.y();
+            }
+
+            if (tmax_temp.z <= tmax_temp.x && tmax_temp.z <= tmax_temp.y) {
+                tcur = tmax_temp.z;
+                tmax.z += tdelta.z * pow(2, static_cast<double>(max_depth - depth));
+                coords.z += step.z * static_cast<int>(pow(2, static_cast<double>(max_depth - depth)));
+                normal += ray.orientation.z();
             }
         }
 
         return objects;
+
+        // auto interval = ray.intersection(bounding_box);
+        // // If ray doesn't hit root bounding_box, skip
+        // if (!root_interval.is_valid())
+        //     return objects;
+
+        // // Stores nodes with t-intervals
+        // struct StackNode {
+        //     Node* ptr;
+        //     num tmin;
+        //     num tmax;
+        // };
+
+        // // Stack of nodes while traversing
+        // auto stack = std::stack<StackNode>{};
+        // stack.push({root.get(), root_interval.min, root_interval.max});
+
+        // // Iterate until stack is empty or opaque node is hit
+        // while (!stack.empty()) {
+        //     /// Pop stack
+        //     auto stack_node = stack.top();
+        //     auto node = stack_node.ptr;
+        //     stack.pop();
+
+        //     if (node->depth == max_depth) {
+        //         auto hit = ray.at(stack_node.tmin);
+        //         auto normal = Vec3();
+
+        //         if (std::fabs(hit.x - node_bb.min.x) < epsilon) 
+        //             normal = Vec3(1, 0, 0);
+        //         else if (std::fabs(hit.x - node_bb.max.x) < epsilon) 
+        //             normal = Vec3(-1, 0, 0);
+        //         else if (std::fabs(hit.y - node_bb.min.y) < epsilon) 
+        //             normal = Vec3(0, 1, 0);
+        //         else if (std::fabs(hit.y - node_bb.max.y) < epsilon)
+        //             normal = Vec3(0, -1, 0);
+        //         else if (std::fabs(hit.z - node_bb.min.z) < epsilon)
+        //             normal = Vec3(0, 0, 1);
+        //         else if (std::fabs(hit.z - node_bb.max.z) < epsilon)
+        //             normal = Vec3(0, 0, -1);
+
+        //         objects.push_back(Intersection(node->data, stack_node.tmin * ray.dir.length(), normal));
+        //         break;
+        //     }
+
+        //     auto sorted_children = std::array<StackNode, 8>{};
+        //     std::size_t child_count = 0;
+        //     for (std::size_t i = 0; i < 8; i++) {
+        //         // If child is nullptr, skip
+        //         if (!node->children[i]) continue;
+        //         auto child = node->children[i].get();
+                
+        //         // If ray doesn't intersect, skip
+        //         auto child_interval = ray.intersection(child->bounding_box);
+        //         if (!child_interval.is_valid()) continue;
+
+        //         // If ray doesnt originate from the parent, skip  
+        //         num tmin = std::max(child_interval.min, stack_node.tmin); 
+        //         num tmax = std::min(child_interval.max, stack_node.tmax); 
+        //         if (tmin > tmax) continue;
+                
+        //         sorted_children[child_count++] = {child, tmin, tmax};
+        //     }
+
+        //     // Sort children in descending tmin order
+        //     std::sort(
+        //         sorted_children.begin(), 
+        //         sorted_children.end(),
+        //         [](const StackNode& a, const StackNode& b) { return a.tmin > b.tmin; }
+        //     );
+
+        //     for (const auto& child : sorted_children) {
+        //         if (!child.ptr) 
+        //             break;
+
+        //         stack.push(child);
+        //     }
+        // }
+
+        // return objects;
     }
 
 };
