@@ -8,8 +8,6 @@
 #include "voxel.hpp"
 
 namespace geometry {
-    static Voxel INVALID_VOXEL = Voxel();
-
     class Intersection {
     public:
         explicit Intersection(const Voxel& voxel) noexcept

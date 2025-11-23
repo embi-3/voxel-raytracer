@@ -22,7 +22,30 @@ namespace geometry {
     public:
         virtual void set_voxel(Coordinate coords, Voxel voxel) = 0;
 
+        virtual const Voxel& get_voxel(Coordinate coords) const = 0;
+
         virtual IntersectionList traverse(const Ray& ray) const = 0;
+
+        IntersectionList fixed_step_traverse(const Ray &ray) {
+            IntersectionList hits = IntersectionList(ray.dir);
+            Interval interval = ray.intersection(bounding_box);
+            const num step = 0.5;
+            num tcur = interval.min;
+
+
+            while (tcur + step < interval.max) {
+                Vec3 pos = ray.at(tcur);
+                const Voxel voxel = get_voxel(get_coords(pos, ray.orientation));
+                tcur += step;
+                if (voxel.is_invalid()) {
+                    continue;
+                } else if (hits.empty() || hits.at(hits.size() - 1).voxel != voxel) {
+                    hits.push_back(Intersection(voxel, tcur, ray.orientation));
+                }
+            }
+
+            return hits;
+        }
 
         virtual size_t mem_usage() const = 0;
 
@@ -112,7 +135,7 @@ namespace geometry {
         }
 
         // TODO: Check if this returns shallow or deep copy of the Voxel.
-        const Voxel& get_voxel(Coordinate coords) const {
+        const Voxel& get_voxel(Coordinate coords) const override {
             if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0
                 || coords.z >= size.z) {
                 auto stream = StringStream{};
@@ -189,6 +212,32 @@ namespace geometry {
 
         size_t mem_usage() const override {
             return get_size(*root);
+        }
+
+        const Voxel& get_voxel(Coordinate coords) const override {
+            if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0
+                || coords.z >= size.z) {
+                auto stream = StringStream{};
+                stream << "[!] Coordinates out of bounds: " << coords << "\n";
+                throw std::invalid_argument(stream.str());
+            }
+
+            auto* curr = root.get();
+
+            for (std::size_t depth = 0; depth < max_depth; depth++) {
+                const auto x_bit = (static_cast<std::size_t>(coords.x) >> (max_depth - depth - 1)) & 1u;
+                const auto y_bit = (static_cast<std::size_t>(coords.y) >> (max_depth - depth - 1)) & 1u;
+                const auto z_bit = (static_cast<std::size_t>(coords.z) >> (max_depth - depth - 1)) & 1u;
+                const auto child_index = (x_bit << 2) | (y_bit << 1) | z_bit;
+
+                auto& child = curr->children[child_index];
+                if (!child) {
+                    return INVALID_VOXEL;
+                }
+                curr = child.get();
+            }
+
+            return curr->data;
         }
 
         void set_voxel(Coordinate coords, Voxel voxel) override;

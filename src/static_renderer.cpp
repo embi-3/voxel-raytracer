@@ -180,7 +180,10 @@ int main(int argc, char* argv[]) {
     std::string debug_path = "output.txt";
     std::string model_path = "../src/voxmodels/monument/monu1.vox";
     std::string preset = "default";
+    std::string shader_type = "default";
     bool from_vox = false;
+
+    std::unique_ptr<Shader> shader;
 
     // Parse command line arguments
     for (int i = 1; i < argc; ++i) {
@@ -207,6 +210,9 @@ int main(int argc, char* argv[]) {
         }
         else if (arg == "--svo") {
             svo = true;
+        }
+        else if (arg == "--shader" && i + 1 < argc) {
+            shader_type = argv[++i];
         }
         else {
             auto stream = StringStream{};
@@ -253,24 +259,29 @@ int main(int argc, char* argv[]) {
     // ! INFO
     std::cout << " > " << scene.mem_usage() << " bytes required to store the scene.\n";
 
+    // Create the shader
     // ! INFO
-    std::cout << " > " << scene.mem_usage() << " bytes required to store the scene.\n";
-
-    // Create shaders
-    // ! INFO
-    std::cout << "> Creating shaders...\n";
-    GradientShader gradient_shader = GradientShader();
-    WhiteShader white_shader = WhiteShader();
-    RedShader red_shader = RedShader();
-    DistanceShader distance_shader = DistanceShader();
-    OrientationShader orientation_shader = OrientationShader();
-    RayShader ray_shader = RayShader();
-    FlatShader flat_shader = FlatShader();
+    std::cout << "> Creating shader...\n";
+    if (shader_type == "orientation" || shader_type == "default") {
+        shader = std::make_unique<OrientationShader>();
+    } else if (shader_type == "gradient") {
+        shader = std::make_unique<GradientShader>();
+    } else if (shader_type == "flat") {
+        shader = std::make_unique<FlatShader>();
+    } else if (shader_type == "white") {
+        shader = std::make_unique<WhiteShader>();
+    } else if (shader_type == "distance") {
+        shader = std::make_unique<DistanceShader>();
+    } else if (shader_type == "ray") {
+        shader = std::make_unique<RayShader>();
+    } else {
+        throw new std::invalid_argument("Invalid shader option! Please choose from: [flat, white, orientation, ray]\n");
+    }
 
     // Render the scene
     // ! INFO
     std::cout << "> Rendering scene...\n";
-    auto pixels = camera.render(scene, orientation_shader);
+    auto pixels = camera.render(scene, *shader);
     create_png(static_cast<std::size_t>(image_width), static_cast<std::size_t>(image_height), pixels);
 
     const auto end = high_resolution_clock::now();

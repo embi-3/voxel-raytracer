@@ -43,9 +43,13 @@ namespace geometry {
         //     return !(*this == other);
         // }
 
+        bool is_invalid() const;
+
     private:
         bool opaque = true;
         Colour colour = Colour::white();
     };
+
+    static Voxel INVALID_VOXEL = Voxel();
 } // namespace geometry
 #endif // VOXEL_H
