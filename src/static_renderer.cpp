@@ -279,7 +279,7 @@ int main(int argc, char* argv[]) {
     } else if (shader_type == "transparent") {
         shader = std::make_unique<TransparentShader>();
     } else {
-        throw new std::invalid_argument("Invalid shader option! Please choose from: [flat, white, orientation, ray]\n");
+        throw new std::invalid_argument("Invalid shader option! Please choose from: [flat, white, orientation, ray, transparent]\n");
     }
 
     // Render the scene
