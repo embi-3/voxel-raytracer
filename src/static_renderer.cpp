@@ -202,7 +202,9 @@ int main(int argc, char* argv[]) {
             debug_path = argv[++i];
         }
         else if (arg == "--model-path" && i + 1 < argc) {
-            model_path = argv[++i];
+            std::ostringstream oss;
+            oss << "../" << argv[++i];
+            model_path = oss.str();
             from_vox = true;
         }
         else if (arg == "--preset" && i + 1 < argc) {
@@ -274,6 +276,8 @@ int main(int argc, char* argv[]) {
         shader = std::make_unique<DistanceShader>();
     } else if (shader_type == "ray") {
         shader = std::make_unique<RayShader>();
+    } else if (shader_type == "transparent") {
+        shader = std::make_unique<TransparentShader>();
     } else {
         throw new std::invalid_argument("Invalid shader option! Please choose from: [flat, white, orientation, ray]\n");
     }

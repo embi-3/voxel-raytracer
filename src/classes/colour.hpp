@@ -20,13 +20,13 @@ namespace texture {
     public:
         explicit constexpr Colour() noexcept = default;
 
-        explicit constexpr Colour(num v, num a = 1) noexcept
+        explicit constexpr Colour(num v, num a = 255) noexcept
         : r(v)
         , g(v)
         , b(v)
         , a(a) {}
 
-        explicit constexpr Colour(num r, num g, num b, num a = 1) noexcept
+        explicit constexpr Colour(num r, num g, num b, num a = 255) noexcept
         : r(r)
         , g(g)
         , b(b)
@@ -153,7 +153,7 @@ namespace texture {
     }
 
     inline num bounded_alpha(num alpha) {
-        return std::clamp(alpha, 0.0, 1.0);
+        return std::clamp(alpha, 0.0, 255.0);
     }
 
     inline Colour operator+(const Colour& u, const Colour& v) noexcept {
@@ -175,7 +175,7 @@ namespace texture {
     // Blend Modes
     inline Colour normal_blend(const Colour& u, const Colour& v) {
         auto blended = (u.a * u) + ((1 - u.a) * (v * v.a));
-        blended.a = std::min(u.a + (u.a * v.a), 1.0);
+        blended.a = std::min(u.a + (u.a * v.a), 255.0);
         return blended;
     }
 

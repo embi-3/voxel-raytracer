@@ -172,9 +172,6 @@ namespace geometry {
                 }
 
                 objects.push_back(Intersection(voxel, tcur * ray.dir.length(), normal));
-
-                // ! TEMP
-                break;
             }
 
             // Create a temporary variable so any traversal updates don't affect the current iteration.
@@ -326,7 +323,7 @@ namespace geometry {
                     normal = Vec3(0, 0, -1);
 
                 objects.push_back(Intersection(node->data, stack_node.tmin * ray.dir.length(), normal));
-                break;
+                // break;
             }
 
             sorted_children.clear();
