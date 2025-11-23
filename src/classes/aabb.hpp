@@ -15,6 +15,10 @@ namespace geometry {
         : min(min)
         , max(max){};
 
+        explicit constexpr AABB(Coordinate min, Coordinate max) noexcept
+        : min(Vec3{static_cast<double>(min.x), static_cast<double>(min.y), static_cast<double>(min.z)})
+        , max(Vec3{static_cast<double>(max.x), static_cast<double>(max.y), static_cast<double>(max.z)}){};
+
         bool contains(Vec3 pos) const noexcept {
             return epsilon >= min.x - pos.x && pos.x - max.x <= epsilon && epsilon >= min.y - pos.y
                    && pos.y - max.y <= epsilon && epsilon >= min.z - pos.z && pos.z - max.z <= epsilon;

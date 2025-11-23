@@ -9,8 +9,8 @@
 #include "voxel.hpp"
 
 #include <cmath>
-#include <memory>
 #include <iostream>
+#include <memory>
 #include <sstream>
 
 #include <vector>
@@ -22,7 +22,9 @@ namespace geometry {
     public:
         virtual void set_voxel(Coordinate coords, Voxel voxel) = 0;
 
-        virtual IntersectionList traverse(Ray ray) const = 0;
+        virtual IntersectionList traverse(const Ray& ray) const = 0;
+
+        virtual size_t mem_usage() const = 0;
 
         // ! The orientation is used to distinguish ties for coordinates on the border of voxels.
         Coordinate get_coords(Vec3 pos, Direction orientation) const;
@@ -111,7 +113,8 @@ namespace geometry {
 
         // TODO: Check if this returns shallow or deep copy of the Voxel.
         const Voxel& get_voxel(Coordinate coords) const {
-            if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0 || coords.z >= size.z) {
+            if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0
+                || coords.z >= size.z) {
                 auto stream = StringStream{};
                 stream << "[!] Coordinates out of bounds: " << coords << "\n";
                 throw std::invalid_argument(stream.str());
@@ -121,7 +124,8 @@ namespace geometry {
         }
 
         void set_voxel(Coordinate coords, Voxel voxel) override {
-            if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0 || coords.z >= size.z) {
+            if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0
+                || coords.z >= size.z) {
                 auto stream = StringStream{};
                 stream << "[!] Coordinates out of bounds: " << coords << "\n";
                 throw std::invalid_argument(stream.str());
@@ -130,7 +134,11 @@ namespace geometry {
             world[flatten(coords)] = voxel;
         }
 
-        IntersectionList traverse(Ray ray) const override;
+        IntersectionList traverse(const Ray& ray) const override;
+
+        size_t mem_usage() const override {
+            return static_cast<size_t>(size.x * size.y * size.z) * sizeof(Voxel);
+        }
 
     private:
         std::vector<Voxel> world = {}; // 1D array representation of the voxel world
@@ -155,7 +163,8 @@ namespace geometry {
     public:
         explicit SVOVoxelGrid(std::size_t world_size, Vec3 centre) {
             size = Coordinate(static_cast<int>(world_size));
-            origin = centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
+            origin =
+                centre - Vec3((size.x * scale.x) / 2 - 0.5, (size.y * scale.y) / 2 - 0.5, (size.z * scale.z) / 2 - 0.5);
 
             max_depth = static_cast<std::size_t>(ceil(std::log2(world_size))) + 1;
             root = std::make_unique<Node>(0);
@@ -170,11 +179,14 @@ namespace geometry {
             root = std::make_unique<Node>(0);
         }
 
+        size_t mem_usage() const override {
+            return get_size(*root);
+        }
         const Voxel& get_voxel(Coordinate coords, size_t& depth) const;
 
         void set_voxel(Coordinate coords, Voxel voxel) override;
 
-        IntersectionList traverse(Ray ray) const override;
+        IntersectionList traverse(const Ray& ray) const override;
 
         struct Node {
             size_t depth;
@@ -184,6 +196,19 @@ namespace geometry {
             explicit Node(size_t depth) noexcept
             : depth(depth) {}
         };
+        
+        size_t get_size(struct Node& node) const {
+            size_t size = sizeof(Node);
+            if (node.depth != max_depth - 1) {
+                for (size_t i = 0; i < 8; i++) {
+                    if (node.children.at(i) != nullptr) {
+                        size += get_size(*(node.children[i]));
+                    }
+                }
+            }
+
+            return size;
+        }
 
         std::size_t max_depth;
         std::unique_ptr<Node> root;

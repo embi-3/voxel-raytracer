@@ -1,13 +1,13 @@
-#include "ray.hpp"
 #include "voxel_grid.hpp"
+#include "ray.hpp"
 
 #include <stack>
 
 namespace geometry {
 
-// ========================================================================
-//  VoxelGrid
-// ========================================================================
+    // ========================================================================
+    //  VoxelGrid
+    // ========================================================================
 
     // ! The orientation is used to distinguish ties for coordinates on the border of voxels.
     Coordinate VoxelGrid::get_coords(Vec3 pos, Direction orientation) const {
@@ -29,9 +29,10 @@ namespace geometry {
             }
 
             return Coordinate(static_cast<int>(round(x_scaled)),
-                                static_cast<int>(round(y_scaled)),
-                                static_cast<int>(round(z_scaled)));
-        } else {
+                              static_cast<int>(round(y_scaled)),
+                              static_cast<int>(round(z_scaled)));
+        }
+        else {
             auto stream = StringStream{};
             stream << "[!] " << pos << "is not in bounds: " << bounding_box << "\n";
             throw std::invalid_argument(stream.str());
@@ -50,16 +51,16 @@ namespace geometry {
 
     void VoxelGrid::create_sphere(Coordinate centre, num radius) {
         for (auto x = static_cast<int>(std::max(static_cast<num>(centre.x) - radius, 0.0));
-                x <= centre.x + radius && x < size.x;
-                x++)
+             x <= centre.x + radius && x < size.x;
+             x++)
         {
             for (auto y = static_cast<int>(std::max(static_cast<num>(centre.y) - radius, 0.0));
-                    y <= centre.y + radius && x < size.y;
-                    y++)
+                 y <= centre.y + radius && x < size.y;
+                 y++)
             {
                 for (auto z = static_cast<int>(std::max(static_cast<num>(centre.z) - radius, 0.0));
-                        z <= centre.z + radius && x < size.z;
-                        z++)
+                     z <= centre.z + radius && x < size.z;
+                     z++)
                 {
                     if (space_dist(centre, Coordinate(x, y, z)) <= radius) {
                         set_voxel(Coordinate(x, y, z), Voxel());
@@ -69,17 +70,18 @@ namespace geometry {
         }
     }
 
-// ========================================================================
-//  ArrayVoxelGrid
-// ========================================================================
+    // ========================================================================
+    //  ArrayVoxelGrid
+    // ========================================================================
 
-    IntersectionList ArrayVoxelGrid::traverse(Ray ray) const {
+    IntersectionList ArrayVoxelGrid::traverse(const Ray& ray) const {
         IntersectionList objects = IntersectionList(ray.dir);
 
         Vec3 tmax;
         Vec3 tdelta = Vec3(equals_zero(ray.dir.x) ? infinity : fabs(scale.x * ray.inv_dir.x),
-                        equals_zero(ray.dir.y) ? infinity : fabs(scale.y * ray.inv_dir.y),
-                        equals_zero(ray.dir.z) ? infinity : fabs(scale.z * ray.inv_dir.z));
+                           equals_zero(ray.dir.y) ? infinity : fabs(scale.y * ray.inv_dir.y),
+                           equals_zero(ray.dir.z) ? infinity : fabs(scale.z * ray.inv_dir.z)); // 3 multiplications, 3
+                                                                                               // comparisons
         num tcur = 0;
         Direction normal = Direction();
         Coordinate step = ray.orientation.sign();
@@ -87,7 +89,7 @@ namespace geometry {
 
         Vec3 min;
         Vec3 max;
-        Interval interval = ray.intersection(bounding_box, min, max);
+        Interval interval = ray.intersection(bounding_box, min, max); // 6 multiplications, 6 comparisons
         Voxel voxel;
 
         // ! DEBUG
@@ -102,24 +104,22 @@ namespace geometry {
             // Calculate the first t which intersects with each coordinate plane.
             // If it's infinity, don't bother.
             // ! Double check the order of multiplications / divisions is correct!
+            // 9 multiplications
             num first_x =
                 (max.x == infinity
-                    ? infinity
-                    : std::max(
-                        min.x,
-                        max.x - (trunc((max.x - interval.min) * ray.dir.x / scale.x) * scale.x * ray.inv_dir.x)));
+                     ? infinity
+                     : std::max(min.x,
+                                max.x - (trunc((max.x - interval.min) * ray.dir.x / scale.x) * scale.x * ray.inv_dir.x)));
             num first_y =
                 (max.y == infinity
-                    ? infinity
-                    : std::max(
-                        min.y,
-                        max.y - (trunc((max.y - interval.min) * ray.dir.y / scale.y) * scale.y * ray.inv_dir.y)));
+                     ? infinity
+                     : std::max(min.y,
+                                max.y - (trunc((max.y - interval.min) * ray.dir.y / scale.y) * scale.y * ray.inv_dir.y)));
             num first_z =
                 (max.z == infinity
-                    ? infinity
-                    : std::max(
-                        min.z,
-                        max.z - (trunc((max.z - interval.min) * ray.dir.z / scale.z) * scale.z * ray.inv_dir.z)));
+                     ? infinity
+                     : std::max(min.z,
+                                max.z - (trunc((max.z - interval.min) * ray.dir.z / scale.z) * scale.z * ray.inv_dir.z)));
 
             tmax = Vec3(first_x, first_y, first_z);
 
@@ -128,6 +128,7 @@ namespace geometry {
                 std::cerr << "pos: " << ray.at(tcur) << ", tcur: " << tcur << ", tmax: " << tmax << "\n";
             }
 
+            // 3 comparisons, 3 additions
             if (equals(tmax.x, tcur)) {
                 // normal += orientation.x();
                 tmax.x += tdelta.x;
@@ -158,16 +159,16 @@ namespace geometry {
             // ! DEBUG
             if (debug) {
                 std::cerr << "[c] " << coords << ": [" << tcur << "] " << ray.at(tcur) << " " << normal << " => "
-                        << get_coords(ray.at(tcur), ray.orientation) << "\n";
+                          << get_coords(ray.at(tcur), ray.orientation) << "\n";
             }
 
             voxel = get_voxel(coords);
             if (voxel.is_opaque()) {
                 // ! DEBUG
                 if (debug) {
-                    std::cerr << "[i] ray: " << ray.dir << ", dist: " << tcur * ray.dir.length() << ", pos: " << ray.at(tcur)
-                            << ", coords: " << get_coords(ray.at(tcur), ray.orientation) << ", normal: " << normal
-                            << "\n";
+                    std::cerr << "[i] ray: " << ray.dir << ", dist: " << tcur * ray.dir.length()
+                              << ", pos: " << ray.at(tcur) << ", coords: " << get_coords(ray.at(tcur), ray.orientation)
+                              << ", normal: " << normal << "\n";
                 }
 
                 objects.push_back(Intersection(voxel, tcur * ray.dir.length(), normal));
@@ -186,7 +187,8 @@ namespace geometry {
 
             normal = Direction(NONE);
 
-            // Update the Amanatides-Woo algorithm to handle diagonals.
+            // Update the Amanatides-Woo algorithm to handle corners.
+            // 2 floating point comparisons, 1 floating point addition and 2 integer additions per axis.
             if (tmax_temp.x <= tmax_temp.y && tmax_temp.x <= tmax_temp.z) {
                 tcur = tmax_temp.x;
                 tmax.x += tdelta.x;
@@ -214,24 +216,24 @@ namespace geometry {
 
     void ArrayVoxelGrid::initialise() {
         // ! INFO
-        std::cout << "   > Allocating space, " << size.x << "x" << size.y << "x" << size.z
-                    << "\n";
+        std::cout << "   > Allocating space, " << size.x << "x" << size.y << "x" << size.z << "\n";
 
-        std::cout << "   > " << static_cast<unsigned long>(size.x * size.y * size.z) * sizeof(Voxel)
-                    << " bytes required (" << sizeof(Voxel) << " bytes per voxel).\n";
+        std::cout << "   > " << mem_usage()
+                  << " bytes required (" << sizeof(Voxel) << " bytes per voxel).\n";
 
         world.resize(static_cast<size_t>(size.x * size.y * size.z));
 
         // ! INFO
         std::cout << "   > Zeroing memory..."
-                    << "\n";
+                  << "\n";
         std::fill(world.begin(), world.end(), Voxel::empty());
         // ! INFO
         // std::cout << "   > " << world.size() << " of " << world.capacity() << " bytes used" << "\n";
         std::cout << "   > Origin at " << origin << "\n";
 
         const auto min_bounds = origin - Vec3(0.5 * scale.x, 0.5 * scale.y, 0.5 * scale.z);
-        const auto max_bounds = origin + Vec3((size.x - 0.5) * scale.x, (size.y - 0.5) * scale.y, (size.z - 0.5) * scale.z);
+        const auto max_bounds =
+            origin + Vec3((size.x - 0.5) * scale.x, (size.y - 0.5) * scale.y, (size.z - 0.5) * scale.z);
         bounding_box = AABB(min_bounds, max_bounds);
     }
 
@@ -267,7 +269,8 @@ namespace geometry {
     }
 
     void SVOVoxelGrid::set_voxel(Coordinate coords, Voxel voxel) {
-        if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0 || coords.z >= size.z) {
+        if (coords.x < 0 || coords.x >= size.x || coords.y < 0 || coords.y >= size.y || coords.z < 0
+            || coords.z >= size.z) {
             auto stream = StringStream{};
             stream << "[!] Coordinates out of bounds: " << coords << "\n";
             throw std::invalid_argument(stream.str());
@@ -280,7 +283,7 @@ namespace geometry {
             const auto y_bit = (static_cast<std::size_t>(coords.y) >> (max_depth - depth - 1)) & 1u;
             const auto z_bit = (static_cast<std::size_t>(coords.z) >> (max_depth - depth - 1)) & 1u;
             const auto child_index = (x_bit << 2) | (y_bit << 1) | z_bit;
-            
+
             auto& child = curr->children[child_index];
             if (!child) {
                 child = std::make_unique<Node>(depth);
@@ -291,7 +294,7 @@ namespace geometry {
         curr->data = voxel;
     }
 
-    IntersectionList SVOVoxelGrid::traverse(Ray ray) const {
+    IntersectionList SVOVoxelGrid::traverse(const Ray& ray) const {
         auto objects = IntersectionList(ray.dir);
 
         Vec3 tmax;
@@ -417,86 +420,5 @@ namespace geometry {
         }
 
         return objects;
-
-        // auto interval = ray.intersection(bounding_box);
-        // // If ray doesn't hit root bounding_box, skip
-        // if (!root_interval.is_valid())
-        //     return objects;
-
-        // // Stores nodes with t-intervals
-        // struct StackNode {
-        //     Node* ptr;
-        //     num tmin;
-        //     num tmax;
-        // };
-
-        // // Stack of nodes while traversing
-        // auto stack = std::stack<StackNode>{};
-        // stack.push({root.get(), root_interval.min, root_interval.max});
-
-        // // Iterate until stack is empty or opaque node is hit
-        // while (!stack.empty()) {
-        //     /// Pop stack
-        //     auto stack_node = stack.top();
-        //     auto node = stack_node.ptr;
-        //     stack.pop();
-
-        //     if (node->depth == max_depth) {
-        //         auto hit = ray.at(stack_node.tmin);
-        //         auto normal = Vec3();
-
-        //         if (std::fabs(hit.x - node_bb.min.x) < epsilon) 
-        //             normal = Vec3(1, 0, 0);
-        //         else if (std::fabs(hit.x - node_bb.max.x) < epsilon) 
-        //             normal = Vec3(-1, 0, 0);
-        //         else if (std::fabs(hit.y - node_bb.min.y) < epsilon) 
-        //             normal = Vec3(0, 1, 0);
-        //         else if (std::fabs(hit.y - node_bb.max.y) < epsilon)
-        //             normal = Vec3(0, -1, 0);
-        //         else if (std::fabs(hit.z - node_bb.min.z) < epsilon)
-        //             normal = Vec3(0, 0, 1);
-        //         else if (std::fabs(hit.z - node_bb.max.z) < epsilon)
-        //             normal = Vec3(0, 0, -1);
-
-        //         objects.push_back(Intersection(node->data, stack_node.tmin * ray.dir.length(), normal));
-        //         break;
-        //     }
-
-        //     auto sorted_children = std::array<StackNode, 8>{};
-        //     std::size_t child_count = 0;
-        //     for (std::size_t i = 0; i < 8; i++) {
-        //         // If child is nullptr, skip
-        //         if (!node->children[i]) continue;
-        //         auto child = node->children[i].get();
-                
-        //         // If ray doesn't intersect, skip
-        //         auto child_interval = ray.intersection(child->bounding_box);
-        //         if (!child_interval.is_valid()) continue;
-
-        //         // If ray doesnt originate from the parent, skip  
-        //         num tmin = std::max(child_interval.min, stack_node.tmin); 
-        //         num tmax = std::min(child_interval.max, stack_node.tmax); 
-        //         if (tmin > tmax) continue;
-                
-        //         sorted_children[child_count++] = {child, tmin, tmax};
-        //     }
-
-        //     // Sort children in descending tmin order
-        //     std::sort(
-        //         sorted_children.begin(), 
-        //         sorted_children.end(),
-        //         [](const StackNode& a, const StackNode& b) { return a.tmin > b.tmin; }
-        //     );
-
-        //     for (const auto& child : sorted_children) {
-        //         if (!child.ptr) 
-        //             break;
-
-        //         stack.push(child);
-        //     }
-        // }
-
-        // return objects;
     }
-
-};
+}; // namespace geometry

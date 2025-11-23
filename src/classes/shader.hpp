@@ -48,7 +48,7 @@ namespace shader {
                 if (debug) {
                     std::cerr << "Distance: " << distance << "\n";
                 }
-                return Colour(distance - 10);
+                return Colour((1 / distance) * 255);
             }
             return Colour();
         }
@@ -104,6 +104,28 @@ namespace shader {
             Vec3 unit_direction = list.ray_direction();
             auto a = 0.5 * (unit_direction.y + 1.0);
             return interpolate(Colour(124, 179, 255), Colour::white(), a);
+        }
+    };
+
+    class FlatShader : public Shader {
+    public:
+        Colour fragment(const IntersectionList& list) const override {
+            if (!list.empty()) {
+                const auto& hitVoxel = list.items.at(0);
+                return hitVoxel.voxel.get_colour();
+            }
+            return Colour();
+        }
+    };
+
+    class IterationShader : public Shader {
+    public:
+        Colour fragment(const IntersectionList& list) const override {
+            if (!list.empty()) {
+                const auto& hitVoxel = list.items.at(0);
+                return hitVoxel.voxel.get_colour();
+            }
+            return Colour();
         }
     };
 } // namespace shader

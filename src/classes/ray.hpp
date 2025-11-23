@@ -22,7 +22,7 @@ namespace geometry {
         Direction orientation;
         Vec3 inv_dir;
 
-        explicit constexpr Ray(Vec3 origin, Vec3 dir)
+        explicit Ray(Vec3 origin, Vec3 dir)
         : origin(origin)
         , dir(dir)
         , orientation(Direction(dir)) {

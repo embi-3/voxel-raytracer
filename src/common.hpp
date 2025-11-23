@@ -9,8 +9,8 @@
 #define COMMON_H
 
 #include <limits>
-#include <string>
 #include <sstream>
+#include <string>
 
 #ifdef USE_SINGLE_PRECISION
 using num = float;
@@ -21,7 +21,9 @@ using num = double;
 using StringStream = std::ostringstream;
 
 extern bool debug;
+extern bool svo;
 static constexpr num infinity = std::numeric_limits<num>::infinity();
+static constexpr std::size_t sentinel = std::numeric_limits<std::size_t>::max();
 static constexpr num epsilon = 1.E-10;
 
 #endif // COMMON_H

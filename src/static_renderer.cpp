@@ -24,6 +24,7 @@ using namespace renderer;
 using namespace std::chrono;
 
 bool debug = false;
+bool svo = false;
 
 // Outputs PPM ASCII and PNG
 void create_png(std::size_t width, std::size_t height, const std::vector<Pixel>& pixels) {
@@ -59,7 +60,8 @@ Scene two_spheres() {
 
     // ! INFO
     std::cout << "> Creating grid...\n";
-    auto grid = std::make_unique<SVOVoxelGrid>(32, Vec3(0, 0, 20));
+    //auto grid = std::make_unique<SVOVoxelGrid>(32, Vec3(0, 0, 20));
+    auto grid = std::make_unique<ArrayVoxelGrid>(32, Vec3(0, 0, 20));
 
     // TODO: Test shapes that go outside the boundary of the grid and see what happens.
     std::cout << "> Creating shapes...\n";
@@ -76,7 +78,7 @@ Scene random_spheres() {
     int num_spheres = 300;
     Scene scene = Scene();
 
-    auto grid = std::make_unique<ArrayVoxelGrid>(world_size, Vec3(0, 0, world_size/2));
+    auto grid = std::make_unique<ArrayVoxelGrid>(world_size, Vec3(0, 0, world_size / 2));
     int x;
     int y;
     int z;
@@ -96,19 +98,75 @@ Scene random_spheres() {
     return scene;
 }
 
+
+Scene hi_res_spheres() {
+    Scene scene = Scene();
+
+    // ! INFO
+    std::cout << "> Creating grid...\n";
+    std::unique_ptr<VoxelGrid> grid;
+    if (svo) {
+        grid = std::make_unique<SVOVoxelGrid>(320, Vec3(0, 0, 200));
+    } else {
+        grid = std::make_unique<ArrayVoxelGrid>(320, Vec3(0, 0, 200));
+    }
+
+    // TODO: Test shapes that go outside the boundary of the grid and see what happens.
+    std::cout << "> Creating shapes...\n";
+    grid->create_sphere(Coordinate(250, 270, 200), 40);
+    grid->create_sphere(Coordinate(100, 50, 100), 100);
+
+    scene.push_back(std::move(grid));
+
+    return scene;
+}
+
 Scene random_cubes() {
-    int world_size = 500;
-    //int num_cubes = 100000;
+    int world_size = 400;
+    int num_cubes = 100;
 
     Scene scene = Scene();
-    auto grid = std::make_unique<SVOVoxelGrid>(world_size, Vec3(0, 0, 0));
+
+    std::unique_ptr<VoxelGrid> grid;
+    if (svo) {
+        grid = std::make_unique<SVOVoxelGrid>(world_size, Vec3(0, 0, 0));
+    } else {
+        grid = std::make_unique<ArrayVoxelGrid>(world_size, Vec3(0, 0, 0));
+    }
     int x;
     int y;
     int z;
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < num_cubes; i++) {
         x = rand() % world_size;
         y = rand() % world_size;
         z = rand() % world_size;
+        grid->create_cube(Coordinate(x, y, z), Coordinate(x + 3, y + 3, z + 3));
+    }
+    scene.push_back(std::move(grid));
+
+    return scene;
+}
+
+Scene random_many_cubes() {
+    int world_size = 500;
+    int num_cubes = 50000;
+    Scene scene = Scene();
+
+    std::unique_ptr<VoxelGrid> grid; 
+
+    if (svo) {
+        grid = std::make_unique<SVOVoxelGrid>(world_size, world_size, world_size / 4, Vec3(0, 0, world_size / 8));
+    } else {
+        grid = std::make_unique<ArrayVoxelGrid>(world_size, world_size, world_size / 4, Vec3(0, 0, world_size / 8));
+    }
+    
+    int x;
+    int y;
+    int z;
+    for (int i = 0; i < num_cubes; i++) {
+        x = rand() % world_size;
+        y = rand() % world_size;
+        z = rand() % world_size / 4;
         grid->create_cube(Coordinate(x, y, z));
     }
     scene.push_back(std::move(grid));
@@ -117,10 +175,12 @@ Scene random_cubes() {
 }
 
 int main(int argc, char* argv[]) {
-    int image_width = 1920;
-    int image_height = 1080;
+    int image_width = 1280;
+    int image_height = 720;
     std::string debug_path = "output.txt";
     std::string model_path = "../src/voxmodels/monument/monu1.vox";
+    std::string preset = "default";
+    bool from_vox = false;
 
     // Parse command line arguments
     for (int i = 1; i < argc; ++i) {
@@ -133,13 +193,21 @@ int main(int argc, char* argv[]) {
             image_height = std::atoi(argv[++i]);
         }
         else if (arg == "--debug-path" && i + 1 < argc) {
+            debug_path = argv[++i];
             debug = true;
         }
         else if (arg == "--debug") {
-            debug_path = argv[++i];
+            debug = true;
         }
         else if (arg == "--model-path" && i + 1 < argc) {
             model_path = argv[++i];
+            from_vox = true;
+        }
+        else if (arg == "--preset" && i + 1 < argc) {
+            preset = argv[++i];
+        }
+        else if (arg == "--svo") {
+            svo = true;
         }
         else {
             auto stream = StringStream{};
@@ -166,10 +234,28 @@ int main(int argc, char* argv[]) {
     // Create the scene
     // ! INFO
     std::cout << "> Creating scene...\n";
-    Scene scene = two_spheres();
-    // Scene scene = random_spheres();
-    // Scene scene = random_cubes();
-    // Scene scene = voxelise(model_path);
+    Scene scene = Scene();
+    if (from_vox) {
+        scene = voxelise(model_path);
+    } else if (preset == "default" || preset == "two_spheres") {
+        scene = two_spheres();
+    } else if (preset == "hi_res_spheres") {
+        scene = hi_res_spheres();
+    } else if (preset == "cubes" || preset == "rand_cubes") {
+        scene = random_cubes();
+    } else if (preset == "many_cubes" || preset == "rand_many_cubes") {
+        scene = random_many_cubes();
+    } else if (preset == "spheres" || preset == "rand_spheres") {   
+        scene = random_spheres();
+    } else {
+        throw new std::invalid_argument("Invalid preset option! Please choose from: [two_spheres, hi_res_spheres, rand_cubes, many_cubes, rand_spheres]\n");
+    }
+
+    // ! INFO
+    std::cout << " > " << scene.mem_usage() << " bytes required to store the scene.\n";
+
+    // ! INFO
+    std::cout << " > " << scene.mem_usage() << " bytes required to store the scene.\n";
 
     // Create shaders
     // ! INFO
@@ -180,6 +266,7 @@ int main(int argc, char* argv[]) {
     DistanceShader distance_shader = DistanceShader();
     OrientationShader orientation_shader = OrientationShader();
     RayShader ray_shader = RayShader();
+    FlatShader flat_shader = FlatShader();
 
     // Render the scene
     // ! INFO
