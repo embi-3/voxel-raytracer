@@ -196,10 +196,11 @@ int main(int argc, char* argv[]) {
             image_height = std::atoi(argv[++i]);
         }
         else if (arg == "--debug-path" && i + 1 < argc) {
+            debug_path = argv[++i];
             debug = true;
         }
         else if (arg == "--debug") {
-            debug_path = argv[++i];
+            debug = true;
         }
         else if (arg == "--model-path" && i + 1 < argc) {
             std::ostringstream oss;
