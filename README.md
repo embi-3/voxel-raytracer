@@ -31,7 +31,7 @@ Several flags can be used to modify the behaviour of the program:
 - `--debug` prints diagnostic and debug information for the ray tracer. By default, this will print to `std::cerr`. **BE WARNED, THIS PRODUCES A LOT OF OUTPUT!**
 - `--debug-path <path>` specifies a path to write the debug output to, and also enables the `--debug` flag.
 - `--model-path <path>` specifies a path to a `.vox` file to render. `<path>` is a relative path from the root directory.
-- `--preset <preset>` specifies a preset scene to render. The options are: `two_spheres`, `hi_res_spheres`, `cubes`, `many_cubes` and `spheres`. If `--model-path` is also used, this flag will be overriden. By default, the `two_spheres` is rendered if no presets or `.vox` files are specified.
+- `--preset <preset>` specifies a preset scene to render. The options are: `two_spheres`, `hi_res_spheres`, `cubes`, `many_cubes` and `spheres`. If `--model-path` is also used, this flag will be overriden. By default, the `two_spheres` preset is rendered if no presets or `.vox` files are specified.
 - `--shader <shader>` specifies a shader to render the scene. The options are: `flat`, `white`, `distance`, `orientation`, `ray` and `transparent`. By default, `orientation` is used.
 
 
