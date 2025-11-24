@@ -10,7 +10,7 @@ The ideas in these papers have been extended to further improve the performance 
 ## How to Use
 Firstly, clone the repository:
 ```
-https://github.com/embi-3/voxel-raytracer.git
+git clone https://github.com/embi-3/voxel-raytracer.git
 ```
 
 Navigate to the root directory of the repository and build the project:

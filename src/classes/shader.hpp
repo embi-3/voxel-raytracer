@@ -18,7 +18,6 @@ namespace shader {
         virtual ~Shader() = default;
     };
 
-    // ? Is it bad practice to put these classes here instead of in their own files?
     class WhiteShader : public Shader {
     public:
         Colour fragment(const IntersectionList& list) const override {
@@ -137,7 +136,6 @@ namespace shader {
             return colour;
         }
     };
-
 
     class IterationShader : public Shader {
     public:
