@@ -18,7 +18,6 @@ namespace shader {
         virtual ~Shader() = default;
     };
 
-    // ? Is it bad practice to put these classes here instead of in their own files?
     class WhiteShader : public Shader {
     public:
         Colour fragment(const IntersectionList& list) const override {
@@ -115,6 +114,26 @@ namespace shader {
                 return hitVoxel.voxel.get_colour();
             }
             return Colour();
+        }
+    };
+
+    class TransparentShader : public Shader {
+    public:
+        Colour fragment(const IntersectionList& list) const override {
+            size_t index = 0;
+            num alpha = 255;
+            Colour colour = Colour();
+            while (index < list.size() && !equals_zero(alpha)) {
+                const auto& hitColour = list.items.at(index).voxel.get_colour();
+                const auto hitAlpha = hitColour.a;
+                colour.r = colour.r * colour.a + hitColour.r * alpha * hitAlpha;
+                colour.g = colour.g * colour.a + hitColour.g * alpha * hitAlpha;
+                colour.b = colour.b * colour.a + hitColour.b * alpha * hitAlpha;
+                colour.a = colour.a + alpha * hitAlpha;
+                alpha = std::max(alpha * (1 - hitAlpha), 0.0);
+            }
+
+            return colour;
         }
     };
 

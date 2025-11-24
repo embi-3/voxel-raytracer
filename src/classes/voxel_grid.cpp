@@ -146,7 +146,7 @@ namespace geometry {
             // If the ray doesn't hit the bounding box, return an empty list.
             return objects;
         }
-
+        
         coords = get_coords(ray.at(tcur), ray.orientation);
 
         // ! DEBUG
@@ -173,7 +173,6 @@ namespace geometry {
 
                 objects.push_back(Intersection(voxel, tcur * ray.dir.length(), normal));
 
-                // ! TEMP
                 break;
             }
 

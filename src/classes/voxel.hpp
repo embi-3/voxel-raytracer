@@ -7,6 +7,7 @@
 #include "vec3.hpp"
 
 #include <array>
+#include <cstdlib>
 
 static constexpr int NUM_FACES = 6;
 
@@ -45,7 +46,7 @@ namespace geometry {
 
     private:
         bool opaque = true;
-        Colour colour = Colour::white();
+        Colour colour = Colour::red();
     };
 } // namespace geometry
 #endif // VOXEL_H
