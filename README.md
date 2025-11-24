@@ -29,8 +29,10 @@ To run the program, run the following while in the `build` directory:
 Several flags can be used to modify the behaviour of the program:
 - `--width <width>` and `--height <height>` can be used to specify the width and height of the output image. By default, the program will choose `1920` and `1080` respectively.
 - `--debug` prints diagnostic and debug information for the ray tracer. By default, this will print to `std::cerr`. **BE WARNED, THIS PRODUCES A LOT OF OUTPUT!**
-- `--debug-path <path>` specifies a path to write the debug output to. Does nothing if `--debug` is not enabled.
-- `--model-path <path>` specifies a path to a `.vox` file to render. `<path>` can be an absolute path, or a relative path from the `src` directory.
+- `--debug-path <path>` specifies a path to write the debug output to, and also enables the `--debug` flag.
+- `--model-path <path>` specifies a path to a `.vox` file to render. `<path>` is a relative path from the root directory.
+- `--preset <preset>` specifies a preset scene to render. The options are: `two_spheres`, `hi_res_spheres`, `cubes`, `many_cubes` and `spheres`. If `--model-path` is also used, this flag will be overriden. By default, the `two_spheres` is rendered if no presets or `.vox` files are specified.
+- `--shader <shader>` specifies a shader to render the scene. The options are: `flat`, `white`, `distance`, `orientation`, `ray` and `transparent`. By default, `orientation` is used.
 
 
 ### Models
