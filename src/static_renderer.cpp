@@ -25,7 +25,6 @@ using namespace std::chrono;
 
 bool debug = false;
 bool svo = false;
-bool svo = false;
 
 // Outputs PPM ASCII and PNG
 void create_png(std::size_t width, std::size_t height, const std::vector<Pixel>& pixels) {
@@ -176,8 +175,6 @@ Scene random_many_cubes() {
 }
 
 int main(int argc, char* argv[]) {
-    int image_width = 1280;
-    int image_height = 720;
     int image_width = 1280;
     int image_height = 720;
     std::string debug_path = "output.txt";

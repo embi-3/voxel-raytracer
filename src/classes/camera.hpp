@@ -37,17 +37,65 @@ namespace renderer {
             upper_left_pixel = viewport_upper_left + 0.5 * (delta_x + delta_y);
         }
 
-        std::vector<Pixel> render(const Scene& scene, const Shader& shader) const;
+        std::vector<Pixel> render(const Scene& scene, const Shader& shader) const {
+            auto progress = 0;
+            auto current_pixels = 0;
+            auto total_pixels = image_height * image_width;
+            auto chunk = total_pixels / 10;
+            auto pixels = std::vector<Pixel>{}; // array of pixels
 
-        std::vector<Pixel> render(const VoxelGrid& grid, const Shader& shader) const;
+            for (auto j = 0; j < image_height; j++) {
+                for (auto i = 0; i < image_width; i++) {
+                    current_pixels = j * image_width + i;
+                    if (current_pixels / chunk >= progress) {
+                        // ! INFO
+                        std::cout << "- " << (progress++ * 10) << "% done"
+                                << " \n";
+                    }
+                    auto pixel_center = upper_left_pixel + (i * delta_x) + (j * delta_y);
+                    auto ray_direction = pixel_center - camera_center;
+                    auto r = Ray{camera_center, ray_direction};
+
+                    // ! DEBUG
+                    if (debug) {
+                        std::cerr << "Pixel: (" << i << ", " << j << ")\n";
+                    }
+
+                    auto intersections = scene.traverse(r);
+                    auto pixel_colour = shader.fragment(intersections);
+                    pixels.push_back(pixel_colour);
+                }
+            }
+            // ! INFO
+            std::cout << "- 100% done \n";
+
+            return pixels;
+        }
+
+        std::vector<Pixel> render(const VoxelGrid& grid, const Shader& shader) const {
+            auto pixels = std::vector<Pixel>{}; // array of pixels
+
+            for (auto j = 0; j < image_height; j++) {
+                for (auto i = 0; i < image_width; i++) {
+                    auto pixel_center = upper_left_pixel + (i * delta_x) + (j * delta_y);
+                    auto ray_direction = pixel_center - camera_center;
+                    auto r = Ray{camera_center, ray_direction};
+
+                    auto intersections = grid.traverse(r);
+                    auto pixel_colour = shader.fragment(intersections);
+                    pixels.push_back(pixel_colour);
+                }
+            }
+            return pixels;
+        }
 
     private:
         int image_width;
         int image_height;
-        [[maybe_unused]] num aspect_ratio;
-        [[maybe_unused]] num focal_length;
+        num aspect_ratio;
+        num focal_length;
         Vec3 camera_center = Vec3();
-        [[maybe_unused]] num viewport_height;
+        num viewport_height;
         num viewport_width;
         Vec3 upper_left_pixel;
         Vec3 delta_x;
